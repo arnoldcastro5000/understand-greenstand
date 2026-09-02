@@ -1,0 +1,1219 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "node-mapnik-1",
+    "languages": [
+      "javascript",
+      "cpp",
+      "yaml",
+      "dockerfile",
+      "shell"
+    ],
+    "frameworks": [
+      "Express",
+      "Mapnik",
+      "PostGIS",
+      "Docker",
+      "Kustomize",
+      "GitHub Actions",
+      "Jest"
+    ],
+    "description": "Greenstand fork of node-mapnik. A PostGIS-backed Express tile server that renders Tree Tracker web-map tiles, built on upstream C++/Node-API Mapnik bindings.",
+    "analyzedAt": "2026-09-02T23:26:40.642Z",
+    "gitCommitHash": "35fff37f7f10af483a128b199520b2264164d1fb"
+  },
+  "nodes": [
+    {
+      "id": "domain:tile-rendering",
+      "type": "domain",
+      "name": "Tile Rendering",
+      "summary": "Handles incoming web-map tile requests for the Tree Tracker map. It parses x/y/z tile coordinates, builds a Mapnik map instance with the correct envelope and style, renders the PostGIS features, and returns a PNG tile.",
+      "tags": [
+        "tile-server",
+        "http",
+        "rendering",
+        "geospatial"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": [
+          "Tile (x/y/z)",
+          "Map instance",
+          "PNG image",
+          "Bounding-box envelope"
+        ],
+        "businessRules": [
+          "Zoom-level settings must be present at startup or the server refuses to boot",
+          "Each request builds a fresh Mapnik map for its tile envelope"
+        ],
+        "crossDomainInteractions": [
+          "Delegates data selection to Map Query Building",
+          "Uses Style & Projection Config for the Mapnik XML and projection",
+          "Calls Native Rendering Engine to rasterize the map"
+        ]
+      }
+    },
+    {
+      "id": "domain:map-query-building",
+      "type": "domain",
+      "name": "Map Query Building",
+      "summary": "Selects and assembles the correct PostGIS SQL for a tile request. A Map controller inspects request settings (tree id, user, wallet, timeline, zoom target) and instantiates the matching SQL query-builder from a case-based class hierarchy.",
+      "tags": [
+        "query-builder",
+        "postgis",
+        "sql",
+        "orchestrator"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": [
+          "SQL query builder (SQLCase/SQLZoomTarget/SQLTree)",
+          "Request settings",
+          "Tree",
+          "Wallet",
+          "Timeline range"
+        ],
+        "businessRules": [
+          "The builder case is chosen from request settings (tree/user/wallet/timeline/zoom-target)",
+          "Zoom-target and clustered variants override the base query per zoom level",
+          "Queries are bounding-box constrained to the tile envelope"
+        ],
+        "crossDomainInteractions": [
+          "Invoked by Tile Rendering to fetch tile data",
+          "Executes queries through Database Access"
+        ]
+      }
+    },
+    {
+      "id": "domain:style-projection-config",
+      "type": "domain",
+      "name": "Style & Projection Config",
+      "summary": "Generates the Mapnik XML style for each tile and provides the spherical-mercator projection. It injects zoom-aware SQL and the database connection into a PostGIS datasource template, and converts tile coordinates to geographic envelopes.",
+      "tags": [
+        "config",
+        "xml",
+        "mapnik",
+        "projection",
+        "geospatial"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": [
+          "Mapnik XML template",
+          "PostGIS datasource",
+          "SQL CDATA parameter",
+          "Zoom level",
+          "Projection constants"
+        ],
+        "businessRules": [
+          "Clustered SQL is used at low zoom and per-tree SQL at high zoom",
+          "The SQL is injected into the postgis.xml datasource CDATA table parameter",
+          "Projection constants are precached per zoom level"
+        ],
+        "crossDomainInteractions": [
+          "Supplies style XML and envelopes to Tile Rendering",
+          "Embeds the Database Access connection into the datasource"
+        ]
+      }
+    },
+    {
+      "id": "domain:database-access",
+      "type": "domain",
+      "name": "Database Access",
+      "summary": "Provides pooled, cached access to the PostGIS database. It wraps a PostgreSQL connection pool with an LRU cache and coalesces identical in-flight queries to avoid duplicate concurrent reads.",
+      "tags": [
+        "database",
+        "postgis",
+        "caching",
+        "connection-pool"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entities": [
+          "Connection pool",
+          "LRU cache",
+          "Query result",
+          "In-flight query queue"
+        ],
+        "businessRules": [
+          "Identical concurrent queries are coalesced into one database read",
+          "Completed results populate the LRU cache for reuse"
+        ],
+        "crossDomainInteractions": [
+          "Serves query results to Map Query Building",
+          "Connection string is injected by Style & Projection Config"
+        ]
+      }
+    },
+    {
+      "id": "domain:deployment-delivery",
+      "type": "domain",
+      "name": "Deployment & Delivery",
+      "summary": "Builds, packages, and deploys the tile server. A CI pipeline versions and containerizes the app, and Kustomize overlays deploy it to dev, prod, and test namespaces with Ambassador routing.",
+      "tags": [
+        "ci-cd",
+        "docker",
+        "kubernetes",
+        "kustomize"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": [
+          "Docker image",
+          "Kustomize overlay",
+          "Ambassador Mapping",
+          "Kubernetes Service/Deployment",
+          "Sealed secret"
+        ],
+        "businessRules": [
+          "Production deploys are approval-gated",
+          "Each environment layers its overlay on a shared Kustomize base",
+          "External /tiles/ traffic is routed by Ambassador to the service"
+        ],
+        "crossDomainInteractions": [
+          "Deploys and exposes the Tile Rendering service"
+        ]
+      }
+    },
+    {
+      "id": "domain:native-rendering-engine",
+      "type": "domain",
+      "name": "Native Rendering Engine",
+      "summary": "Supporting upstream C++/Node-API Mapnik bindings. It loads the compiled addon and exposes Map, Image, Datasource, and Projection wrappers that rasterize a configured map into an image buffer.",
+      "tags": [
+        "native",
+        "cpp",
+        "mapnik",
+        "bindings",
+        "supporting"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": [
+          "Mapnik Map",
+          "Image",
+          "Datasource",
+          "Projection"
+        ],
+        "businessRules": [
+          "The compiled addon is loaded at module init and wrapper classes are registered",
+          "Rendering produces a raster image from a loaded map and envelope"
+        ],
+        "crossDomainInteractions": [
+          "Rasterizes maps on behalf of Tile Rendering"
+        ]
+      }
+    },
+    {
+      "id": "flow:render-map-tile",
+      "type": "flow",
+      "name": "Render Map Tile",
+      "summary": "End-to-end handling of a tile request: parse coordinates, build the map, query data, render, and return a PNG.",
+      "tags": [
+        "http",
+        "tile-server",
+        "rendering"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entryPoint": "GET tile route (x/y/z)",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "flow:select-and-build-tile-query",
+      "type": "flow",
+      "name": "Select and Build Tile Query",
+      "summary": "Inspect request settings, choose the matching SQL builder case, assemble the query with variant overrides, and execute it.",
+      "tags": [
+        "query-builder",
+        "sql",
+        "orchestrator"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entryPoint": "Map controller invocation",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "flow:build-single-tree-query",
+      "type": "flow",
+      "name": "Build Single-Tree Query",
+      "summary": "Produce a parameterized SELECT for one tree, resolving numeric id versus UUID and joining related data.",
+      "tags": [
+        "query-builder",
+        "sql"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "Map controller (single-tree request)",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "flow:generate-style-xml",
+      "type": "flow",
+      "name": "Generate Mapnik Style XML",
+      "summary": "Assemble a zoom-aware Mapnik XML style by injecting SQL and the database connection into the PostGIS datasource template.",
+      "tags": [
+        "config",
+        "xml",
+        "mapnik"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entryPoint": "Map build (per tile)",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "flow:project-tile-coordinates",
+      "type": "flow",
+      "name": "Project Tile Coordinates",
+      "summary": "Convert tile x/y/z to a geographic bounding box using precached spherical-mercator constants.",
+      "tags": [
+        "projection",
+        "geospatial"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "Map build (per tile)",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "flow:serve-pooled-query",
+      "type": "flow",
+      "name": "Serve Pooled Query",
+      "summary": "Serve a query from cache or a coalesced in-flight read, otherwise execute on a pooled connection and cache the result.",
+      "tags": [
+        "database",
+        "caching",
+        "connection-pool"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "PGPool.query call",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "flow:build-publish-image",
+      "type": "flow",
+      "name": "Build and Publish Image",
+      "summary": "CI pipeline versions the app, builds the Docker image, and pushes it to the registry.",
+      "tags": [
+        "ci-cd",
+        "docker"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "push to default branch",
+        "entryType": "event"
+      }
+    },
+    {
+      "id": "flow:deploy-environment",
+      "type": "flow",
+      "name": "Deploy to Environment",
+      "summary": "Manually dispatched workflow applies a Kustomize overlay for the chosen environment and exposes the service via Ambassador.",
+      "tags": [
+        "kubernetes",
+        "kustomize",
+        "ci-cd"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entryPoint": "workflow_dispatch (deploy-*.yml)",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "flow:initialize-and-render",
+      "type": "flow",
+      "name": "Initialize Bindings and Rasterize",
+      "summary": "Load the compiled Mapnik addon, register wrapper classes at init, and rasterize a configured map to an image buffer.",
+      "tags": [
+        "native",
+        "mapnik",
+        "bindings"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entryPoint": "addon module load",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "step:render-map-tile:receive-tile-request",
+      "type": "step",
+      "name": "Receive tile request",
+      "summary": "Express handler receives a tile request and parses x/y/z coordinates.",
+      "tags": [
+        "api-handler",
+        "http"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/app.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:render-map-tile:compute-envelope",
+      "type": "step",
+      "name": "Compute projected envelope",
+      "summary": "Convert the x/y/z tile coordinates to a spherical-mercator bounding-box envelope.",
+      "tags": [
+        "geospatial",
+        "projection"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/sphericalmercator.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:render-map-tile:build-map-instance",
+      "type": "step",
+      "name": "Build map instance and load style",
+      "summary": "Create a Mapnik map for the envelope and load the generated XML style before rendering.",
+      "tags": [
+        "factory",
+        "mapnik",
+        "async"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/app.js",
+      "lineRange": [
+        45,
+        97
+      ]
+    },
+    {
+      "id": "step:render-map-tile:query-tile-data",
+      "type": "step",
+      "name": "Query tile data",
+      "summary": "Delegate to the Map controller to select and run the PostGIS query for the tile.",
+      "tags": [
+        "query-builder",
+        "postgis"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/Map.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:render-map-tile:render-to-png",
+      "type": "step",
+      "name": "Render map to PNG",
+      "summary": "Rasterize the configured map into a PNG image via the native Mapnik engine.",
+      "tags": [
+        "rendering",
+        "native"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/app.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:render-map-tile:send-response",
+      "type": "step",
+      "name": "Send PNG response",
+      "summary": "Return the encoded PNG tile in the HTTP response.",
+      "tags": [
+        "http",
+        "api-handler"
+      ],
+      "complexity": "simple",
+      "filePath": "greenstand/app.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:select-and-build-tile-query:inspect-settings",
+      "type": "step",
+      "name": "Inspect request settings",
+      "summary": "Read tree id, user, wallet, timeline, and zoom-target flags from the request settings.",
+      "tags": [
+        "orchestrator"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/Map.js",
+      "lineRange": [
+        14,
+        196
+      ]
+    },
+    {
+      "id": "step:select-and-build-tile-query:select-builder",
+      "type": "step",
+      "name": "Select SQL builder case",
+      "summary": "Choose the matching SQL query-builder class based on the request settings.",
+      "tags": [
+        "query-builder",
+        "factory"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/Map.js",
+      "lineRange": [
+        14,
+        196
+      ]
+    },
+    {
+      "id": "step:select-and-build-tile-query:assemble-base-query",
+      "type": "step",
+      "name": "Assemble base query clauses",
+      "summary": "Build the WITH, JOIN, filter, and bounding-box clauses for the selected case.",
+      "tags": [
+        "sql",
+        "query-builder"
+      ],
+      "complexity": "complex",
+      "filePath": "greenstand/sqls/SQLCase1.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:select-and-build-tile-query:apply-variant-overrides",
+      "type": "step",
+      "name": "Apply variant overrides",
+      "summary": "Apply timeline, wallet, or zoom-target overrides via the case subclasses.",
+      "tags": [
+        "sql",
+        "inheritance"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/sqls/SQLCase1WithZoomTarget.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:select-and-build-tile-query:execute-query",
+      "type": "step",
+      "name": "Execute query via pool",
+      "summary": "Run the assembled query through the PostGIS connection pool and return rows.",
+      "tags": [
+        "postgis",
+        "database"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/Map.js",
+      "lineRange": [
+        14,
+        196
+      ]
+    },
+    {
+      "id": "step:build-single-tree-query:resolve-id-type",
+      "type": "step",
+      "name": "Resolve tree id type",
+      "summary": "Detect whether the tree identifier is a numeric id or a UUID.",
+      "tags": [
+        "sql"
+      ],
+      "complexity": "simple",
+      "filePath": "greenstand/sqls/SQLTree.js",
+      "lineRange": [
+        2,
+        73
+      ]
+    },
+    {
+      "id": "step:build-single-tree-query:build-select",
+      "type": "step",
+      "name": "Build parameterized SELECT",
+      "summary": "Assemble the parameterized SELECT with related joins for the tree.",
+      "tags": [
+        "sql",
+        "query-builder"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/sqls/SQLTree.js",
+      "lineRange": [
+        2,
+        73
+      ]
+    },
+    {
+      "id": "step:generate-style-xml:load-template",
+      "type": "step",
+      "name": "Load XML template",
+      "summary": "Load the embedded Mapnik XML map template with its PostGIS datasource.",
+      "tags": [
+        "xml",
+        "config-builder"
+      ],
+      "complexity": "simple",
+      "filePath": "greenstand/XMLConfig.js",
+      "lineRange": [
+        76,
+        88
+      ]
+    },
+    {
+      "id": "step:generate-style-xml:choose-zoom-sql",
+      "type": "step",
+      "name": "Choose zoom-aware SQL",
+      "summary": "Select clustered SQL at low zoom or per-tree SQL at high zoom.",
+      "tags": [
+        "config",
+        "factory"
+      ],
+      "complexity": "complex",
+      "filePath": "greenstand/config.js",
+      "lineRange": [
+        100,
+        284
+      ]
+    },
+    {
+      "id": "step:generate-style-xml:inject-sql",
+      "type": "step",
+      "name": "Inject SQL into datasource",
+      "summary": "Replace the CDATA table parameter in the datasource with the chosen SQL.",
+      "tags": [
+        "xml",
+        "string-manipulation"
+      ],
+      "complexity": "simple",
+      "filePath": "greenstand/utils.js",
+      "lineRange": [
+        1,
+        4
+      ]
+    },
+    {
+      "id": "step:generate-style-xml:inject-connection",
+      "type": "step",
+      "name": "Inject DB connection",
+      "summary": "Insert the shared PostGIS connection parameters into the datasource.",
+      "tags": [
+        "config",
+        "serialization"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/config.js",
+      "lineRange": [
+        100,
+        284
+      ]
+    },
+    {
+      "id": "step:generate-style-xml:return-style",
+      "type": "step",
+      "name": "Return style XML",
+      "summary": "Return the assembled Mapnik XML string for the map instance.",
+      "tags": [
+        "config",
+        "xml"
+      ],
+      "complexity": "simple",
+      "filePath": "greenstand/config.js",
+      "lineRange": [
+        100,
+        284
+      ]
+    },
+    {
+      "id": "step:project-tile-coordinates:precache-constants",
+      "type": "step",
+      "name": "Precache per-zoom constants",
+      "summary": "Compute and cache spherical-mercator constants for each zoom level.",
+      "tags": [
+        "projection",
+        "singleton"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/sphericalmercator.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:project-tile-coordinates:convert-to-bbox",
+      "type": "step",
+      "name": "Convert x/y/z to bbox",
+      "summary": "Convert tile coordinates to a geographic bounding-box envelope.",
+      "tags": [
+        "projection",
+        "geospatial"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/sphericalmercator.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:serve-pooled-query:check-cache",
+      "type": "step",
+      "name": "Check LRU cache",
+      "summary": "Return a cached result if the identical query is already in the LRU cache.",
+      "tags": [
+        "caching"
+      ],
+      "complexity": "simple",
+      "filePath": "greenstand/PGPool.js",
+      "lineRange": [
+        4,
+        90
+      ]
+    },
+    {
+      "id": "step:serve-pooled-query:coalesce-inflight",
+      "type": "step",
+      "name": "Coalesce in-flight query",
+      "summary": "Queue callers behind an identical query that is already running.",
+      "tags": [
+        "caching",
+        "concurrency"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/PGPool.js",
+      "lineRange": [
+        4,
+        90
+      ]
+    },
+    {
+      "id": "step:serve-pooled-query:execute-on-pool",
+      "type": "step",
+      "name": "Execute on pooled connection",
+      "summary": "Acquire a pooled PostgreSQL connection and run the query.",
+      "tags": [
+        "database",
+        "connection-pool"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/PGPool.js",
+      "lineRange": [
+        4,
+        90
+      ]
+    },
+    {
+      "id": "step:serve-pooled-query:populate-cache",
+      "type": "step",
+      "name": "Populate cache and resolve",
+      "summary": "Store the result in the LRU cache and resolve all queued callers.",
+      "tags": [
+        "caching"
+      ],
+      "complexity": "moderate",
+      "filePath": "greenstand/PGPool.js",
+      "lineRange": [
+        4,
+        90
+      ]
+    },
+    {
+      "id": "step:build-publish-image:semantic-release",
+      "type": "step",
+      "name": "Run semantic-release",
+      "summary": "Compute the next version from commit history via semantic-release.",
+      "tags": [
+        "ci-cd",
+        "versioning"
+      ],
+      "complexity": "moderate",
+      "filePath": ".github/workflows/build-deploy.yml",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:build-publish-image:build-image",
+      "type": "step",
+      "name": "Build Docker image",
+      "summary": "Build the tile-server container image from the Dockerfile.",
+      "tags": [
+        "docker",
+        "build"
+      ],
+      "complexity": "moderate",
+      "filePath": "Dockerfile",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:build-publish-image:push-image",
+      "type": "step",
+      "name": "Push image to registry",
+      "summary": "Push the tagged image to the container registry.",
+      "tags": [
+        "docker",
+        "ci-cd"
+      ],
+      "complexity": "simple",
+      "filePath": ".github/workflows/build-deploy.yml",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:deploy-environment:select-tag",
+      "type": "step",
+      "name": "Select image tag",
+      "summary": "Choose the image tag to deploy for the target environment.",
+      "tags": [
+        "ci-cd"
+      ],
+      "complexity": "simple",
+      "filePath": ".github/workflows/deploy-dev.yml",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:deploy-environment:apply-overlay",
+      "type": "step",
+      "name": "Apply Kustomize overlay",
+      "summary": "Apply the dev, prod, or test overlay layered on the shared base.",
+      "tags": [
+        "kustomize",
+        "kubernetes"
+      ],
+      "complexity": "moderate",
+      "filePath": "deployment/overlays/development/kustomization.yaml",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:deploy-environment:route-traffic",
+      "type": "step",
+      "name": "Route traffic via Ambassador",
+      "summary": "Expose the deployment through the Service and Ambassador Mapping.",
+      "tags": [
+        "kubernetes",
+        "routing"
+      ],
+      "complexity": "moderate",
+      "filePath": "deployment/base/mapping.yaml",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:initialize-and-render:load-addon",
+      "type": "step",
+      "name": "Load compiled addon",
+      "summary": "Load the compiled native Mapnik addon from lib/.",
+      "tags": [
+        "native",
+        "bindings"
+      ],
+      "complexity": "moderate",
+      "filePath": "lib/mapnik.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:initialize-and-render:register-wrappers",
+      "type": "step",
+      "name": "Register wrapper classes",
+      "summary": "Initialize and register Map, Image, Datasource, and Projection wrappers.",
+      "tags": [
+        "native",
+        "cpp"
+      ],
+      "complexity": "complex",
+      "filePath": "src/node_mapnik.cpp",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:initialize-and-render:rasterize-map",
+      "type": "step",
+      "name": "Rasterize map to image",
+      "summary": "Render the loaded map and envelope into a raster image buffer.",
+      "tags": [
+        "native",
+        "rendering"
+      ],
+      "complexity": "complex",
+      "filePath": "src/mapnik_map.cpp",
+      "lineRange": [
+        0,
+        0
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "domain:tile-rendering",
+      "target": "flow:render-map-tile",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "domain:map-query-building",
+      "target": "flow:select-and-build-tile-query",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "domain:map-query-building",
+      "target": "flow:build-single-tree-query",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "domain:style-projection-config",
+      "target": "flow:generate-style-xml",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "domain:style-projection-config",
+      "target": "flow:project-tile-coordinates",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "domain:database-access",
+      "target": "flow:serve-pooled-query",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "domain:deployment-delivery",
+      "target": "flow:build-publish-image",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "domain:deployment-delivery",
+      "target": "flow:deploy-environment",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "domain:native-rendering-engine",
+      "target": "flow:initialize-and-render",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "flow:render-map-tile",
+      "target": "step:render-map-tile:receive-tile-request",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.14
+    },
+    {
+      "source": "flow:render-map-tile",
+      "target": "step:render-map-tile:compute-envelope",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.29
+    },
+    {
+      "source": "flow:render-map-tile",
+      "target": "step:render-map-tile:build-map-instance",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.43
+    },
+    {
+      "source": "flow:render-map-tile",
+      "target": "step:render-map-tile:query-tile-data",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.57
+    },
+    {
+      "source": "flow:render-map-tile",
+      "target": "step:render-map-tile:render-to-png",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.71
+    },
+    {
+      "source": "flow:render-map-tile",
+      "target": "step:render-map-tile:send-response",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.86
+    },
+    {
+      "source": "flow:select-and-build-tile-query",
+      "target": "step:select-and-build-tile-query:inspect-settings",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.17
+    },
+    {
+      "source": "flow:select-and-build-tile-query",
+      "target": "step:select-and-build-tile-query:select-builder",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.33
+    },
+    {
+      "source": "flow:select-and-build-tile-query",
+      "target": "step:select-and-build-tile-query:assemble-base-query",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:select-and-build-tile-query",
+      "target": "step:select-and-build-tile-query:apply-variant-overrides",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.67
+    },
+    {
+      "source": "flow:select-and-build-tile-query",
+      "target": "step:select-and-build-tile-query:execute-query",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.83
+    },
+    {
+      "source": "flow:build-single-tree-query",
+      "target": "step:build-single-tree-query:resolve-id-type",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.33
+    },
+    {
+      "source": "flow:build-single-tree-query",
+      "target": "step:build-single-tree-query:build-select",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.67
+    },
+    {
+      "source": "flow:generate-style-xml",
+      "target": "step:generate-style-xml:load-template",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.17
+    },
+    {
+      "source": "flow:generate-style-xml",
+      "target": "step:generate-style-xml:choose-zoom-sql",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.33
+    },
+    {
+      "source": "flow:generate-style-xml",
+      "target": "step:generate-style-xml:inject-sql",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:generate-style-xml",
+      "target": "step:generate-style-xml:inject-connection",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.67
+    },
+    {
+      "source": "flow:generate-style-xml",
+      "target": "step:generate-style-xml:return-style",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.83
+    },
+    {
+      "source": "flow:project-tile-coordinates",
+      "target": "step:project-tile-coordinates:precache-constants",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.33
+    },
+    {
+      "source": "flow:project-tile-coordinates",
+      "target": "step:project-tile-coordinates:convert-to-bbox",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.67
+    },
+    {
+      "source": "flow:serve-pooled-query",
+      "target": "step:serve-pooled-query:check-cache",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:serve-pooled-query",
+      "target": "step:serve-pooled-query:coalesce-inflight",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:serve-pooled-query",
+      "target": "step:serve-pooled-query:execute-on-pool",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:serve-pooled-query",
+      "target": "step:serve-pooled-query:populate-cache",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:build-publish-image",
+      "target": "step:build-publish-image:semantic-release",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.25
+    },
+    {
+      "source": "flow:build-publish-image",
+      "target": "step:build-publish-image:build-image",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:build-publish-image",
+      "target": "step:build-publish-image:push-image",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.75
+    },
+    {
+      "source": "flow:deploy-environment",
+      "target": "step:deploy-environment:select-tag",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.25
+    },
+    {
+      "source": "flow:deploy-environment",
+      "target": "step:deploy-environment:apply-overlay",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:deploy-environment",
+      "target": "step:deploy-environment:route-traffic",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.75
+    },
+    {
+      "source": "flow:initialize-and-render",
+      "target": "step:initialize-and-render:load-addon",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.25
+    },
+    {
+      "source": "flow:initialize-and-render",
+      "target": "step:initialize-and-render:register-wrappers",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:initialize-and-render",
+      "target": "step:initialize-and-render:rasterize-map",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.75
+    },
+    {
+      "source": "domain:tile-rendering",
+      "target": "domain:map-query-building",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Tile Rendering asks the Map controller to select and run the PostGIS query for the tile.",
+      "weight": 0.6
+    },
+    {
+      "source": "domain:tile-rendering",
+      "target": "domain:style-projection-config",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Tile Rendering loads the generated Mapnik style XML and the projected envelope for each map instance.",
+      "weight": 0.6
+    },
+    {
+      "source": "domain:tile-rendering",
+      "target": "domain:native-rendering-engine",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Tile Rendering calls the native Mapnik engine to rasterize the map to PNG.",
+      "weight": 0.6
+    },
+    {
+      "source": "domain:map-query-building",
+      "target": "domain:database-access",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Map Query Building executes assembled SQL through the pooled, cached database layer.",
+      "weight": 0.6
+    },
+    {
+      "source": "domain:style-projection-config",
+      "target": "domain:database-access",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Style & Projection Config injects the database connection into the PostGIS datasource.",
+      "weight": 0.6
+    },
+    {
+      "source": "domain:deployment-delivery",
+      "target": "domain:tile-rendering",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Deployment & Delivery builds, deploys, and exposes the Tile Rendering service.",
+      "weight": 0.6
+    }
+  ],
+  "layers": [],
+  "tour": []
+}
