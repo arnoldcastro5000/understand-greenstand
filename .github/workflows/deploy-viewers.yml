@@ -53,19 +53,24 @@ jobs:
       - name: Install and build the dashboard (demo/static)
         working-directory: _ua
         run: |
+          set -euo pipefail
           pnpm install --frozen-lockfile
           pnpm --filter @understand-anything/core build
+          # The repo layout differs across refs, so discover the dashboard package dir.
+          DASH_DIR="$(find . -type d -path '*/packages/dashboard' | head -1)"
+          echo "Dashboard dir: $DASH_DIR"
+          cd "$DASH_DIR"
           # Static demo build, relative base + relative graph URLs so one bundle
           # works from any subpath, loading ./knowledge-graph.json per directory.
-          cd packages/dashboard
           VITE_GRAPH_URL=./knowledge-graph.json \
           VITE_DOMAIN_GRAPH_URL=./domain-graph.json \
             pnpm exec vite build --config vite.config.demo.ts --base=./
+          echo "DIST=$(pwd)/dist" >> "$GITHUB_ENV"
 
       - name: Assemble the Pages site
         run: |
           set -euo pipefail
-          DIST="_ua/packages/dashboard/dist"
+          DIST="${DIST:?dashboard dist path not set by build step}"
           OUT="_site"
           rm -rf "$OUT"; mkdir -p "$OUT"
           touch "$OUT/.nojekyll"
