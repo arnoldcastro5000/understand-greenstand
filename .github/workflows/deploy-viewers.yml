@@ -82,6 +82,7 @@ jobs:
             cp -r "$DIST"/. "$OUT/$repo/"
             cp "$dir/knowledge-graph.json" "$OUT/$repo/knowledge-graph.json"
             [ -f "$dir/domain-graph.json" ] && cp "$dir/domain-graph.json" "$OUT/$repo/domain-graph.json"
+            [ -f "$dir/meta.json" ] && cp "$dir/meta.json" "$OUT/$repo/meta.json"
             echo "  assembled viewer: $repo"
             links="$links      <li><a href=\"./$repo/\">$repo</a></li>\n"
           done
