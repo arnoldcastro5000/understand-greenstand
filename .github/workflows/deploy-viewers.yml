@@ -1,0 +1,100 @@
+name: Deploy viewers to Pages
+
+# Builds one static Understand-Anything viewer per documented repo and publishes them
+# to GitHub Pages, one per subpath (/understand-greenstand/<repo>/). No built bundles
+# live in git: the viewer is built from a pinned Understand-Anything source ref each run.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "repos/**"
+      - ".github/workflows/deploy-viewers.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; do not cancel an in-progress deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  # Pin the viewer source. Nearest public tag to the plugin (2.9.4) is v2.9.0.
+  UA_REF: v2.9.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout docs repo
+        uses: actions/checkout@v4
+
+      - name: Checkout Understand-Anything source (pinned)
+        uses: actions/checkout@v4
+        with:
+          repository: Egonex-AI/Understand-Anything
+          ref: ${{ env.UA_REF }}
+          path: _ua
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: _ua/pnpm-lock.yaml
+
+      - name: Install and build the dashboard (demo/static)
+        working-directory: _ua
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @understand-anything/core build
+          # Static demo build, relative base + relative graph URLs so one bundle
+          # works from any subpath, loading ./knowledge-graph.json per directory.
+          cd packages/dashboard
+          VITE_GRAPH_URL=./knowledge-graph.json \
+          VITE_DOMAIN_GRAPH_URL=./domain-graph.json \
+            pnpm exec vite build --config vite.config.demo.ts --base=./
+
+      - name: Assemble the Pages site
+        run: |
+          set -euo pipefail
+          DIST="_ua/packages/dashboard/dist"
+          OUT="_site"
+          rm -rf "$OUT"; mkdir -p "$OUT"
+          touch "$OUT/.nojekyll"
+          links=""
+          for dir in repos/*/; do
+            repo="$(basename "$dir")"
+            [ -f "$dir/knowledge-graph.json" ] || continue
+            mkdir -p "$OUT/$repo"
+            cp -r "$DIST"/. "$OUT/$repo/"
+            cp "$dir/knowledge-graph.json" "$OUT/$repo/knowledge-graph.json"
+            [ -f "$dir/domain-graph.json" ] && cp "$dir/domain-graph.json" "$OUT/$repo/domain-graph.json"
+            echo "  assembled viewer: $repo"
+            links="$links      <li><a href=\"./$repo/\">$repo</a></li>\n"
+          done
+          # Minimal landing index (ticket 09 refines this).
+          printf '<!doctype html>\n<html lang="en"><head><meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>understand-greenstand viewers</title>\n<style>body{font:16px/1.5 system-ui,sans-serif;max-width:40rem;margin:3rem auto;padding:0 1rem}h1{font-size:1.4rem}li{margin:.3rem 0}</style>\n</head><body>\n<h1>understand-greenstand viewers</h1>\n<p>Interactive Understand-Anything viewers, one per documented Greenstand repo.</p>\n<ul>\n%b</ul>\n</body></html>\n' "$links" > "$OUT/index.html"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
