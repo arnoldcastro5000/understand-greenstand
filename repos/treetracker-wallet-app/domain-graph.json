@@ -1,0 +1,1714 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "treetracker-wallet-app",
+    "languages": [
+      "typescript",
+      "javascript"
+    ],
+    "frameworks": [
+      "Next.js",
+      "React",
+      "Expo React Native",
+      "NestJS",
+      "Jotai",
+      "Cucumber/WebdriverIO"
+    ],
+    "description": "Treetracker Wallet App is a secure digital token wallet platform built by Greenstand for transparent, verifiable tree-planting and forest-management token transfers, spanning a Next.js web app, an Expo React Native mobile app, and a NestJS backend, unified by Keycloak-based identity and a shared wallet API package.",
+    "analyzedAt": "2026-09-03T11:26:23Z",
+    "gitCommitHash": "51ae4e337957e06e372cd73346ead9c9e6c471eb"
+  },
+  "nodes": [
+    {
+      "id": "domain:wallet-management",
+      "type": "domain",
+      "name": "Wallet Management",
+      "summary": "Handles the lifecycle of a user's token wallet: creating a wallet, listing and viewing wallets and their balances, and updating a wallet's profile. It also covers the event-driven automatic provisioning of a wallet when a new user account is created.",
+      "tags": [
+        "wallet",
+        "core-domain",
+        "profile"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entities": [
+          "Wallet",
+          "Wallet Profile"
+        ],
+        "businessRules": [
+          "A wallet has a unique display name, checked for duplicates before creation.",
+          "New user accounts are auto-provisioned a wallet via an event-driven queue, not a direct API call from signup.",
+          "Wallet profile updates support optional logo and cover image uploads via multipart PATCH."
+        ],
+        "crossDomainInteractions": [
+          "Receives an auto-provisioning trigger from Authentication & Identity through the Postgres wallet-creation queue.",
+          "Supplies the wallet records that Search & Discovery filters and displays.",
+          "Provides the sending and receiving wallets used by Token Transfer."
+        ]
+      }
+    },
+    {
+      "id": "flow:create-wallet",
+      "type": "flow",
+      "name": "Create Wallet",
+      "summary": "A user creates a new token wallet from the web or native app, with a duplicate-name check and optional redemption of a pending shared action token immediately after creation.",
+      "tags": [
+        "wallet-creation",
+        "onboarding",
+        "form"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "User taps or clicks Create Wallet in the wallet list UI (web or native)",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "step:create-wallet:open-create-wallet-form",
+      "type": "step",
+      "name": "Open Create Wallet Form",
+      "summary": "User opens the create-wallet drawer/form from the wallet list.",
+      "tags": [
+        "ui",
+        "form"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/components/WalletCreateDrawer.tsx"
+    },
+    {
+      "id": "step:create-wallet:check-duplicate-wallet-name",
+      "type": "step",
+      "name": "Check Duplicate Wallet Name",
+      "summary": "The wallet page checks the entered name against existing wallets before allowing submission.",
+      "tags": [
+        "validation"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(protected)/wallet/page.tsx"
+    },
+    {
+      "id": "step:create-wallet:submit-wallet-creation",
+      "type": "step",
+      "name": "Submit Wallet Creation",
+      "summary": "The useCreateWallet hook triggers the wallet-creation mutation with the form data.",
+      "tags": [
+        "hook",
+        "state-management"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/wallet/src/hooks/useCreateWallet.ts"
+    },
+    {
+      "id": "step:create-wallet:create-wallet-via-api",
+      "type": "step",
+      "name": "Create Wallet via API",
+      "summary": "The wallet API client posts the wallet name and about text to POST /wallets and returns the created record.",
+      "tags": [
+        "api-client",
+        "http"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/wallet/src/api/createWallet.ts"
+    },
+    {
+      "id": "step:create-wallet:redeem-pending-shared-token",
+      "type": "step",
+      "name": "Redeem Pending Shared Token",
+      "summary": "If a shared action token was captured from a /claim link, it is redeemed into the newly created wallet.",
+      "tags": [
+        "action-token",
+        "local-storage"
+      ],
+      "complexity": "moderate",
+      "filePath": "apps/web/src/utils/actionToken.ts"
+    },
+    {
+      "id": "flow:view-wallet-details",
+      "type": "flow",
+      "name": "View and Update Wallet",
+      "summary": "A user lists their wallets, opens a wallet to see its balance and details, and can update the wallet's profile (name, about text, visibility, images).",
+      "tags": [
+        "wallet",
+        "profile",
+        "list-view"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "User opens the Wallets list or a specific wallet",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "step:view-wallet-details:fetch-wallets-list",
+      "type": "step",
+      "name": "Fetch Wallets List",
+      "summary": "The useGetWallets hook fetches the user's wallets via GET /wallets.",
+      "tags": [
+        "hook",
+        "api-client"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/wallet/src/hooks/useGetWallets.ts"
+    },
+    {
+      "id": "step:view-wallet-details:render-wallet-list",
+      "type": "step",
+      "name": "Render Wallet List",
+      "summary": "Each wallet is rendered as a card/row in the wallet list UI.",
+      "tags": [
+        "ui",
+        "list"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/components/WalletItem.tsx"
+    },
+    {
+      "id": "step:view-wallet-details:view-wallet-balance",
+      "type": "step",
+      "name": "View Wallet Balance",
+      "summary": "The wallet's token balance is displayed in a summary component.",
+      "tags": [
+        "ui",
+        "balance"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/components/WalletBalance.tsx"
+    },
+    {
+      "id": "step:view-wallet-details:view-wallet-detail-page",
+      "type": "step",
+      "name": "View Wallet Detail Page",
+      "summary": "Selecting a wallet opens its detail page showing profile and activity.",
+      "tags": [
+        "ui",
+        "detail-view"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(protected)/wallet/details/page.tsx"
+    },
+    {
+      "id": "step:view-wallet-details:update-wallet-profile",
+      "type": "step",
+      "name": "Update Wallet Profile",
+      "summary": "The wallet's display name, about text, map visibility, and images are updated via a multipart PATCH request.",
+      "tags": [
+        "api-client",
+        "file-upload"
+      ],
+      "complexity": "moderate",
+      "filePath": "packages/wallet/src/api/updateWallet.ts"
+    },
+    {
+      "id": "flow:automatic-wallet-provisioning",
+      "type": "flow",
+      "name": "Automatic Wallet Provisioning",
+      "summary": "When a new user account is created in Authentication & Identity, the backend listens for a queue notification and automatically creates a wallet for the new account, decoupling registration from wallet setup.",
+      "tags": [
+        "event-driven",
+        "queue",
+        "provisioning"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "Postgres NOTIFY on the wallets/creation channel, published after a new Keycloak account is created",
+        "entryType": "event"
+      }
+    },
+    {
+      "id": "step:automatic-wallet-provisioning:subscribe-on-module-init",
+      "type": "step",
+      "name": "Subscribe on Module Init",
+      "summary": "The QueueListenerService subscribes to the wallet-creation channel when the NestJS module initializes.",
+      "tags": [
+        "service",
+        "event-handler"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/user/src/queue-listener/queue-listener.service.ts"
+    },
+    {
+      "id": "step:automatic-wallet-provisioning:listen-for-wallet-creation-notifications",
+      "type": "step",
+      "name": "Listen for Wallet-Creation Notifications",
+      "summary": "A Postgres LISTEN subscription invokes a callback with the new account id from each parsed message.",
+      "tags": [
+        "postgres",
+        "event-handler"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/user/src/queue-listener/helpers/onQueueNotification.ts"
+    },
+    {
+      "id": "step:automatic-wallet-provisioning:deliver-notification-via-postgres-notify",
+      "type": "step",
+      "name": "Deliver Notification via Postgres NOTIFY",
+      "summary": "The shared queue package's subscribe function emits a message event for each NOTIFY payload after acknowledging it.",
+      "tags": [
+        "queue",
+        "postgres"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/queue/subscribe.js"
+    },
+    {
+      "id": "step:automatic-wallet-provisioning:fetch-service-account-token",
+      "type": "step",
+      "name": "Fetch Service-Account Token",
+      "summary": "The listener obtains a cached Keycloak service-account token to authenticate its call to the wallet API.",
+      "tags": [
+        "auth",
+        "token"
+      ],
+      "complexity": "moderate",
+      "filePath": "apps/user/src/auth/auth.service.ts"
+    },
+    {
+      "id": "step:automatic-wallet-provisioning:create-wallet-via-wallet-api",
+      "type": "step",
+      "name": "Create Wallet via Wallet API",
+      "summary": "The listener calls the wallet API with the service-account token to provision a token wallet for the new account.",
+      "tags": [
+        "http-client",
+        "wallet"
+      ],
+      "complexity": "moderate",
+      "filePath": "apps/user/src/queue-listener/queue-listener.service.ts"
+    },
+    {
+      "id": "domain:token-transfer",
+      "type": "domain",
+      "name": "Token Transfer",
+      "summary": "Governs how tree-planting tokens move between wallets: initiating direct or link-shared transfers, responding to incoming transfer notifications, cancelling outgoing transfers, and viewing transfer and token history.",
+      "tags": [
+        "transfer",
+        "token",
+        "core-domain"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": [
+          "Transfer",
+          "Token",
+          "Action Token",
+          "Notification"
+        ],
+        "businessRules": [
+          "A transfer moves either a bundle of generic tokens or a specific set of token ids from one wallet to another.",
+          "Pending incoming transfers are surfaced as notifications until the recipient accepts or declines them.",
+          "Only the sender can cancel a still-pending outgoing transfer.",
+          "Action tokens are signed, time-limited credentials that let a transfer be completed via a shareable link instead of a direct recipient wallet."
+        ],
+        "crossDomainInteractions": [
+          "Requires wallets provisioned by Wallet Management as the sending and receiving endpoints of a transfer.",
+          "Uses recipient wallets found through Search & Discovery when the sender is choosing who to send to.",
+          "Requires an authenticated session token from Authentication & Identity to authorize every transfer API call."
+        ]
+      }
+    },
+    {
+      "id": "flow:send-transfer",
+      "type": "flow",
+      "name": "Send Transfer",
+      "summary": "A user selects a sending wallet, chooses or searches for a recipient, enters an amount and note, optionally generates a shareable claim link, and submits the transfer.",
+      "tags": [
+        "transfer",
+        "send-tokens",
+        "form"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entryPoint": "User opens the Send page/screen",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "step:send-transfer:choose-sending-wallet",
+      "type": "step",
+      "name": "Choose Sending Wallet",
+      "summary": "The user selects which of their wallets to send tokens from.",
+      "tags": [
+        "form",
+        "wallet"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(protected)/send/page.tsx"
+    },
+    {
+      "id": "step:send-transfer:search-and-select-recipient",
+      "type": "step",
+      "name": "Search and Select Recipient",
+      "summary": "The user searches for and selects the recipient wallet to send to.",
+      "tags": [
+        "search",
+        "navigation"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/native/app/transfer/index.tsx"
+    },
+    {
+      "id": "step:send-transfer:enter-amount-and-note",
+      "type": "step",
+      "name": "Enter Amount and Note",
+      "summary": "The user enters the token amount and an optional note before proceeding.",
+      "tags": [
+        "form",
+        "validation"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/native/app/transfer/entry.tsx"
+    },
+    {
+      "id": "step:send-transfer:generate-shareable-action-token",
+      "type": "step",
+      "name": "Generate Shareable Action Token",
+      "summary": "If sending via a link instead of a direct recipient, a signed, expiring action token is generated.",
+      "tags": [
+        "action-token",
+        "api-client"
+      ],
+      "complexity": "moderate",
+      "filePath": "packages/wallet/src/api/generateActionToken.ts"
+    },
+    {
+      "id": "step:send-transfer:submit-transfer",
+      "type": "step",
+      "name": "Submit Transfer",
+      "summary": "The useSendTransfer hook triggers the transfer-creation mutation with the chosen wallet, recipient, and amount.",
+      "tags": [
+        "hook",
+        "state-management"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/wallet/src/hooks/useSendTransfer.ts"
+    },
+    {
+      "id": "step:send-transfer:create-transfer-via-api",
+      "type": "step",
+      "name": "Create Transfer via API",
+      "summary": "The wallet API client posts the transfer to POST /transfers as either a token bundle or a list of specific token ids.",
+      "tags": [
+        "api-client",
+        "http"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/wallet/src/api/sendTransfer.ts"
+    },
+    {
+      "id": "flow:share-token-via-link",
+      "type": "flow",
+      "name": "Share Token via Link",
+      "summary": "A sender shares tokens with someone who may not yet have an account: an action token is generated, embedded in a claim link, and redeemed by the recipient after they register and create their first wallet.",
+      "tags": [
+        "action-token",
+        "sharing",
+        "onboarding"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entryPoint": "Sender generates a shareable claim link; recipient opens /claim",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "step:share-token-via-link:sender-generates-action-token",
+      "type": "step",
+      "name": "Sender Generates Action Token",
+      "summary": "The sender requests a signed, expiring action token authorizing the transfer, embedded in a shareable link.",
+      "tags": [
+        "action-token",
+        "api-client"
+      ],
+      "complexity": "moderate",
+      "filePath": "packages/wallet/src/api/generateActionToken.ts"
+    },
+    {
+      "id": "step:share-token-via-link:recipient-opens-claim-link",
+      "type": "step",
+      "name": "Recipient Opens Claim Link",
+      "summary": "The recipient visits the public /claim route with the action_token query parameter.",
+      "tags": [
+        "public-route",
+        "routing"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/claim/page.tsx"
+    },
+    {
+      "id": "step:share-token-via-link:persist-pending-action-token",
+      "type": "step",
+      "name": "Persist Pending Action Token",
+      "summary": "The action token is stored locally so it survives the recipient's signup and login flow.",
+      "tags": [
+        "local-storage",
+        "action-token"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/utils/actionToken.ts"
+    },
+    {
+      "id": "step:share-token-via-link:recipient-registers-or-logs-in",
+      "type": "step",
+      "name": "Recipient Registers or Logs In",
+      "summary": "The recipient creates an account or signs in before they can redeem the shared tokens.",
+      "tags": [
+        "auth",
+        "onboarding"
+      ],
+      "complexity": "moderate",
+      "filePath": "apps/web/src/app/(public)/signup/page.tsx"
+    },
+    {
+      "id": "step:share-token-via-link:redeem-action-token-after-wallet-creation",
+      "type": "step",
+      "name": "Redeem Action Token After Wallet Creation",
+      "summary": "Once the recipient has a wallet, the pending action token is redeemed, completing the transfer into their wallet.",
+      "tags": [
+        "action-token",
+        "api-client"
+      ],
+      "complexity": "moderate",
+      "filePath": "packages/wallet/src/api/redeemActionToken.ts"
+    },
+    {
+      "id": "flow:view-and-respond-to-notifications",
+      "type": "flow",
+      "name": "View and Respond to Transfer Notifications",
+      "summary": "Pending incoming transfers appear as notifications; the recipient opens a notification's detail to accept the transfer and receive the token, or decline it.",
+      "tags": [
+        "notification",
+        "transfer",
+        "action-handler"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "User opens the Notifications list",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "step:view-and-respond-to-notifications:list-pending-notifications",
+      "type": "step",
+      "name": "List Pending Notifications",
+      "summary": "Pending incoming transfer notifications for the user's wallets are listed.",
+      "tags": [
+        "list-view",
+        "notification"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(protected)/notifications/page.tsx"
+    },
+    {
+      "id": "step:view-and-respond-to-notifications:render-notification-item",
+      "type": "step",
+      "name": "Render Notification Item",
+      "summary": "Each notification is rendered with sender initials, title, timestamp, and description.",
+      "tags": [
+        "ui",
+        "notification"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/components/NotificationItem.tsx"
+    },
+    {
+      "id": "step:view-and-respond-to-notifications:open-notification-detail",
+      "type": "step",
+      "name": "Open Notification Detail",
+      "summary": "Selecting a notification opens its detail view with accept/decline actions.",
+      "tags": [
+        "detail-view",
+        "notification"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(protected)/notifications/details/page.tsx"
+    },
+    {
+      "id": "step:view-and-respond-to-notifications:accept-transfer",
+      "type": "step",
+      "name": "Accept Transfer",
+      "summary": "Accepting calls the transfer-accept API, completing the transfer into the recipient's wallet.",
+      "tags": [
+        "api-client",
+        "transfer"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/wallet/src/api/acceptTransfer.ts"
+    },
+    {
+      "id": "step:view-and-respond-to-notifications:decline-transfer",
+      "type": "step",
+      "name": "Decline Transfer",
+      "summary": "Declining calls the transfer-decline API, returning the tokens to the sender.",
+      "tags": [
+        "api-client",
+        "transfer"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/wallet/src/api/declineTransfer.ts"
+    },
+    {
+      "id": "step:view-and-respond-to-notifications:view-resulting-token",
+      "type": "step",
+      "name": "View Resulting Token",
+      "summary": "After accepting, the user can view the resulting token's details.",
+      "tags": [
+        "detail-view",
+        "token"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(protected)/token/details/page.tsx"
+    },
+    {
+      "id": "flow:cancel-transfer",
+      "type": "flow",
+      "name": "Cancel Transfer",
+      "summary": "A sender views their outgoing pending transfers and cancels one before the recipient responds.",
+      "tags": [
+        "transfer",
+        "cancel"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "User opens Transfers list and selects a pending outgoing transfer",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "step:cancel-transfer:view-outgoing-pending-transfers",
+      "type": "step",
+      "name": "View Outgoing Pending Transfers",
+      "summary": "The transfers page lists incoming, outgoing, and historical transfers with available actions.",
+      "tags": [
+        "list-view",
+        "transfer"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(protected)/transfers/page.tsx"
+    },
+    {
+      "id": "step:cancel-transfer:cancel-transfer-via-api",
+      "type": "step",
+      "name": "Cancel Transfer via API",
+      "summary": "The wallet API client sends DELETE /transfers/:id to cancel a sender-initiated pending transfer.",
+      "tags": [
+        "api-client",
+        "http"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/wallet/src/api/cancelTransfer.ts"
+    },
+    {
+      "id": "step:cancel-transfer:remove-transfer-from-pending-list",
+      "type": "step",
+      "name": "Remove Transfer from Pending List",
+      "summary": "The cancelled transfer is removed from the outgoing pending list in the UI.",
+      "tags": [
+        "ui",
+        "state-management"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(protected)/transfers/page.tsx"
+    },
+    {
+      "id": "flow:view-transfer-token-history",
+      "type": "flow",
+      "name": "View Transfer and Token History",
+      "summary": "A user browses their transfer history and drills into a specific transfer or token to see its details and transaction lineage.",
+      "tags": [
+        "history",
+        "transfer",
+        "token"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "User opens Transfers or Token details page",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "step:view-transfer-token-history:list-transfers",
+      "type": "step",
+      "name": "List Transfers",
+      "summary": "Transfers are listed via GET /transfers with optional state, wallet, date-range, and sort filters.",
+      "tags": [
+        "api-client",
+        "list-view"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/wallet/src/api/getTransfers.ts"
+    },
+    {
+      "id": "step:view-transfer-token-history:view-transfer-detail",
+      "type": "step",
+      "name": "View Transfer Detail",
+      "summary": "A single transfer's creation/close timestamps and involved tokens are shown.",
+      "tags": [
+        "detail-view",
+        "transfer"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(protected)/transfers/details/page.tsx"
+    },
+    {
+      "id": "step:view-transfer-token-history:list-tokens-in-transfer",
+      "type": "step",
+      "name": "List Tokens in Transfer",
+      "summary": "The specific tokens included in a transfer are fetched via GET /transfers/:id/tokens.",
+      "tags": [
+        "api-client",
+        "token"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/wallet/src/api/getTransferTokens.ts"
+    },
+    {
+      "id": "step:view-transfer-token-history:view-token-detail",
+      "type": "step",
+      "name": "View Token Detail",
+      "summary": "A single token's details are shown alongside its transaction history.",
+      "tags": [
+        "detail-view",
+        "token"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(protected)/token/details/page.tsx"
+    },
+    {
+      "id": "step:view-transfer-token-history:view-token-transaction-lineage",
+      "type": "step",
+      "name": "View Token Transaction Lineage",
+      "summary": "A token's full transaction (lineage) history is fetched via GET /tokens/:id/transactions.",
+      "tags": [
+        "api-client",
+        "history"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/wallet/src/api/getTokenTransactions.ts"
+    },
+    {
+      "id": "domain:search-discovery",
+      "type": "domain",
+      "name": "Search & Discovery",
+      "summary": "Lets users find wallets, most often to choose a recipient for a token transfer, by typing a query or displaying a scannable QR code that others can search for.",
+      "tags": [
+        "search",
+        "discovery"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entities": [
+          "Search Result",
+          "Wallet (as search target)"
+        ],
+        "businessRules": [
+          "Search results are sectioned into matching, non-matching, or category-grouped results with computed relevance sorting.",
+          "A wallet's QR code is a shareable identifier that lets other users find and select it via search."
+        ],
+        "crossDomainInteractions": [
+          "Searches and filters wallet records owned by Wallet Management.",
+          "Feeds the recipient-selection step of Token Transfer's send flow."
+        ]
+      }
+    },
+    {
+      "id": "flow:search-wallets",
+      "type": "flow",
+      "name": "Search Wallets",
+      "summary": "A user types a query in the search box; the app derives sectioned, category-grouped results and lets the user open a wallet's details.",
+      "tags": [
+        "search",
+        "filtering"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "User types in the header/search screen search box",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "step:search-wallets:enter-search-query",
+      "type": "step",
+      "name": "Enter Search Query",
+      "summary": "The user types a query into the header or dedicated search screen.",
+      "tags": [
+        "ui",
+        "search"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/components/header/HeaderSearch.tsx"
+    },
+    {
+      "id": "step:search-wallets:update-search-state",
+      "type": "step",
+      "name": "Update Search State",
+      "summary": "Query text, loading flags, recent searches, and category selection are tracked in shared search atoms.",
+      "tags": [
+        "state-management",
+        "jotai"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/core/src/atoms/search/index.ts"
+    },
+    {
+      "id": "step:search-wallets:derive-sectioned-results",
+      "type": "step",
+      "name": "Derive Sectioned Results",
+      "summary": "A hook derives UI-ready matching, non-matching, or category-grouped results plus display metadata.",
+      "tags": [
+        "hook",
+        "search"
+      ],
+      "complexity": "moderate",
+      "filePath": "packages/core/src/hooks/useSearchResults.ts"
+    },
+    {
+      "id": "step:search-wallets:render-search-results",
+      "type": "step",
+      "name": "Render Search Results",
+      "summary": "Results are rendered as a list of selectable items.",
+      "tags": [
+        "ui",
+        "list"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/native/components/ui/SearchResults.tsx"
+    },
+    {
+      "id": "step:search-wallets:select-result-and-open-wallet-detail",
+      "type": "step",
+      "name": "Select Result and Open Wallet Detail",
+      "summary": "Selecting a result opens the corresponding wallet's detail modal or page.",
+      "tags": [
+        "ui",
+        "detail-view"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(protected)/search/page.tsx"
+    },
+    {
+      "id": "flow:display-wallet-qr",
+      "type": "flow",
+      "name": "Display Wallet QR Code",
+      "summary": "A user displays their own wallet's QR code so another user can scan or search for it as a transfer recipient.",
+      "tags": [
+        "qr-code",
+        "discovery"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "User opens their wallet's QR code display",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "step:display-wallet-qr:render-wallet-qr-code",
+      "type": "step",
+      "name": "Render Wallet QR Code",
+      "summary": "The user's wallet identifier is rendered as a scannable QR code.",
+      "tags": [
+        "ui",
+        "qr-code"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/components/QRCodeDisplay.tsx"
+    },
+    {
+      "id": "step:display-wallet-qr:display-on-native-search-tab",
+      "type": "step",
+      "name": "Display on Native Search Tab",
+      "summary": "The native app's search tab shows the same QR display alongside search results.",
+      "tags": [
+        "ui",
+        "qr-code"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/native/components/ui/QRCodeDisplay.tsx"
+    },
+    {
+      "id": "step:display-wallet-qr:peer-searches-for-the-wallet",
+      "type": "step",
+      "name": "Peer Searches for the Wallet",
+      "summary": "Another user finds the wallet through the search flow, e.g. after scanning the code.",
+      "tags": [
+        "search",
+        "navigation"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/native/app/(tabs)/search/index.tsx"
+    },
+    {
+      "id": "domain:authentication-identity",
+      "type": "domain",
+      "name": "Authentication & Identity",
+      "summary": "Manages user registration, login, session token lifecycle, and logout, all delegated to a centralized Keycloak identity provider, plus the backend's own service-account credentials for calling Keycloak's admin API.",
+      "tags": [
+        "auth",
+        "identity",
+        "keycloak",
+        "core-domain"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": [
+          "User Account",
+          "Session Token",
+          "Service-Account Token"
+        ],
+        "businessRules": [
+          "User registration and login are delegated to a hosted Keycloak instance rather than handled with local credential storage.",
+          "The backend caches a single service-account token, refreshing it only when missing or expired, to call Keycloak's admin API.",
+          "Session tokens are persisted through a cross-platform storage adapter: session storage on web, AsyncStorage on native."
+        ],
+        "crossDomainInteractions": [
+          "Issues the session tokens that Token Transfer and Wallet Management require to authorize API calls.",
+          "New account creation publishes the queue event that Wallet Management consumes to auto-provision a wallet."
+        ]
+      }
+    },
+    {
+      "id": "flow:user-registration",
+      "type": "flow",
+      "name": "User Registration",
+      "summary": "A new user registers via Keycloak's hosted registration page or an in-app form; the backend creates the account in Keycloak and a wallet-creation event is published for downstream provisioning.",
+      "tags": [
+        "registration",
+        "onboarding",
+        "keycloak"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "POST /api/auth/signup (web) or Keycloak hosted registration redirect",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:user-registration:redirect-to-registration",
+      "type": "step",
+      "name": "Redirect to Registration",
+      "summary": "The signup route redirects the browser to Keycloak's hosted registration page.",
+      "tags": [
+        "routing",
+        "keycloak"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(public)/signup/page.tsx"
+    },
+    {
+      "id": "step:user-registration:validate-and-submit-registration-form",
+      "type": "step",
+      "name": "Validate and Submit Registration Form",
+      "summary": "Registration form input is trimmed and validated before being posted to the treetracker user API.",
+      "tags": [
+        "validation",
+        "state-atom"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/core/src/atoms/auth/registerAtom.ts"
+    },
+    {
+      "id": "step:user-registration:create-account-in-keycloak",
+      "type": "step",
+      "name": "Create Account in Keycloak",
+      "summary": "The backend user service creates the account via Keycloak's admin REST API using a service-account token.",
+      "tags": [
+        "service",
+        "keycloak"
+      ],
+      "complexity": "moderate",
+      "filePath": "apps/user/src/user/user.service.ts"
+    },
+    {
+      "id": "step:user-registration:publish-wallet-creation-notification",
+      "type": "step",
+      "name": "Publish Wallet-Creation Notification",
+      "summary": "A notification is published on the wallet-creation channel so a wallet can be provisioned asynchronously.",
+      "tags": [
+        "queue",
+        "postgres"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/queue/publish.js"
+    },
+    {
+      "id": "step:user-registration:show-account-created-confirmation",
+      "type": "step",
+      "name": "Show Account-Created Confirmation",
+      "summary": "The user is shown a confirmation page after their account and wallet are set up.",
+      "tags": [
+        "ui",
+        "onboarding"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(public)/account-created/page.tsx"
+    },
+    {
+      "id": "flow:user-login",
+      "type": "flow",
+      "name": "User Login",
+      "summary": "A user logs in via Keycloak's hosted login page or an in-app form, and the app handles the resulting OIDC callback.",
+      "tags": [
+        "login",
+        "keycloak",
+        "oauth"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "POST /api/auth/login (web) or Keycloak hosted login redirect",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:user-login:redirect-to-keycloak-hosted-login",
+      "type": "step",
+      "name": "Redirect to Keycloak Hosted Login",
+      "summary": "The login route redirects the browser to Keycloak's hosted login page.",
+      "tags": [
+        "routing",
+        "keycloak"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/(public)/login/page.tsx"
+    },
+    {
+      "id": "step:user-login:validate-and-submit-credentials",
+      "type": "step",
+      "name": "Validate and Submit Credentials",
+      "summary": "Login form input is trimmed and validated before being posted to the treetracker user API.",
+      "tags": [
+        "validation",
+        "state-atom"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/core/src/atoms/auth/loginAtom.ts"
+    },
+    {
+      "id": "step:user-login:password-grant-login-against-keycloak",
+      "type": "step",
+      "name": "Password-Grant Login Against Keycloak",
+      "summary": "The backend user service performs a password-grant login against Keycloak's OpenID Connect endpoint.",
+      "tags": [
+        "service",
+        "keycloak"
+      ],
+      "complexity": "moderate",
+      "filePath": "apps/user/src/user/user.service.ts"
+    },
+    {
+      "id": "step:user-login:handle-oidc-callback",
+      "type": "step",
+      "name": "Handle OIDC Callback",
+      "summary": "The callback route waits for the auth context to be ready then routes to home or login based on authentication state.",
+      "tags": [
+        "oauth-callback",
+        "routing"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/app/auth/callback/page.tsx"
+    },
+    {
+      "id": "flow:session-token-management",
+      "type": "flow",
+      "name": "Session Token Management",
+      "summary": "The app initializes the Keycloak client on mount, mirrors and persists the resulting token, keeps it refreshed, and clears it on logout.",
+      "tags": [
+        "session",
+        "token",
+        "keycloak"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "App mount / KeycloakProvider initialization",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "step:session-token-management:initialize-keycloak-client",
+      "type": "step",
+      "name": "Initialize Keycloak Client",
+      "summary": "Keycloak is initialized on mount and its ready/authenticated state exposed via a context provider.",
+      "tags": [
+        "context-provider",
+        "keycloak"
+      ],
+      "complexity": "moderate",
+      "filePath": "apps/web/src/components/KeycloakProvider.tsx"
+    },
+    {
+      "id": "step:session-token-management:persist-token",
+      "type": "step",
+      "name": "Persist Token",
+      "summary": "The auth token is persisted in a cross-platform storage adapter shared by web and native.",
+      "tags": [
+        "persistence",
+        "state-atom"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/core/src/atoms/auth/tokenAtom.ts"
+    },
+    {
+      "id": "step:session-token-management:auto-refresh-token",
+      "type": "step",
+      "name": "Auto-Refresh Token",
+      "summary": "The provider sets up automatic token refresh so the session stays valid.",
+      "tags": [
+        "keycloak",
+        "token-refresh"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/web/src/components/KeycloakProvider.tsx"
+    },
+    {
+      "id": "step:session-token-management:log-out-and-clear-token",
+      "type": "step",
+      "name": "Log Out and Clear Token",
+      "summary": "Logging out clears the persisted authentication token and redirects to Keycloak logout.",
+      "tags": [
+        "state-atom",
+        "logout"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/core/src/atoms/auth/logoutAtom.ts"
+    },
+    {
+      "id": "flow:backend-service-auth",
+      "type": "flow",
+      "name": "Backend Service-to-Service Auth",
+      "summary": "The backend obtains and caches its own Keycloak service-account token via the client-credentials flow so it can call Keycloak's admin API on behalf of users.",
+      "tags": [
+        "service-auth",
+        "keycloak",
+        "token-management"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "Backend service needs a Keycloak service-account token to call an admin API",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:backend-service-auth:request-service-account-token",
+      "type": "step",
+      "name": "Request Service-Account Token",
+      "summary": "The auth service requests a service-account token from Keycloak's token endpoint using client credentials.",
+      "tags": [
+        "service",
+        "keycloak"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/user/src/auth/auth.service.ts"
+    },
+    {
+      "id": "step:backend-service-auth:cache-and-reuse-token",
+      "type": "step",
+      "name": "Cache and Reuse Token",
+      "summary": "The token is cached and only refreshed when missing or expired, avoiding a token request on every call.",
+      "tags": [
+        "caching",
+        "token-management"
+      ],
+      "complexity": "simple",
+      "filePath": "apps/user/src/auth/auth.service.ts"
+    },
+    {
+      "id": "step:backend-service-auth:call-keycloak-admin-api",
+      "type": "step",
+      "name": "Call Keycloak Admin API",
+      "summary": "The cached token authorizes calls to Keycloak's admin REST API, e.g. to create a user account.",
+      "tags": [
+        "api-handler",
+        "keycloak"
+      ],
+      "complexity": "simple",
+      "filePath": "packages/keycloak/src/api/createAccountFromKeycloak.ts"
+    }
+  ],
+  "edges": [
+    {
+      "source": "domain:wallet-management",
+      "target": "flow:create-wallet",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:create-wallet",
+      "target": "step:create-wallet:open-create-wallet-form",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:create-wallet",
+      "target": "step:create-wallet:check-duplicate-wallet-name",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:create-wallet",
+      "target": "step:create-wallet:submit-wallet-creation",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:create-wallet",
+      "target": "step:create-wallet:create-wallet-via-api",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:create-wallet",
+      "target": "step:create-wallet:redeem-pending-shared-token",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:wallet-management",
+      "target": "flow:view-wallet-details",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:view-wallet-details",
+      "target": "step:view-wallet-details:fetch-wallets-list",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:view-wallet-details",
+      "target": "step:view-wallet-details:render-wallet-list",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:view-wallet-details",
+      "target": "step:view-wallet-details:view-wallet-balance",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:view-wallet-details",
+      "target": "step:view-wallet-details:view-wallet-detail-page",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:view-wallet-details",
+      "target": "step:view-wallet-details:update-wallet-profile",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:wallet-management",
+      "target": "flow:automatic-wallet-provisioning",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:automatic-wallet-provisioning",
+      "target": "step:automatic-wallet-provisioning:subscribe-on-module-init",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:automatic-wallet-provisioning",
+      "target": "step:automatic-wallet-provisioning:listen-for-wallet-creation-notifications",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:automatic-wallet-provisioning",
+      "target": "step:automatic-wallet-provisioning:deliver-notification-via-postgres-notify",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:automatic-wallet-provisioning",
+      "target": "step:automatic-wallet-provisioning:fetch-service-account-token",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:automatic-wallet-provisioning",
+      "target": "step:automatic-wallet-provisioning:create-wallet-via-wallet-api",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:token-transfer",
+      "target": "flow:send-transfer",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:send-transfer",
+      "target": "step:send-transfer:choose-sending-wallet",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:send-transfer",
+      "target": "step:send-transfer:search-and-select-recipient",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:send-transfer",
+      "target": "step:send-transfer:enter-amount-and-note",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:send-transfer",
+      "target": "step:send-transfer:generate-shareable-action-token",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "flow:send-transfer",
+      "target": "step:send-transfer:submit-transfer",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:send-transfer",
+      "target": "step:send-transfer:create-transfer-via-api",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:token-transfer",
+      "target": "flow:share-token-via-link",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:share-token-via-link",
+      "target": "step:share-token-via-link:sender-generates-action-token",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:share-token-via-link",
+      "target": "step:share-token-via-link:recipient-opens-claim-link",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:share-token-via-link",
+      "target": "step:share-token-via-link:persist-pending-action-token",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:share-token-via-link",
+      "target": "step:share-token-via-link:recipient-registers-or-logs-in",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:share-token-via-link",
+      "target": "step:share-token-via-link:redeem-action-token-after-wallet-creation",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:token-transfer",
+      "target": "flow:view-and-respond-to-notifications",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:view-and-respond-to-notifications",
+      "target": "step:view-and-respond-to-notifications:list-pending-notifications",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:view-and-respond-to-notifications",
+      "target": "step:view-and-respond-to-notifications:render-notification-item",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:view-and-respond-to-notifications",
+      "target": "step:view-and-respond-to-notifications:open-notification-detail",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:view-and-respond-to-notifications",
+      "target": "step:view-and-respond-to-notifications:accept-transfer",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "flow:view-and-respond-to-notifications",
+      "target": "step:view-and-respond-to-notifications:decline-transfer",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:view-and-respond-to-notifications",
+      "target": "step:view-and-respond-to-notifications:view-resulting-token",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:token-transfer",
+      "target": "flow:cancel-transfer",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:cancel-transfer",
+      "target": "step:cancel-transfer:view-outgoing-pending-transfers",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:cancel-transfer",
+      "target": "step:cancel-transfer:cancel-transfer-via-api",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "flow:cancel-transfer",
+      "target": "step:cancel-transfer:remove-transfer-from-pending-list",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:token-transfer",
+      "target": "flow:view-transfer-token-history",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:view-transfer-token-history",
+      "target": "step:view-transfer-token-history:list-transfers",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:view-transfer-token-history",
+      "target": "step:view-transfer-token-history:view-transfer-detail",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:view-transfer-token-history",
+      "target": "step:view-transfer-token-history:list-tokens-in-transfer",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:view-transfer-token-history",
+      "target": "step:view-transfer-token-history:view-token-detail",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:view-transfer-token-history",
+      "target": "step:view-transfer-token-history:view-token-transaction-lineage",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:search-discovery",
+      "target": "flow:search-wallets",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:search-wallets",
+      "target": "step:search-wallets:enter-search-query",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:search-wallets",
+      "target": "step:search-wallets:update-search-state",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:search-wallets",
+      "target": "step:search-wallets:derive-sectioned-results",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:search-wallets",
+      "target": "step:search-wallets:render-search-results",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:search-wallets",
+      "target": "step:search-wallets:select-result-and-open-wallet-detail",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:search-discovery",
+      "target": "flow:display-wallet-qr",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:display-wallet-qr",
+      "target": "step:display-wallet-qr:render-wallet-qr-code",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:display-wallet-qr",
+      "target": "step:display-wallet-qr:display-on-native-search-tab",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "flow:display-wallet-qr",
+      "target": "step:display-wallet-qr:peer-searches-for-the-wallet",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:authentication-identity",
+      "target": "flow:user-registration",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:user-registration",
+      "target": "step:user-registration:redirect-to-registration",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:user-registration",
+      "target": "step:user-registration:validate-and-submit-registration-form",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:user-registration",
+      "target": "step:user-registration:create-account-in-keycloak",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:user-registration",
+      "target": "step:user-registration:publish-wallet-creation-notification",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:user-registration",
+      "target": "step:user-registration:show-account-created-confirmation",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:authentication-identity",
+      "target": "flow:user-login",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:user-login",
+      "target": "step:user-login:redirect-to-keycloak-hosted-login",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:user-login",
+      "target": "step:user-login:validate-and-submit-credentials",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:user-login",
+      "target": "step:user-login:password-grant-login-against-keycloak",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:user-login",
+      "target": "step:user-login:handle-oidc-callback",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:authentication-identity",
+      "target": "flow:session-token-management",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:session-token-management",
+      "target": "step:session-token-management:initialize-keycloak-client",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:session-token-management",
+      "target": "step:session-token-management:persist-token",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:session-token-management",
+      "target": "step:session-token-management:auto-refresh-token",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:session-token-management",
+      "target": "step:session-token-management:log-out-and-clear-token",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:authentication-identity",
+      "target": "flow:backend-service-auth",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:backend-service-auth",
+      "target": "step:backend-service-auth:request-service-account-token",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:backend-service-auth",
+      "target": "step:backend-service-auth:cache-and-reuse-token",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "flow:backend-service-auth",
+      "target": "step:backend-service-auth:call-keycloak-admin-api",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:authentication-identity",
+      "target": "domain:wallet-management",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "New Keycloak account creation publishes a queue notification that Wallet Management consumes to auto-provision a wallet.",
+      "weight": 0.7
+    },
+    {
+      "source": "domain:authentication-identity",
+      "target": "domain:token-transfer",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Session tokens issued during login authorize every wallet and transfer API call.",
+      "weight": 0.6
+    },
+    {
+      "source": "domain:wallet-management",
+      "target": "domain:token-transfer",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "A wallet must exist before it can send, receive, or hold pending transfers.",
+      "weight": 0.7
+    },
+    {
+      "source": "domain:token-transfer",
+      "target": "domain:search-discovery",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Search results supply the recipient wallet chosen when sending a transfer.",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:search-discovery",
+      "target": "domain:wallet-management",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Search filters and displays the same wallet records that Wallet Management fetches and manages.",
+      "weight": 0.5
+    }
+  ],
+  "layers": [],
+  "tour": []
+}
