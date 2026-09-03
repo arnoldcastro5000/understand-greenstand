@@ -54,6 +54,10 @@ jobs:
         working-directory: _ua
         run: |
           set -euo pipefail
+          # Overlay the source-from-github viewer patch onto the pinned upstream ref
+          # (makes CodeViewer load source from GitHub raw when a per-repo config.json
+          # supplies sourceBaseUrl). working-directory is _ua, a git checkout.
+          git apply --verbose "${GITHUB_WORKSPACE}/viewer/source-from-github.patch"
           pnpm install --frozen-lockfile
           pnpm --filter @understand-anything/core build
           # The repo layout differs across refs, so discover the dashboard package dir.
@@ -86,7 +90,19 @@ jobs:
             cp -r "$DIST"/. "$OUT/$repo/"
             cp "$dir/knowledge-graph.json" "$OUT/$repo/knowledge-graph.json"
             [ -f "$dir/domain-graph.json" ] && cp "$dir/domain-graph.json" "$OUT/$repo/domain-graph.json"
-            [ -f "$dir/meta.json" ] && cp "$dir/meta.json" "$OUT/$repo/meta.json"
+            if [ -f "$dir/meta.json" ]; then
+              cp "$dir/meta.json" "$OUT/$repo/meta.json"
+              # Per-repo config.json: point the viewer's source panel at GitHub raw at the
+              # analyzed commit, so "view source" loads the real code with no server.
+              sha="$(jq -r '.gitCommitHash // empty' "$dir/meta.json")"
+              if [ -n "$sha" ]; then
+                printf '{"sourceBaseUrl":"https://raw.githubusercontent.com/Greenstand/%s/%s/"}\n' \
+                  "$repo" "$sha" > "$OUT/$repo/config.json"
+                echo "  config.json: $repo @ $sha"
+              else
+                echo "  WARN: no gitCommitHash in $dir/meta.json; no config.json for $repo"
+              fi
+            fi
             # Human docs: copy the raw markdown and render styled HTML beside the viewer.
             doclinks=""
             if [ -f "$dir/ONBOARDING.md" ]; then
