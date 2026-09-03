@@ -1,0 +1,1757 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "treetracker-field-data",
+    "languages": [
+      "javascript",
+      "sql"
+    ],
+    "frameworks": [
+      "Express",
+      "Knex",
+      "Rascal/RabbitMQ",
+      "Mocha"
+    ],
+    "description": "Field data service that owns raw tree tracking data uploaded from treetracker app devices. It ingests raw captures, tracks field sessions and device movement, registers devices and wallets, and publishes domain events to downstream systems while dual-writing to the legacy treetracker database during migration.",
+    "analyzedAt": "2026-09-03T05:52:07Z",
+    "gitCommitHash": "a6dfe14903d2ab2ca2cc60bea2fe18411ca02449"
+  },
+  "nodes": [
+    {
+      "id": "domain:raw-capture-ingestion",
+      "type": "domain",
+      "name": "Raw Capture Ingestion",
+      "summary": "Owns the raw tree captures that treetracker app devices upload. It creates, queries, verifies and rejects captures, coordinating dual writes to the field-data and legacy databases and emitting domain events for each action.",
+      "tags": [
+        "capture",
+        "ingestion",
+        "core-domain",
+        "field-data"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": [
+          "RawCapture",
+          "Capture"
+        ],
+        "businessRules": [
+          "A capture write spans the main field-data database and the legacy database in one atomic unit; failure rolls back both",
+          "Each capture create or reject raises a matching domain event (capture-created / capture-rejected)",
+          "A capture references its session, wallet registration and device configuration"
+        ],
+        "crossDomainInteractions": [
+          "Publishes capture events to Domain Events & Messaging",
+          "Dual-writes legacy tree records via Legacy Database Bridging",
+          "Joins Session, Wallet Registration and Device Configuration data on read"
+        ]
+      }
+    },
+    {
+      "id": "domain:session-track-tracking",
+      "type": "domain",
+      "name": "Session & Track Tracking",
+      "summary": "Records field capture sessions, session segments, and device movement tracks. It provides transactional creation and paginated queries for sessions and tracks that captures reference.",
+      "tags": [
+        "session",
+        "track",
+        "tracking",
+        "field-data"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entities": [
+          "Session",
+          "SessionSegment",
+          "Track"
+        ],
+        "businessRules": [
+          "Sessions carry an organization id used to bridge captures to organizations",
+          "Session and track creation run inside a database transaction with rollback on failure"
+        ],
+        "crossDomainInteractions": [
+          "Provides session context that Raw Capture Ingestion joins on read"
+        ]
+      }
+    },
+    {
+      "id": "domain:device-configuration",
+      "type": "domain",
+      "name": "Device Configuration",
+      "summary": "Registers and queries the configuration of treetracker devices in the field. Configurations are created transactionally and joined into captures for provenance.",
+      "tags": [
+        "device",
+        "configuration",
+        "field-data"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entities": [
+          "DeviceConfiguration"
+        ],
+        "businessRules": [
+          "Device configuration creation is wrapped in a database transaction"
+        ],
+        "crossDomainInteractions": [
+          "Supplies device metadata joined into Raw Capture Ingestion reads"
+        ]
+      }
+    },
+    {
+      "id": "domain:wallet-registration",
+      "type": "domain",
+      "name": "Wallet Registration",
+      "summary": "Registers the wallets that captures are attributed to and lets clients query them. Creation is idempotent, returning the existing record on duplicate, and is backfilled from legacy data via ETL.",
+      "tags": [
+        "wallet",
+        "registration",
+        "idempotent"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entities": [
+          "WalletRegistration"
+        ],
+        "businessRules": [
+          "Creating a wallet registration is idempotent: a duplicate returns the existing record",
+          "Creation runs inside a transaction that rolls back on error"
+        ],
+        "crossDomainInteractions": [
+          "Provides wallet attribution joined into Raw Capture Ingestion reads",
+          "Backfilled from legacy data by Legacy Database Bridging ETL"
+        ]
+      }
+    },
+    {
+      "id": "domain:domain-events-messaging",
+      "type": "domain",
+      "name": "Domain Events & Messaging",
+      "summary": "Implements the event-sourcing outbox and RabbitMQ messaging that carry capture events out of the service and back in for processing. It publishes, consumes, and replays domain events with at-least-once delivery.",
+      "tags": [
+        "events",
+        "messaging",
+        "rabbitmq",
+        "event-sourcing",
+        "outbox"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": [
+          "DomainEvent"
+        ],
+        "businessRules": [
+          "Domain events are persisted to a partitioned outbox table before and after publication",
+          "Incoming events are processed inside a transactional session; failure rolls back and re-queues via republish/nack recovery",
+          "Stored events can be replayed by re-publishing or re-applying handlers for recovery"
+        ],
+        "crossDomainInteractions": [
+          "Receives capture-created and capture-rejected events from Raw Capture Ingestion",
+          "Reprocesses captures on consume and replay"
+        ]
+      }
+    },
+    {
+      "id": "domain:legacy-database-bridging",
+      "type": "domain",
+      "name": "Legacy Database Bridging",
+      "summary": "Bridges field-data records into the legacy treetracker main database during migration. It maps captures to legacy tree, planter and attribute records and backfills wallet registrations and session ids from legacy data.",
+      "tags": [
+        "legacy",
+        "migration",
+        "dual-write",
+        "etl"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": [
+          "LegacyTree",
+          "LegacyPlanter",
+          "LegacyTreeAttribute",
+          "LegacySession"
+        ],
+        "businessRules": [
+          "Each new capture is dual-written as a legacy tree with its planter lookup and tree attributes",
+          "Rejecting a capture also rejects the corresponding legacy tree via the legacy API"
+        ],
+        "crossDomainInteractions": [
+          "Persists legacy trees on behalf of Raw Capture Ingestion",
+          "Backfills Wallet Registration records from legacy data"
+        ]
+      }
+    },
+    {
+      "id": "flow:create-raw-capture",
+      "type": "flow",
+      "name": "Create Raw Capture",
+      "summary": "Accepts a new raw tree capture from a device, persists it to the field-data and legacy databases in a dual transaction, and publishes a capture-created event.",
+      "tags": [
+        "capture",
+        "create",
+        "dual-write",
+        "event"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entryPoint": "POST /captures",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "flow:reject-raw-capture",
+      "type": "flow",
+      "name": "Reject Raw Capture",
+      "summary": "Marks an existing raw capture as rejected, rejects the corresponding legacy tree, and publishes a capture-rejected event.",
+      "tags": [
+        "capture",
+        "reject",
+        "event"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "PATCH /captures",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "flow:query-raw-captures",
+      "type": "flow",
+      "name": "Query Raw Captures",
+      "summary": "Returns raw captures as a paginated list with prev/next links or as a single capture by id.",
+      "tags": [
+        "capture",
+        "query",
+        "pagination"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "GET /captures",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "flow:create-session",
+      "type": "flow",
+      "name": "Create Session",
+      "summary": "Validates and persists a new field capture session inside a database transaction.",
+      "tags": [
+        "session",
+        "create",
+        "transaction"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "POST /session",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "flow:query-sessions",
+      "type": "flow",
+      "name": "Query Sessions",
+      "summary": "Returns sessions joined with wallet and device configuration data as a paginated list or a single session by id.",
+      "tags": [
+        "session",
+        "query",
+        "pagination"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "GET /session",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "flow:track-device-movement",
+      "type": "flow",
+      "name": "Track Device Movement",
+      "summary": "Creates device movement track records transactionally and returns them as a paginated list or single track by id.",
+      "tags": [
+        "track",
+        "device",
+        "query"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "/track",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "flow:register-device-configuration",
+      "type": "flow",
+      "name": "Register Device Configuration",
+      "summary": "Validates and creates a device configuration record inside a database transaction.",
+      "tags": [
+        "device",
+        "configuration",
+        "create"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "POST /device_configuration",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "flow:query-device-configurations",
+      "type": "flow",
+      "name": "Query Device Configurations",
+      "summary": "Returns device configurations as a paginated list with total count and prev/next links or a single configuration by id.",
+      "tags": [
+        "device",
+        "configuration",
+        "query",
+        "pagination"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "GET /device_configuration",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "flow:create-wallet-registration",
+      "type": "flow",
+      "name": "Create Wallet Registration",
+      "summary": "Validates and idempotently creates a wallet registration inside a transaction, returning the existing record on duplicate.",
+      "tags": [
+        "wallet",
+        "create",
+        "idempotent",
+        "transaction"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "POST /wallet_registration",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "flow:query-wallet-registrations",
+      "type": "flow",
+      "name": "Query Wallet Registrations",
+      "summary": "Returns wallet registrations as a paginated list with prev/next links or a single registration by id.",
+      "tags": [
+        "wallet",
+        "query",
+        "pagination"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "GET /wallet_registration",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "flow:publish-capture-event",
+      "type": "flow",
+      "name": "Publish Capture Event",
+      "summary": "Raises a domain event on a model, persists it to the outbox, and publishes it to RabbitMQ for downstream consumers.",
+      "tags": [
+        "events",
+        "publish",
+        "outbox",
+        "rabbitmq"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "RawCapture create/reject",
+        "entryType": "event"
+      }
+    },
+    {
+      "id": "flow:consume-capture-event",
+      "type": "flow",
+      "name": "Consume Capture Event",
+      "summary": "Subscribes to the capture-creation queue and processes incoming events inside a transactional session, updating domain event state on success or rollback.",
+      "tags": [
+        "events",
+        "consume",
+        "subscribe",
+        "transaction"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entryPoint": "RabbitMQ capture-creation subscription",
+        "entryType": "event"
+      }
+    },
+    {
+      "id": "flow:replay-domain-events",
+      "type": "flow",
+      "name": "Replay Domain Events",
+      "summary": "Loads stored domain events and re-publishes them to the queue or re-applies their handlers for recovery.",
+      "tags": [
+        "events",
+        "replay",
+        "recovery"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "POST /replay_event",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "flow:dual-write-legacy-tree",
+      "type": "flow",
+      "name": "Dual-Write Legacy Tree",
+      "summary": "Maps a new capture into legacy tree records and persists them with a planter lookup and bulk tree-attribute inserts into the legacy database.",
+      "tags": [
+        "legacy",
+        "dual-write",
+        "tree"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entryPoint": "RawCaptureService.createRawCapture",
+        "entryType": "event"
+      }
+    },
+    {
+      "id": "flow:backfill-from-legacy",
+      "type": "flow",
+      "name": "Backfill From Legacy ETL",
+      "summary": "One-off ETL that generates legacy session ids and builds wallet registration rows from legacy data during migration.",
+      "tags": [
+        "legacy",
+        "etl",
+        "backfill",
+        "migration"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "database/etl scripts",
+        "entryType": "cli"
+      }
+    },
+    {
+      "id": "step:create-raw-capture:validate-payload",
+      "type": "step",
+      "name": "Validate capture payload",
+      "summary": "Validates the incoming capture request body against the Joi schema in the raw capture handler.",
+      "tags": [
+        "validation",
+        "handler"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/rawCaptureHandler/index.js"
+    },
+    {
+      "id": "step:create-raw-capture:begin-dual-transactions",
+      "type": "step",
+      "name": "Begin dual transactions",
+      "summary": "RawCaptureService opens transactional sessions on both the main and legacy databases to coordinate an atomic write.",
+      "tags": [
+        "service",
+        "transaction",
+        "dual-write"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/services/RawCaptureService.js"
+    },
+    {
+      "id": "step:create-raw-capture:persist-raw-capture",
+      "type": "step",
+      "name": "Persist raw capture",
+      "summary": "RawCaptureRepository inserts the raw_capture row, resolving session, wallet registration and device configuration references.",
+      "tags": [
+        "repository",
+        "persistence"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/repositories/RawCaptureRepository.js"
+    },
+    {
+      "id": "step:create-raw-capture:write-legacy-tree",
+      "type": "step",
+      "name": "Write legacy tree",
+      "summary": "LegacyTree maps the capture into legacy tree records and writes them to the legacy database.",
+      "tags": [
+        "legacy",
+        "dual-write"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/models/LegacyTree.js"
+    },
+    {
+      "id": "step:create-raw-capture:raise-created-event",
+      "type": "step",
+      "name": "Raise capture-created event",
+      "summary": "The RawCapture model raises a capture-created domain event, persisted to the outbox by the event repository.",
+      "tags": [
+        "events",
+        "model",
+        "outbox"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/models/RawCapture.js"
+    },
+    {
+      "id": "step:create-raw-capture:publish-created-message",
+      "type": "step",
+      "name": "Publish capture-created message",
+      "summary": "QueueService publishes the capture-created message to RabbitMQ.",
+      "tags": [
+        "messaging",
+        "publish",
+        "rabbitmq"
+      ],
+      "complexity": "simple",
+      "filePath": "server/services/QueueService.js"
+    },
+    {
+      "id": "step:create-raw-capture:commit-transactions",
+      "type": "step",
+      "name": "Commit transactions",
+      "summary": "RawCaptureService commits both database transactions, rolling back both on any failure.",
+      "tags": [
+        "service",
+        "transaction"
+      ],
+      "complexity": "simple",
+      "filePath": "server/services/RawCaptureService.js"
+    },
+    {
+      "id": "step:reject-raw-capture:validate-params",
+      "type": "step",
+      "name": "Validate reject request",
+      "summary": "rawCaptureRejectPatch validates the request parameters for the capture to reject.",
+      "tags": [
+        "validation",
+        "handler"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/rawCaptureHandler/index.js"
+    },
+    {
+      "id": "step:reject-raw-capture:mark-rejected",
+      "type": "step",
+      "name": "Mark capture rejected",
+      "summary": "RawCaptureService updates the capture status to rejected through the RawCapture model.",
+      "tags": [
+        "service",
+        "model"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/services/RawCaptureService.js"
+    },
+    {
+      "id": "step:reject-raw-capture:reject-legacy-tree",
+      "type": "step",
+      "name": "Reject legacy tree",
+      "summary": "LegacyAPIService issues a PATCH to the legacy tree API to reject the legacy tree for its organization.",
+      "tags": [
+        "legacy",
+        "api"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/services/LegacyAPIService.js"
+    },
+    {
+      "id": "step:reject-raw-capture:raise-rejected-event",
+      "type": "step",
+      "name": "Raise capture-rejected event",
+      "summary": "The RawCapture model raises a capture-rejected domain event.",
+      "tags": [
+        "events",
+        "model"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/models/RawCapture.js"
+    },
+    {
+      "id": "step:reject-raw-capture:publish-rejected-message",
+      "type": "step",
+      "name": "Publish capture-rejected message",
+      "summary": "QueueService publishes the capture-rejected message to RabbitMQ.",
+      "tags": [
+        "messaging",
+        "publish",
+        "rabbitmq"
+      ],
+      "complexity": "simple",
+      "filePath": "server/services/QueueService.js"
+    },
+    {
+      "id": "step:query-raw-captures:validate-query",
+      "type": "step",
+      "name": "Validate query params",
+      "summary": "rawCaptureGet validates query parameters and applies filter/limit options.",
+      "tags": [
+        "validation",
+        "handler"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/rawCaptureHandler/index.js"
+    },
+    {
+      "id": "step:query-raw-captures:fetch-list",
+      "type": "step",
+      "name": "Fetch paginated captures",
+      "summary": "RawCaptureRepository reads captures with left joins to session, wallet registration and device configuration.",
+      "tags": [
+        "repository",
+        "query",
+        "pagination"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/repositories/RawCaptureRepository.js"
+    },
+    {
+      "id": "step:query-raw-captures:build-links",
+      "type": "step",
+      "name": "Build prev/next links",
+      "summary": "generatePrevAndNext builds pagination links from the request, limit and offset.",
+      "tags": [
+        "pagination",
+        "helper"
+      ],
+      "complexity": "simple",
+      "filePath": "server/utils/helper.js"
+    },
+    {
+      "id": "step:query-raw-captures:fetch-single",
+      "type": "step",
+      "name": "Fetch single capture",
+      "summary": "rawCaptureSingleGet fetches a single raw capture by id through RawCaptureService.",
+      "tags": [
+        "handler",
+        "query"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/rawCaptureHandler/index.js"
+    },
+    {
+      "id": "step:create-session:validate-payload",
+      "type": "step",
+      "name": "Validate session payload",
+      "summary": "sessionPost validates the session creation payload against the Joi schema.",
+      "tags": [
+        "validation",
+        "handler"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/sessionHandler/index.js"
+    },
+    {
+      "id": "step:create-session:begin-transaction",
+      "type": "step",
+      "name": "Begin transaction",
+      "summary": "SessionService opens a transactional session on the field-data database.",
+      "tags": [
+        "service",
+        "transaction"
+      ],
+      "complexity": "simple",
+      "filePath": "server/services/SessionService.js"
+    },
+    {
+      "id": "step:create-session:persist-session",
+      "type": "step",
+      "name": "Persist session",
+      "summary": "SessionModel creates the session row through SessionRepository.",
+      "tags": [
+        "model",
+        "repository",
+        "persistence"
+      ],
+      "complexity": "simple",
+      "filePath": "server/models/SessionModel.js"
+    },
+    {
+      "id": "step:create-session:commit",
+      "type": "step",
+      "name": "Commit transaction",
+      "summary": "SessionService commits the transaction, rolling back on failure.",
+      "tags": [
+        "service",
+        "transaction"
+      ],
+      "complexity": "simple",
+      "filePath": "server/services/SessionService.js"
+    },
+    {
+      "id": "step:query-sessions:validate-query",
+      "type": "step",
+      "name": "Validate query params",
+      "summary": "sessionGet validates query parameters and applies filter/limit options.",
+      "tags": [
+        "validation",
+        "handler"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/sessionHandler/index.js"
+    },
+    {
+      "id": "step:query-sessions:fetch-list",
+      "type": "step",
+      "name": "Fetch paginated sessions",
+      "summary": "SessionRepository builds join and count queries across wallet_registration and device_configuration tables.",
+      "tags": [
+        "repository",
+        "query",
+        "pagination"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/repositories/SessionRepository.js"
+    },
+    {
+      "id": "step:query-sessions:build-links",
+      "type": "step",
+      "name": "Build prev/next links",
+      "summary": "generatePrevAndNext builds pagination links for the session list.",
+      "tags": [
+        "pagination",
+        "helper"
+      ],
+      "complexity": "simple",
+      "filePath": "server/utils/helper.js"
+    },
+    {
+      "id": "step:query-sessions:fetch-single",
+      "type": "step",
+      "name": "Fetch single session",
+      "summary": "sessionSingleGet validates the id path parameter and returns the matching session.",
+      "tags": [
+        "handler",
+        "query"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/sessionHandler/index.js"
+    },
+    {
+      "id": "step:track-device-movement:create-track",
+      "type": "step",
+      "name": "Create track",
+      "summary": "TrackService wraps track creation in a database transaction with rollback on failure.",
+      "tags": [
+        "service",
+        "transaction",
+        "track"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/services/TrackService.js"
+    },
+    {
+      "id": "step:track-device-movement:list-tracks",
+      "type": "step",
+      "name": "List tracks",
+      "summary": "trackGet validates query params and returns a paginated list of tracks with prev/next links.",
+      "tags": [
+        "handler",
+        "query",
+        "pagination"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/tracksHandler/index.js"
+    },
+    {
+      "id": "step:track-device-movement:fetch-single",
+      "type": "step",
+      "name": "Fetch single track",
+      "summary": "trackSingleGet fetches a single track by id via TrackService.",
+      "tags": [
+        "handler",
+        "query"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/tracksHandler/index.js"
+    },
+    {
+      "id": "step:register-device-configuration:validate-body",
+      "type": "step",
+      "name": "Validate configuration body",
+      "summary": "deviceConfigurationPost validates the request body against the Joi schema.",
+      "tags": [
+        "validation",
+        "handler"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/deviceConfigurationHandler/index.js"
+    },
+    {
+      "id": "step:register-device-configuration:begin-transaction",
+      "type": "step",
+      "name": "Begin transaction",
+      "summary": "DeviceConfigurationService opens a transactional session for the write.",
+      "tags": [
+        "service",
+        "transaction"
+      ],
+      "complexity": "simple",
+      "filePath": "server/services/DeviceConfigurationService.js"
+    },
+    {
+      "id": "step:register-device-configuration:persist-configuration",
+      "type": "step",
+      "name": "Persist configuration",
+      "summary": "The DeviceConfiguration model creates the configuration row through its repository.",
+      "tags": [
+        "model",
+        "repository",
+        "persistence"
+      ],
+      "complexity": "simple",
+      "filePath": "server/models/DeviceConfiguration.js"
+    },
+    {
+      "id": "step:register-device-configuration:commit",
+      "type": "step",
+      "name": "Commit transaction",
+      "summary": "DeviceConfigurationService commits the transaction, rolling back on error.",
+      "tags": [
+        "service",
+        "transaction"
+      ],
+      "complexity": "simple",
+      "filePath": "server/services/DeviceConfigurationService.js"
+    },
+    {
+      "id": "step:query-device-configurations:validate-query",
+      "type": "step",
+      "name": "Validate query params",
+      "summary": "deviceConfigurationGet validates query parameters for the list request.",
+      "tags": [
+        "validation",
+        "handler"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/deviceConfigurationHandler/index.js"
+    },
+    {
+      "id": "step:query-device-configurations:fetch-list",
+      "type": "step",
+      "name": "Fetch paginated configurations",
+      "summary": "The DeviceConfiguration model retrieves a paginated list with total count via its repository.",
+      "tags": [
+        "model",
+        "repository",
+        "pagination"
+      ],
+      "complexity": "simple",
+      "filePath": "server/models/DeviceConfiguration.js"
+    },
+    {
+      "id": "step:query-device-configurations:build-links",
+      "type": "step",
+      "name": "Build prev/next links",
+      "summary": "generatePrevAndNext builds pagination navigation links for the configuration list.",
+      "tags": [
+        "pagination",
+        "helper"
+      ],
+      "complexity": "simple",
+      "filePath": "server/utils/helper.js"
+    },
+    {
+      "id": "step:query-device-configurations:fetch-single",
+      "type": "step",
+      "name": "Fetch single configuration",
+      "summary": "deviceConfigurationSingleGet validates the id path parameter and returns one configuration.",
+      "tags": [
+        "handler",
+        "query"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/deviceConfigurationHandler/index.js"
+    },
+    {
+      "id": "step:create-wallet-registration:validate-body",
+      "type": "step",
+      "name": "Validate registration body",
+      "summary": "walletRegistrationPost validates the request body against the Joi schema.",
+      "tags": [
+        "validation",
+        "handler"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/walletRegistrationHandler/index.js"
+    },
+    {
+      "id": "step:create-wallet-registration:begin-transaction",
+      "type": "step",
+      "name": "Begin transaction",
+      "summary": "WalletRegistrationService opens a transactional session for the write.",
+      "tags": [
+        "service",
+        "transaction"
+      ],
+      "complexity": "simple",
+      "filePath": "server/services/WalletRegistrationService.js"
+    },
+    {
+      "id": "step:create-wallet-registration:idempotent-create",
+      "type": "step",
+      "name": "Idempotent create",
+      "summary": "The WalletRegistration model creates the registration and returns the existing record on a duplicate to keep the operation idempotent.",
+      "tags": [
+        "model",
+        "idempotent",
+        "persistence"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/models/WalletRegistration.js"
+    },
+    {
+      "id": "step:create-wallet-registration:commit",
+      "type": "step",
+      "name": "Commit transaction",
+      "summary": "WalletRegistrationService commits the transaction, rolling back on error.",
+      "tags": [
+        "service",
+        "transaction"
+      ],
+      "complexity": "simple",
+      "filePath": "server/services/WalletRegistrationService.js"
+    },
+    {
+      "id": "step:query-wallet-registrations:validate-query",
+      "type": "step",
+      "name": "Validate query params",
+      "summary": "walletRegistrationGet validates query parameters for the list request.",
+      "tags": [
+        "validation",
+        "handler"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/walletRegistrationHandler/index.js"
+    },
+    {
+      "id": "step:query-wallet-registrations:fetch-list",
+      "type": "step",
+      "name": "Fetch paginated registrations",
+      "summary": "The WalletRegistration model retrieves a paginated list through its repository.",
+      "tags": [
+        "model",
+        "repository",
+        "pagination"
+      ],
+      "complexity": "simple",
+      "filePath": "server/models/WalletRegistration.js"
+    },
+    {
+      "id": "step:query-wallet-registrations:build-links",
+      "type": "step",
+      "name": "Build prev/next links",
+      "summary": "generatePrevAndNext builds pagination navigation links for the registration list.",
+      "tags": [
+        "pagination",
+        "helper"
+      ],
+      "complexity": "simple",
+      "filePath": "server/utils/helper.js"
+    },
+    {
+      "id": "step:query-wallet-registrations:fetch-single",
+      "type": "step",
+      "name": "Fetch single registration",
+      "summary": "walletRegistrationSingleGet fetches a single wallet registration by id.",
+      "tags": [
+        "handler",
+        "query"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/walletRegistrationHandler/index.js"
+    },
+    {
+      "id": "step:publish-capture-event:raise-event",
+      "type": "step",
+      "name": "Raise domain event",
+      "summary": "A domain model raises a domain event describing the capture action.",
+      "tags": [
+        "model",
+        "events"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/models/DomainEvent.js"
+    },
+    {
+      "id": "step:publish-capture-event:persist-outbox",
+      "type": "step",
+      "name": "Persist to outbox",
+      "summary": "EventRepository inserts the domain event into the partitioned outbox table.",
+      "tags": [
+        "repository",
+        "outbox",
+        "persistence"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/repositories/EventRepository.js"
+    },
+    {
+      "id": "step:publish-capture-event:publish-message",
+      "type": "step",
+      "name": "Publish to RabbitMQ",
+      "summary": "QueueService publishes the event message through the RabbitMQ broker wrapper.",
+      "tags": [
+        "messaging",
+        "publish",
+        "rabbitmq"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/services/QueueService.js"
+    },
+    {
+      "id": "step:publish-capture-event:mark-sent",
+      "type": "step",
+      "name": "Mark event sent",
+      "summary": "The DomainEvent state is updated to sent once published.",
+      "tags": [
+        "model",
+        "events"
+      ],
+      "complexity": "simple",
+      "filePath": "server/models/DomainEvent.js"
+    },
+    {
+      "id": "step:consume-capture-event:subscribe",
+      "type": "step",
+      "name": "Subscribe to queue",
+      "summary": "EventHandlerService registers queue subscribers on the capture-creation queue.",
+      "tags": [
+        "messaging",
+        "subscribe",
+        "service"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/services/EventHandlerService.js"
+    },
+    {
+      "id": "step:consume-capture-event:process-in-transaction",
+      "type": "step",
+      "name": "Process in transaction",
+      "summary": "EventHandlerService processes the incoming message inside a transactional session.",
+      "tags": [
+        "service",
+        "transaction"
+      ],
+      "complexity": "complex",
+      "filePath": "server/services/EventHandlerService.js"
+    },
+    {
+      "id": "step:consume-capture-event:update-event-state",
+      "type": "step",
+      "name": "Update event state",
+      "summary": "The domain event handled state is updated on successful processing.",
+      "tags": [
+        "model",
+        "events"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/models/DomainEvent.js"
+    },
+    {
+      "id": "step:consume-capture-event:ack-or-rollback",
+      "type": "step",
+      "name": "Ack or rollback",
+      "summary": "On success the message is acknowledged; on failure the transaction rolls back and the broker republishes or dead-letters the message.",
+      "tags": [
+        "messaging",
+        "recovery",
+        "rabbitmq"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/infra/RabbitMQ/RabbitMQ.js"
+    },
+    {
+      "id": "step:replay-domain-events:receive-request",
+      "type": "step",
+      "name": "Receive replay request",
+      "summary": "The replay event handler receives the replay POST request and forwards it to ReplayEventService.",
+      "tags": [
+        "handler",
+        "replay"
+      ],
+      "complexity": "simple",
+      "filePath": "server/handlers/replayEventHandler/index.js"
+    },
+    {
+      "id": "step:replay-domain-events:load-events",
+      "type": "step",
+      "name": "Load stored events",
+      "summary": "ReplayEventService loads the stored domain events from the outbox via EventRepository.",
+      "tags": [
+        "service",
+        "repository",
+        "events"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/services/ReplayEventService.js"
+    },
+    {
+      "id": "step:replay-domain-events:republish-or-reapply",
+      "type": "step",
+      "name": "Republish or re-apply",
+      "summary": "ReplayEventService re-publishes the events to the queue or re-applies the event handlers for recovery.",
+      "tags": [
+        "service",
+        "replay",
+        "recovery"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/services/ReplayEventService.js"
+    },
+    {
+      "id": "step:dual-write-legacy-tree:map-capture",
+      "type": "step",
+      "name": "Map capture to legacy tree",
+      "summary": "LegacyTree builds a frozen legacy tree entity from the capture.",
+      "tags": [
+        "legacy",
+        "model",
+        "mapping"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/models/LegacyTree.js"
+    },
+    {
+      "id": "step:dual-write-legacy-tree:lookup-planter",
+      "type": "step",
+      "name": "Lookup planter",
+      "summary": "LegacyPlanterRepository finds the legacy planter by phone or email identifier.",
+      "tags": [
+        "legacy",
+        "repository"
+      ],
+      "complexity": "simple",
+      "filePath": "server/repositories/Legacy/PlanterRepository.js"
+    },
+    {
+      "id": "step:dual-write-legacy-tree:insert-tree",
+      "type": "step",
+      "name": "Insert legacy tree",
+      "summary": "LegacyTreeRepository inserts the tree row into the legacy database via a raw parameterized query.",
+      "tags": [
+        "legacy",
+        "repository",
+        "persistence"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/repositories/Legacy/TreeRepository.js"
+    },
+    {
+      "id": "step:dual-write-legacy-tree:insert-attributes",
+      "type": "step",
+      "name": "Bulk-insert tree attributes",
+      "summary": "LegacyTreeAttributeRepository bulk-inserts tree attribute rows concurrently.",
+      "tags": [
+        "legacy",
+        "repository",
+        "persistence"
+      ],
+      "complexity": "moderate",
+      "filePath": "server/repositories/Legacy/TreeAttributeRepository.js"
+    },
+    {
+      "id": "step:backfill-from-legacy:generate-session-ids",
+      "type": "step",
+      "name": "Generate legacy session ids",
+      "summary": "The ETL script derives deterministic legacy session ids for backfill.",
+      "tags": [
+        "etl",
+        "legacy",
+        "session"
+      ],
+      "complexity": "moderate",
+      "filePath": "database/etl/create-legacy-session-ids.js"
+    },
+    {
+      "id": "step:backfill-from-legacy:build-wallet-registrations",
+      "type": "step",
+      "name": "Build wallet registrations from legacy",
+      "summary": "The ETL SQL creates wallet_registration rows from legacy data.",
+      "tags": [
+        "etl",
+        "legacy",
+        "wallet"
+      ],
+      "complexity": "moderate",
+      "filePath": "database/etl/create-wallet-registration-from-legacy.sql"
+    }
+  ],
+  "edges": [
+    {
+      "source": "domain:raw-capture-ingestion",
+      "target": "flow:create-raw-capture",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:raw-capture-ingestion",
+      "target": "flow:reject-raw-capture",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:raw-capture-ingestion",
+      "target": "flow:query-raw-captures",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:session-track-tracking",
+      "target": "flow:create-session",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:session-track-tracking",
+      "target": "flow:query-sessions",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:session-track-tracking",
+      "target": "flow:track-device-movement",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:device-configuration",
+      "target": "flow:register-device-configuration",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:device-configuration",
+      "target": "flow:query-device-configurations",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:wallet-registration",
+      "target": "flow:create-wallet-registration",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:wallet-registration",
+      "target": "flow:query-wallet-registrations",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:domain-events-messaging",
+      "target": "flow:publish-capture-event",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:domain-events-messaging",
+      "target": "flow:consume-capture-event",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:domain-events-messaging",
+      "target": "flow:replay-domain-events",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:legacy-database-bridging",
+      "target": "flow:dual-write-legacy-tree",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:legacy-database-bridging",
+      "target": "flow:backfill-from-legacy",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:create-raw-capture",
+      "target": "step:create-raw-capture:validate-payload",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:create-raw-capture",
+      "target": "step:create-raw-capture:begin-dual-transactions",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:create-raw-capture",
+      "target": "step:create-raw-capture:persist-raw-capture",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:create-raw-capture",
+      "target": "step:create-raw-capture:write-legacy-tree",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:create-raw-capture",
+      "target": "step:create-raw-capture:raise-created-event",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "flow:create-raw-capture",
+      "target": "step:create-raw-capture:publish-created-message",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:create-raw-capture",
+      "target": "step:create-raw-capture:commit-transactions",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:reject-raw-capture",
+      "target": "step:reject-raw-capture:validate-params",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:reject-raw-capture",
+      "target": "step:reject-raw-capture:mark-rejected",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:reject-raw-capture",
+      "target": "step:reject-raw-capture:reject-legacy-tree",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "flow:reject-raw-capture",
+      "target": "step:reject-raw-capture:raise-rejected-event",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "flow:reject-raw-capture",
+      "target": "step:reject-raw-capture:publish-rejected-message",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:query-raw-captures",
+      "target": "step:query-raw-captures:validate-query",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.25
+    },
+    {
+      "source": "flow:query-raw-captures",
+      "target": "step:query-raw-captures:fetch-list",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:query-raw-captures",
+      "target": "step:query-raw-captures:build-links",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.75
+    },
+    {
+      "source": "flow:query-raw-captures",
+      "target": "step:query-raw-captures:fetch-single",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:create-session",
+      "target": "step:create-session:validate-payload",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.25
+    },
+    {
+      "source": "flow:create-session",
+      "target": "step:create-session:begin-transaction",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:create-session",
+      "target": "step:create-session:persist-session",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.75
+    },
+    {
+      "source": "flow:create-session",
+      "target": "step:create-session:commit",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:query-sessions",
+      "target": "step:query-sessions:validate-query",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.25
+    },
+    {
+      "source": "flow:query-sessions",
+      "target": "step:query-sessions:fetch-list",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:query-sessions",
+      "target": "step:query-sessions:build-links",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.75
+    },
+    {
+      "source": "flow:query-sessions",
+      "target": "step:query-sessions:fetch-single",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:track-device-movement",
+      "target": "step:track-device-movement:create-track",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.33
+    },
+    {
+      "source": "flow:track-device-movement",
+      "target": "step:track-device-movement:list-tracks",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.67
+    },
+    {
+      "source": "flow:track-device-movement",
+      "target": "step:track-device-movement:fetch-single",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:register-device-configuration",
+      "target": "step:register-device-configuration:validate-body",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.25
+    },
+    {
+      "source": "flow:register-device-configuration",
+      "target": "step:register-device-configuration:begin-transaction",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:register-device-configuration",
+      "target": "step:register-device-configuration:persist-configuration",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.75
+    },
+    {
+      "source": "flow:register-device-configuration",
+      "target": "step:register-device-configuration:commit",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:query-device-configurations",
+      "target": "step:query-device-configurations:validate-query",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.25
+    },
+    {
+      "source": "flow:query-device-configurations",
+      "target": "step:query-device-configurations:fetch-list",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:query-device-configurations",
+      "target": "step:query-device-configurations:build-links",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.75
+    },
+    {
+      "source": "flow:query-device-configurations",
+      "target": "step:query-device-configurations:fetch-single",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:create-wallet-registration",
+      "target": "step:create-wallet-registration:validate-body",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.25
+    },
+    {
+      "source": "flow:create-wallet-registration",
+      "target": "step:create-wallet-registration:begin-transaction",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:create-wallet-registration",
+      "target": "step:create-wallet-registration:idempotent-create",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.75
+    },
+    {
+      "source": "flow:create-wallet-registration",
+      "target": "step:create-wallet-registration:commit",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:query-wallet-registrations",
+      "target": "step:query-wallet-registrations:validate-query",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.25
+    },
+    {
+      "source": "flow:query-wallet-registrations",
+      "target": "step:query-wallet-registrations:fetch-list",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:query-wallet-registrations",
+      "target": "step:query-wallet-registrations:build-links",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.75
+    },
+    {
+      "source": "flow:query-wallet-registrations",
+      "target": "step:query-wallet-registrations:fetch-single",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:publish-capture-event",
+      "target": "step:publish-capture-event:raise-event",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.25
+    },
+    {
+      "source": "flow:publish-capture-event",
+      "target": "step:publish-capture-event:persist-outbox",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:publish-capture-event",
+      "target": "step:publish-capture-event:publish-message",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.75
+    },
+    {
+      "source": "flow:publish-capture-event",
+      "target": "step:publish-capture-event:mark-sent",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:consume-capture-event",
+      "target": "step:consume-capture-event:subscribe",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.25
+    },
+    {
+      "source": "flow:consume-capture-event",
+      "target": "step:consume-capture-event:process-in-transaction",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:consume-capture-event",
+      "target": "step:consume-capture-event:update-event-state",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.75
+    },
+    {
+      "source": "flow:consume-capture-event",
+      "target": "step:consume-capture-event:ack-or-rollback",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:replay-domain-events",
+      "target": "step:replay-domain-events:receive-request",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.33
+    },
+    {
+      "source": "flow:replay-domain-events",
+      "target": "step:replay-domain-events:load-events",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.67
+    },
+    {
+      "source": "flow:replay-domain-events",
+      "target": "step:replay-domain-events:republish-or-reapply",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:dual-write-legacy-tree",
+      "target": "step:dual-write-legacy-tree:map-capture",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.25
+    },
+    {
+      "source": "flow:dual-write-legacy-tree",
+      "target": "step:dual-write-legacy-tree:lookup-planter",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:dual-write-legacy-tree",
+      "target": "step:dual-write-legacy-tree:insert-tree",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.75
+    },
+    {
+      "source": "flow:dual-write-legacy-tree",
+      "target": "step:dual-write-legacy-tree:insert-attributes",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:backfill-from-legacy",
+      "target": "step:backfill-from-legacy:generate-session-ids",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:backfill-from-legacy",
+      "target": "step:backfill-from-legacy:build-wallet-registrations",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "domain:raw-capture-ingestion",
+      "target": "domain:domain-events-messaging",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Capture creation and rejection raise capture-created and capture-rejected domain events that are published and consumed through messaging.",
+      "weight": 0.8
+    },
+    {
+      "source": "domain:raw-capture-ingestion",
+      "target": "domain:legacy-database-bridging",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Each capture write dual-writes a corresponding legacy tree, and capture rejection rejects the legacy tree.",
+      "weight": 0.7
+    },
+    {
+      "source": "domain:raw-capture-ingestion",
+      "target": "domain:session-track-tracking",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Captures reference and join session data on read.",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:raw-capture-ingestion",
+      "target": "domain:wallet-registration",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Captures reference and join wallet registration data for attribution.",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:raw-capture-ingestion",
+      "target": "domain:device-configuration",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Captures reference and join device configuration data for provenance.",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:domain-events-messaging",
+      "target": "domain:raw-capture-ingestion",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Consuming and replaying capture events reprocesses captures within transactional sessions.",
+      "weight": 0.6
+    },
+    {
+      "source": "domain:legacy-database-bridging",
+      "target": "domain:wallet-registration",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "ETL backfills wallet registration records from legacy data during migration.",
+      "weight": 0.4
+    }
+  ],
+  "layers": [],
+  "tour": []
+}
