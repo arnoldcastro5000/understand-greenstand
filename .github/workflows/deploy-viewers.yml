@@ -67,6 +67,9 @@ jobs:
             pnpm exec vite build --config vite.config.demo.ts --base=./
           echo "DIST=$(pwd)/dist" >> "$GITHUB_ENV"
 
+      - name: Install markdown renderer
+        run: npm install marked@12
+
       - name: Assemble the Pages site
         run: |
           set -euo pipefail
@@ -74,20 +77,33 @@ jobs:
           OUT="_site"
           rm -rf "$OUT"; mkdir -p "$OUT"
           touch "$OUT/.nojekyll"
-          links=""
+          rows=""
           for dir in repos/*/; do
             repo="$(basename "$dir")"
             [ -f "$dir/knowledge-graph.json" ] || continue
             mkdir -p "$OUT/$repo"
+            # Viewer bundle + graph data (relative-base build works at any subpath).
             cp -r "$DIST"/. "$OUT/$repo/"
             cp "$dir/knowledge-graph.json" "$OUT/$repo/knowledge-graph.json"
             [ -f "$dir/domain-graph.json" ] && cp "$dir/domain-graph.json" "$OUT/$repo/domain-graph.json"
             [ -f "$dir/meta.json" ] && cp "$dir/meta.json" "$OUT/$repo/meta.json"
-            echo "  assembled viewer: $repo"
-            links="$links      <li><a href=\"./$repo/\">$repo</a></li>\n"
+            # Human docs: copy the raw markdown and render styled HTML beside the viewer.
+            doclinks=""
+            if [ -f "$dir/ONBOARDING.md" ]; then
+              cp "$dir/ONBOARDING.md" "$OUT/$repo/ONBOARDING.md"
+              node .github/scripts/render-md.mjs "$dir/ONBOARDING.md" "$OUT/$repo/onboarding.html" "$repo — Onboarding" "./index.html" "Viewer"
+              doclinks="$doclinks &middot; <a href=\"./$repo/onboarding.html\">Onboarding</a>"
+            fi
+            if [ -f "$dir/README.md" ]; then
+              cp "$dir/README.md" "$OUT/$repo/README.md"
+              node .github/scripts/render-md.mjs "$dir/README.md" "$OUT/$repo/readme.html" "$repo — README" "./index.html" "Viewer"
+              doclinks="$doclinks &middot; <a href=\"./$repo/readme.html\">README</a>"
+            fi
+            echo "  assembled: $repo"
+            rows="$rows      <li><a class=\"viewer\" href=\"./$repo/\">$repo</a>$doclinks</li>\n"
           done
-          # Minimal landing index (ticket 09 refines this).
-          printf '<!doctype html>\n<html lang="en"><head><meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>understand-greenstand viewers</title>\n<style>body{font:16px/1.5 system-ui,sans-serif;max-width:40rem;margin:3rem auto;padding:0 1rem}h1{font-size:1.4rem}li{margin:.3rem 0}</style>\n</head><body>\n<h1>understand-greenstand viewers</h1>\n<p>Interactive Understand-Anything viewers, one per documented Greenstand repo.</p>\n<ul>\n%b</ul>\n</body></html>\n' "$links" > "$OUT/index.html"
+          # Landing index: each repo links to its Viewer, Onboarding, and README.
+          printf '<!doctype html>\n<html lang="en"><head><meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>understand-greenstand</title>\n<style>:root{color-scheme:light dark}body{font:16px/1.6 system-ui,sans-serif;max-width:44rem;margin:3rem auto;padding:0 1.25rem}h1{font-size:1.5rem}ul{list-style:none;padding:0}li{margin:.6rem 0;padding:.6rem .8rem;border:1px solid #8884;border-radius:8px}a{color:#0969da;text-decoration:none}a:hover{text-decoration:underline}a.viewer{font-weight:600}.sub{color:#8888}</style>\n</head><body>\n<h1>understand-greenstand</h1>\n<p>Machine-generated documentation for the core-active Greenstand estate. Each repo has an interactive knowledge-graph viewer plus a human onboarding guide.</p>\n<ul>\n%b</ul>\n</body></html>\n' "$rows" > "$OUT/index.html"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
