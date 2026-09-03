@@ -1,0 +1,2338 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "treetracker-web-map-client",
+    "languages": [
+      "javascript",
+      "css",
+      "html"
+    ],
+    "frameworks": [
+      "Next.js",
+      "React",
+      "MUI",
+      "Leaflet"
+    ],
+    "description": "Public web map at treetracker.org that displays the location and details of every tree tracked in the Greenstand reforestation network, including planter, organization, and blockchain wallet/token provenance data.",
+    "analyzedAt": "2026-09-03T00:00:00.000Z",
+    "gitCommitHash": "0f4d5b00539575498821b84657f4f3f61c5bac6d"
+  },
+  "nodes": [
+    {
+      "id": "domain:map-exploration-search",
+      "type": "domain",
+      "name": "Map Exploration & Search",
+      "summary": "Renders the interactive Leaflet-based map of tracked trees, letting visitors pan, zoom, filter by planting date, and search for trees, planters, or species. Keeps the browser URL synchronized with map state so views are shareable and restorable.",
+      "tags": [
+        "map",
+        "leaflet",
+        "search",
+        "filtering",
+        "url-state"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": [
+          "Map instance",
+          "Marker/cluster",
+          "Timeline filter",
+          "Search result",
+          "URL query state"
+        ],
+        "businessRules": [
+          "Map view state (bounds, filters, selection) must always be reflected in the URL so views are shareable and bookmarkable.",
+          "Timeline date filter cannot select a range beyond the current date."
+        ],
+        "crossDomainInteractions": [
+          "Clicking a marker or a search result navigates into an Entity Profile Page (tree/planter/organization).",
+          "The map's initial location and branding are driven by Site Administration & Customization config."
+        ]
+      }
+    },
+    {
+      "id": "flow:browse-interactive-map",
+      "type": "flow",
+      "name": "Browse the Interactive Map",
+      "summary": "Loads the shared Leaflet map instance, renders tree markers/clusters, and lets a visitor pan, zoom, or click a marker to open its detail drawer.",
+      "tags": [
+        "map",
+        "leaflet",
+        "markers"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entryPoint": "GET / (pages/index.js renders the map)",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:browse-interactive-map:initialize-map-context",
+      "type": "step",
+      "name": "Initialize map context",
+      "summary": "Exposes the shared Leaflet map instance and setter to the component tree via React context.",
+      "tags": [
+        "map",
+        "context"
+      ],
+      "complexity": "simple",
+      "filePath": "src/mapContext.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:browse-interactive-map:configure-initial-location",
+      "type": "step",
+      "name": "Configure initial location",
+      "summary": "Resolves the per-map initial zoom level and center coordinates for the named map instance.",
+      "tags": [
+        "map",
+        "config"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/mapConfig.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:browse-interactive-map:mount-map-component-and-wire-handlers",
+      "type": "step",
+      "name": "Mount map component and wire handlers",
+      "summary": "Instantiates the treetracker-web-map-core Map, wiring click, error, and timeline-filter handlers.",
+      "tags": [
+        "map",
+        "leaflet"
+      ],
+      "complexity": "complex",
+      "filePath": "src/components/App.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:browse-interactive-map:track-markers-and-compute-arrow",
+      "type": "step",
+      "name": "Track markers and compute arrow",
+      "summary": "MapModel wraps the map instance, tracking markers/viewport and computing the directional-arrow algorithm pointing to the nearest tree.",
+      "tags": [
+        "map",
+        "domain-model"
+      ],
+      "complexity": "complex",
+      "filePath": "src/models/MapModel.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:browse-interactive-map:resolve-url-on-marker-click",
+      "type": "step",
+      "name": "Resolve URL on marker click",
+      "summary": "Computes the new browser path and query string when a user clicks a tree marker, encoding tree and wallet identifiers.",
+      "tags": [
+        "url-state",
+        "routing"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/models/pathResolver.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:browse-interactive-map:show-details-in-drawer",
+      "type": "step",
+      "name": "Show details in drawer",
+      "summary": "Opens the swipeable bottom-sheet drawer to show the selected entity's details.",
+      "tags": [
+        "ui",
+        "drawer"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/Drawer.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "flow:filter-trees-by-date",
+      "type": "flow",
+      "name": "Filter Trees by Planting Date",
+      "summary": "Lets a visitor restrict the visible trees on the map to a specific date range via the Timeline picker or the standalone filter page.",
+      "tags": [
+        "filtering",
+        "timeline"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "GET /filter?timeline=... or Timeline widget on map",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:filter-trees-by-date:parse-timeline-query-param",
+      "type": "step",
+      "name": "Parse timeline query param",
+      "summary": "Parses the 'timeline' URL query parameter into a filter object and adapts layout for mobile.",
+      "tags": [
+        "routing",
+        "filtering"
+      ],
+      "complexity": "simple",
+      "filePath": "src/pages/filter.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:filter-trees-by-date:render-date-range-picker",
+      "type": "step",
+      "name": "Render date-range picker",
+      "summary": "Renders the desktop and mobile date-range picker widgets used to select a planting-date range.",
+      "tags": [
+        "ui",
+        "date-picker"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/Timeline.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:filter-trees-by-date:validate-and-apply-filter",
+      "type": "step",
+      "name": "Validate and apply filter",
+      "summary": "Tracks start/end date state with error validation and pushes the resulting time frame into the map's filters.",
+      "tags": [
+        "validation"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/components/Timeline.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:filter-trees-by-date:update-url-to-reflect-filter",
+      "type": "step",
+      "name": "Update URL to reflect filter",
+      "summary": "Updates the URL to reflect the map's current bounds and filter state after the change.",
+      "tags": [
+        "url-state"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/pathResolver.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "flow:search-entities",
+      "type": "flow",
+      "name": "Search for Trees, Planters, and Species",
+      "summary": "Lets a visitor type a keyword to find matching trees, planters, or species, browse recent search history, and jump to a result.",
+      "tags": [
+        "search"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "SearchButton click or GET /search",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:search-entities:trigger-search-ui",
+      "type": "step",
+      "name": "Trigger search UI",
+      "summary": "Floating action button with a search icon used as the trigger for the search feature.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/SearchButton.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:search-entities:debounce-keyword-input",
+      "type": "step",
+      "name": "Debounce keyword input",
+      "summary": "Debounced text input for the search feature that fetches results as the user types and reports focus/empty state.",
+      "tags": [
+        "input"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/components/search/SearchInput.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:search-entities:fetch-matching-results",
+      "type": "step",
+      "name": "Fetch matching results",
+      "summary": "Filters a dataset of locations, planters, and species to produce search results for the typed keyword.",
+      "tags": [
+        "data-fetch"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/search/mockApi.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:search-entities:render-live-results",
+      "type": "step",
+      "name": "Render live results",
+      "summary": "Presentational dropdown card that lists live search results as clickable items.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/search/SearchDialog.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:search-entities:show-recent-search-history",
+      "type": "step",
+      "name": "Show recent search history",
+      "summary": "Presentational dropdown card that lists the user's recent search history entries, persisted via local storage.",
+      "tags": [
+        "ui",
+        "local-storage"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/search/SearchHistoryDialog.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "domain:entity-profile-pages",
+      "type": "domain",
+      "name": "Entity Profile Pages",
+      "summary": "Renders detail pages for individual trees, captures, planters, and organizations fetched from the treetracker-query-api, showing photos, species, capture location, and related people or organizations. These are the destination pages when a visitor selects a marker or search result on the map.",
+      "tags": [
+        "profile",
+        "tree",
+        "capture",
+        "planter",
+        "organization",
+        "ssr"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": [
+          "Tree",
+          "Capture",
+          "Planter (Grower)",
+          "Organization (Stakeholder)",
+          "Species"
+        ],
+        "businessRules": [
+          "Detail pages are statically or server-rendered per id and must gracefully handle missing or loading data via skeleton loaders.",
+          "Organization pages aggregate trees, associates, and species counts concurrently rather than sequentially."
+        ],
+        "crossDomainInteractions": [
+          "Fetches data through the same api.js client used by Blockchain Wallet & Token Tracking.",
+          "Is the navigation target for markers and search results from Map Exploration & Search.",
+          "Profile data feeds the Featured Trees/Planters sliders in Impact & Leaderboard."
+        ]
+      }
+    },
+    {
+      "id": "flow:view-tree-detail",
+      "type": "flow",
+      "name": "View Tree Detail",
+      "summary": "Renders an individual tree's detail view: photo, species, capture location, and associated planter and organization info.",
+      "tags": [
+        "tree",
+        "profile"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "GET /trees/[treeid]",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:view-tree-detail:fetch-tree-by-id",
+      "type": "step",
+      "name": "Fetch tree by id",
+      "summary": "Fetches a single tree's details by ID from the API.",
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/api.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-tree-detail:fetch-related-captures",
+      "type": "step",
+      "name": "Fetch related captures",
+      "summary": "Fetches capture records associated with a given tree ID from the API.",
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/api.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-tree-detail:show-loading-skeleton",
+      "type": "step",
+      "name": "Show loading skeleton",
+      "summary": "Skeleton loading placeholder for the tree detail page, rendering animated blocks that mimic the layout while data loads.",
+      "tags": [
+        "loading",
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/TreeLoader.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-tree-detail:render-species-and-tag",
+      "type": "step",
+      "name": "Render species and tag",
+      "summary": "Card and tag components displaying the tree species name, subtitle, and status/category badge.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/TreeSpeciesCard.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-tree-detail:render-full-tree-info-dialog",
+      "type": "step",
+      "name": "Render full tree info dialog",
+      "summary": "Full-screen dialog that shows the tree's capture image, species, planter, and organization details.",
+      "tags": [
+        "ui",
+        "dialog"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/components/TreeInfoDialog.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "flow:view-capture-detail",
+      "type": "flow",
+      "name": "View Capture Detail (v2)",
+      "summary": "Renders an individual capture's detail view: photo, grower, stakeholder/organization info, and geolocation.",
+      "tags": [
+        "capture",
+        "profile"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "GET /v2/captures/[captureid]",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:view-capture-detail:fetch-capture-by-id",
+      "type": "step",
+      "name": "Fetch capture by id",
+      "summary": "Next.js dynamic page rendering an individual capture's detail view with data resolved per request.",
+      "tags": [
+        "routing",
+        "ssr"
+      ],
+      "complexity": "simple",
+      "filePath": "src/pages/v2/captures/[captureid].js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-capture-detail:fetch-grower-and-stakeholder",
+      "type": "step",
+      "name": "Fetch grower and stakeholder",
+      "summary": "Fetches grower details and stakeholder details by ID from their respective API endpoints.",
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/api.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-capture-detail:render-capture-geolocation",
+      "type": "step",
+      "name": "Render capture geolocation",
+      "summary": "Renders the capture's geolocation focused on the shared map view.",
+      "tags": [
+        "map"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/pages/v2/captures/[captureid].js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-capture-detail:render-capture-photo",
+      "type": "step",
+      "name": "Render capture photo",
+      "summary": "Renders the large capture photo with hover-revealed overlays showing capture date and a link to the full image.",
+      "tags": [
+        "ui",
+        "image"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/common/CustomImageWrapper.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "flow:view-planter-profile",
+      "type": "flow",
+      "name": "View Planter Profile",
+      "summary": "Renders a planter (grower) profile: map focus, bio/quote, species planted, and associated organizations.",
+      "tags": [
+        "planter",
+        "profile"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "GET /planters/[planterid]",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:view-planter-profile:fetch-planter-by-id",
+      "type": "step",
+      "name": "Fetch planter by id",
+      "summary": "Fetches planter profile details by ID from the API.",
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/api.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-planter-profile:fetch-species-planted",
+      "type": "step",
+      "name": "Fetch species planted",
+      "summary": "Fetches species planted under the planter's wallet ID from the API.",
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/api.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-planter-profile:render-avatar-and-quote",
+      "type": "step",
+      "name": "Render avatar and quote",
+      "summary": "Displays the planter's quote, avatar, name, planting date, and location alongside a link to their profile.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/PlanterQuote.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-planter-profile:focus-map-on-planter-location",
+      "type": "step",
+      "name": "Focus map on planter location",
+      "summary": "Focuses the shared map view on the planter's recorded location.",
+      "tags": [
+        "map"
+      ],
+      "complexity": "simple",
+      "filePath": "src/pages/planters/[planterid].js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-planter-profile:list-associated-organizations",
+      "type": "step",
+      "name": "List associated organizations",
+      "summary": "Lists the organizations associated with the planter on the profile page.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/pages/planters/[planterid].js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "flow:view-organization-profile",
+      "type": "flow",
+      "name": "View Organization Profile",
+      "summary": "Renders an organization's public profile: map focus, description, associated species, and planters.",
+      "tags": [
+        "organization",
+        "profile"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "GET /organizations/[organizationid]",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:view-organization-profile:fetch-organization-by-id",
+      "type": "step",
+      "name": "Fetch organization by id",
+      "summary": "Fetches a single organization's details by ID from the API.",
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/api.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-organization-profile:aggregate-org-links",
+      "type": "step",
+      "name": "Aggregate org links",
+      "summary": "Fetches trees, associates, and species counts for an organization concurrently and aggregates the results.",
+      "tags": [
+        "api"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/models/api.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-organization-profile:render-organization-cover",
+      "type": "step",
+      "name": "Render organization cover",
+      "summary": "Renders the profile cover image, or a styled placeholder background when none is provided.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/ProfileCover.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-organization-profile:focus-map-on-organization-location",
+      "type": "step",
+      "name": "Focus map on organization location",
+      "summary": "Focuses the shared map view on the organization's location.",
+      "tags": [
+        "map"
+      ],
+      "complexity": "simple",
+      "filePath": "src/pages/organizations/[organizationid].js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-organization-profile:list-planters-and-species",
+      "type": "step",
+      "name": "List planters and species",
+      "summary": "Lists associated planters and renders species cards for the organization.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/TreeSpeciesCard.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "domain:wallet-token-tracking",
+      "type": "domain",
+      "name": "Blockchain Wallet & Token Tracking",
+      "summary": "Displays blockchain-backed wallet and token pages, showing which trees a wallet holds and a token's ownership and transaction provenance. Represents the tokenization layer that ties physical trees to verifiable digital ownership records.",
+      "tags": [
+        "blockchain",
+        "wallet",
+        "token",
+        "transaction",
+        "provenance"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entities": [
+          "Wallet",
+          "Token",
+          "Transaction",
+          "Species-by-wallet"
+        ],
+        "businessRules": [
+          "Token detail must show full ownership/transaction history for provenance and trust.",
+          "Wallet statistics are aggregated by token region."
+        ],
+        "crossDomainInteractions": [
+          "Shares the api.js/apiPaths.js HTTP client with Entity Profile Pages.",
+          "Wallet and token ids can also be reached via Map Exploration & Search URL routing (pathResolver getContext)."
+        ]
+      }
+    },
+    {
+      "id": "flow:view-wallet-profile",
+      "type": "flow",
+      "name": "View Wallet Profile",
+      "summary": "Renders a wallet's public profile: map view, token-region statistics, token list, and species planted under the wallet.",
+      "tags": [
+        "wallet",
+        "profile"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "GET /wallets/[walletid]",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:view-wallet-profile:fetch-wallet-by-id",
+      "type": "step",
+      "name": "Fetch wallet by id",
+      "summary": "Fetches wallet details by ID from the API.",
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/api.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-wallet-profile:fetch-species-by-wallet",
+      "type": "step",
+      "name": "Fetch species by wallet",
+      "summary": "Fetches species planted under a given wallet ID from the API.",
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/api.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-wallet-profile:compute-token-region-statistics",
+      "type": "step",
+      "name": "Compute token-region statistics",
+      "summary": "Computes and aggregates token-region statistics for display on the wallet page.",
+      "tags": [
+        "stats"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/pages/wallets/[walletid].js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-wallet-profile:render-token-list-and-map-view",
+      "type": "step",
+      "name": "Render token list and map view",
+      "summary": "Renders the wallet's token list alongside a map view of the wallet's holdings.",
+      "tags": [
+        "ui",
+        "map"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/pages/wallets/[walletid].js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-wallet-profile:render-species-cards",
+      "type": "step",
+      "name": "Render species cards",
+      "summary": "Card component displaying species name, subtitle link, and abbreviated planted-tree count for the wallet.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/TreeSpeciesCard.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "flow:view-token-provenance",
+      "type": "flow",
+      "name": "View Token Detail & Provenance",
+      "summary": "Renders a tree token's detail view: tree photo, capture location, and ownership/transaction history.",
+      "tags": [
+        "token",
+        "provenance"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "GET /tokens/[tokenid]",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:view-token-provenance:fetch-token-by-id",
+      "type": "step",
+      "name": "Fetch token by id",
+      "summary": "Fetches token/NFT details by ID from the API.",
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/api.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-token-provenance:resolve-tree-photo-and-location",
+      "type": "step",
+      "name": "Resolve tree photo and location",
+      "summary": "Resolves the underlying tree's photo and capture location for display on the token page.",
+      "tags": [
+        "ui",
+        "map"
+      ],
+      "complexity": "simple",
+      "filePath": "src/pages/tokens/[tokenid].js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-token-provenance:fetch-transaction-history",
+      "type": "step",
+      "name": "Fetch transaction history",
+      "summary": "Resolves the token's ownership and transaction history records for provenance display.",
+      "tags": [
+        "api",
+        "blockchain"
+      ],
+      "complexity": "moderate",
+      "filePath": "doc/examples/transactions",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-token-provenance:render-ownership-history",
+      "type": "step",
+      "name": "Render ownership history",
+      "summary": "Renders the ownership/transaction history list on the token detail page.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/pages/tokens/[tokenid].js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-token-provenance:render-token-image",
+      "type": "step",
+      "name": "Render token image",
+      "summary": "Renders the token's tree photo with hover-revealed overlays and a link to the full image.",
+      "tags": [
+        "ui",
+        "image"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/common/CustomImageWrapper.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "domain:impact-leaderboard",
+      "type": "domain",
+      "name": "Impact & Leaderboard",
+      "summary": "Surfaces aggregate impact statistics and highlights on the homepage and the 'Top' page: a country leaderboard, featured trees/planters sliders, and a world-map continent view, to showcase the reforestation network's scale.",
+      "tags": [
+        "leaderboard",
+        "homepage",
+        "stats",
+        "marketing"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entities": [
+          "Country leaderboard entry",
+          "Featured tree",
+          "Featured planter",
+          "Continent tree count"
+        ],
+        "businessRules": [
+          "Leaderboard ranks countries by trees planted, with medal ribbons for the top 3.",
+          "Featured content is fetched at build time via getStaticProps."
+        ],
+        "crossDomainInteractions": [
+          "Pulls tree/planter data via the same api.js client used by Entity Profile Pages.",
+          "Featured items and country rows link into Entity Profile Pages and Map Exploration & Search."
+        ]
+      }
+    },
+    {
+      "id": "flow:view-leaderboard",
+      "type": "flow",
+      "name": "View Top / Leaderboard Page",
+      "summary": "Shows featured trees, featured planters, and a per-country leaderboard on an interactive world map.",
+      "tags": [
+        "leaderboard"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "GET /top",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:view-leaderboard:fetch-featured-trees",
+      "type": "step",
+      "name": "Fetch featured trees",
+      "summary": "Fetches the list of featured trees from the API for homepage and map highlighting.",
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/api.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-leaderboard:fetch-country-leaderboard",
+      "type": "step",
+      "name": "Fetch country leaderboard",
+      "summary": "Fetches per-country tree-planting leaderboard data from the API.",
+      "tags": [
+        "api"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/api.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-leaderboard:render-ranked-country-list",
+      "type": "step",
+      "name": "Render ranked country list",
+      "summary": "Renders a ranked country leaderboard showing trees planted per country with flag images and medal ribbons for the top 3.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/components/LeaderBoard.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-leaderboard:render-world-map-tooltips",
+      "type": "step",
+      "name": "Render world map tooltips",
+      "summary": "Interactive SVG world map component that highlights selected continents and shows tree-count tooltips per continent.",
+      "tags": [
+        "ui",
+        "map"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/components/CustomWorldMap.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-leaderboard:render-featured-sliders",
+      "type": "step",
+      "name": "Render featured sliders",
+      "summary": "Horizontally scrollable sliders of featured trees and featured planters with scroll-button controls.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/FeaturedTreesSlider/index.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "flow:view-homepage-impact",
+      "type": "flow",
+      "name": "View Homepage Impact Highlights",
+      "summary": "Renders the landing page hero and impact stat cards that promote the network's reforestation impact.",
+      "tags": [
+        "homepage",
+        "marketing"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "GET /",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:view-homepage-impact:set-seo-meta-tags",
+      "type": "step",
+      "name": "Set SEO meta tags",
+      "summary": "Sets SEO meta tags for the homepage route.",
+      "tags": [
+        "seo"
+      ],
+      "complexity": "simple",
+      "filePath": "src/pages/index.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-homepage-impact:render-hero-section",
+      "type": "step",
+      "name": "Render hero section",
+      "summary": "Landing page hero section with call-to-action buttons.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/Home.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-homepage-impact:reload-map-view-on-cta-click",
+      "type": "step",
+      "name": "Reload map view on CTA click",
+      "summary": "Reloads the map view (filters, bounds, or view) based on the clicked call-to-action.",
+      "tags": [
+        "map"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/components/Home.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:view-homepage-impact:render-impact-stat-cards",
+      "type": "step",
+      "name": "Render impact stat cards",
+      "summary": "Renders the 'Impact' section of the landing page with value and carbon-capture stat cards.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/ImpactSection.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "domain:site-admin-customization",
+      "type": "domain",
+      "name": "Site Administration & Customization",
+      "summary": "Lets authorized administrators reconfigure the deployed site's branding, navbar, initial map location, and full Material UI theme (palette, typography, fonts) through a live playground, then persists those choices.",
+      "tags": [
+        "admin",
+        "theming",
+        "dashboard",
+        "keycloak",
+        "configuration"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entities": [
+          "Dashboard config (navbar items, logo, map location)",
+          "Theme (palette, typography, fonts)",
+          "RPT/permission token"
+        ],
+        "businessRules": [
+          "Admin pages require a valid Keycloak RPT/permission token before rendering editable controls.",
+          "Theme and dashboard config changes persist to local storage and can be server-supplied on load."
+        ],
+        "crossDomainInteractions": [
+          "Reuses Authentication & Sharing's OIDC session to gate access to admin pages.",
+          "The resulting theme and config are consumed globally by Map Exploration & Search, Entity Profile Pages, and Impact & Leaderboard UI."
+        ]
+      }
+    },
+    {
+      "id": "flow:admin-authentication",
+      "type": "flow",
+      "name": "Admin Authentication & Authorization",
+      "summary": "Authenticates an admin via Keycloak SSR and conditionally renders admin UI based on decoded entitlements.",
+      "tags": [
+        "admin",
+        "auth"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "GET /admin",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:admin-authentication:run-keycloak-ssr-authentication",
+      "type": "step",
+      "name": "Run Keycloak SSR authentication",
+      "summary": "Integrates Keycloak SSR authentication for the admin login/authorization landing page.",
+      "tags": [
+        "keycloak"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/pages/admin/index.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:admin-authentication:decode-rpt-permissions-token",
+      "type": "step",
+      "name": "Decode RPT permissions token",
+      "summary": "Decodes and inspects the resulting RPT/permissions token from Keycloak.",
+      "tags": [
+        "keycloak"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/pages/admin/index.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:admin-authentication:conditionally-render-admin-ui",
+      "type": "step",
+      "name": "Conditionally render admin UI",
+      "summary": "Conditionally renders admin UI elements based on the decoded entitlement/authorization state.",
+      "tags": [
+        "ui",
+        "auth"
+      ],
+      "complexity": "simple",
+      "filePath": "src/pages/admin/index.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:admin-authentication:redirect-unauthorized-visitors",
+      "type": "step",
+      "name": "Redirect unauthorized visitors",
+      "summary": "Redirects or blocks visitors who lack the required admin entitlement.",
+      "tags": [
+        "auth"
+      ],
+      "complexity": "simple",
+      "filePath": "src/pages/admin/index.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "flow:configure-dashboard-branding",
+      "type": "flow",
+      "name": "Configure Dashboard Branding",
+      "summary": "Lets an admin edit the navbar links, logo, and initial map location, persisting changes to local storage.",
+      "tags": [
+        "admin",
+        "dashboard"
+      ],
+      "complexity": "moderate",
+      "domainMeta": {
+        "entryPoint": "GET /admin/global",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:configure-dashboard-branding:load-persisted-dashboard-config",
+      "type": "step",
+      "name": "Load persisted dashboard config",
+      "summary": "React context for the admin dashboard's editable configuration state, backed by a reducer and persisted to local storage.",
+      "tags": [
+        "context"
+      ],
+      "complexity": "simple",
+      "filePath": "src/context/dashboardContext.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:configure-dashboard-branding:edit-navbar-items",
+      "type": "step",
+      "name": "Edit navbar items",
+      "summary": "Dashboard editor for the site navbar, letting admins add, edit, delete, and drag-and-drop reorder navigation items.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/components/dashboard/CustomizeNavbar.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:configure-dashboard-branding:edit-logo-url",
+      "type": "step",
+      "name": "Edit logo URL",
+      "summary": "Dashboard form control that lets an admin edit the navbar logo URL.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/dashboard/CustomLogo.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:configure-dashboard-branding:update-initial-map-location",
+      "type": "step",
+      "name": "Update initial map location",
+      "summary": "Reducer action updating the dashboard's map initial location setting.",
+      "tags": [
+        "reducer"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/config.reducer.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:configure-dashboard-branding:persist-config-changes",
+      "type": "step",
+      "name": "Persist config changes",
+      "summary": "Reducer and action creators managing dashboard configuration state and dispatching updates.",
+      "tags": [
+        "reducer",
+        "local-storage"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/models/config.reducer.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "flow:customize-theme",
+      "type": "flow",
+      "name": "Customize Theme",
+      "summary": "Lets an admin live-edit the site's Material UI theme (palette, typography, fonts, light/dark mode) with an iframe preview.",
+      "tags": [
+        "admin",
+        "theming"
+      ],
+      "complexity": "complex",
+      "domainMeta": {
+        "entryPoint": "GET /admin/theme",
+        "entryType": "http"
+      }
+    },
+    {
+      "id": "step:customize-theme:load-persisted-theme",
+      "type": "step",
+      "name": "Load persisted theme",
+      "summary": "Builds the Material UI theme object for light and dark mode and provides a CustomThemeProvider that loads persisted or server-supplied overrides.",
+      "tags": [
+        "context"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/context/themeContext.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:customize-theme:render-live-iframe-preview",
+      "type": "step",
+      "name": "Render live iframe preview",
+      "summary": "Admin theme-playground page combining a live iframe preview with palette, typography, and font customization controls.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/pages/admin/theme.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:customize-theme:edit-palette-colors",
+      "type": "step",
+      "name": "Edit palette colors",
+      "summary": "Playground form control for editing a single theme color via a text input and color picker.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/playground/ColorInput.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:customize-theme:edit-typography-and-fonts",
+      "type": "step",
+      "name": "Edit typography and fonts",
+      "summary": "Largest playground form module implementing font-weight selection with dynamic font loading.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/components/playground/TypographyInput.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:customize-theme:toggle-light-dark-mode",
+      "type": "step",
+      "name": "Toggle light/dark mode",
+      "summary": "Control that toggles the playground's theme mode between light and dark.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/playground/ToggleThemeMode.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:customize-theme:preview-against-design-sandbox",
+      "type": "step",
+      "name": "Preview against design sandbox",
+      "summary": "Internal design system sandbox page that renders typography, color palette, and theme swatches for both light and dark mode.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/DesignSandbox/DesignSandbox.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "domain:auth-sharing",
+      "type": "domain",
+      "name": "Authentication & Sharing",
+      "summary": "Provides OIDC/Keycloak sign-in and sign-out for the whole app, and lets any visitor share a tree or entity page via a copyable link, embeddable iframe snippet, or social post.",
+      "tags": [
+        "auth",
+        "oidc",
+        "keycloak",
+        "sharing",
+        "social"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entities": [
+          "OIDC user session",
+          "Share link",
+          "Embed snippet"
+        ],
+        "businessRules": [
+          "Sign-in uses a redirect-based OIDC flow via Keycloak; UserAvatar and admin gating only render when authenticated.",
+          "Share dialog offers both a canonical link and an embeddable iframe snippet."
+        ],
+        "crossDomainInteractions": [
+          "Gates access to Site Administration & Customization admin pages.",
+          "Sign-in/out controls appear in the Navbar shared by Map Exploration & Search.",
+          "Share dialogs are invoked from Entity Profile Pages and Map Exploration & Search views."
+        ]
+      }
+    },
+    {
+      "id": "flow:sign-in-sign-out",
+      "type": "flow",
+      "name": "Sign In / Sign Out",
+      "summary": "Authenticates a visitor against Keycloak via OIDC redirect and reflects the session in the navbar.",
+      "tags": [
+        "auth",
+        "oidc"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "SignInButton / SignOutButton click",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "step:sign-in-sign-out:configure-oidc-client",
+      "type": "step",
+      "name": "Configure OIDC client",
+      "summary": "Defines the OpenID Connect (Keycloak) client configuration object (authority, client ID, redirect URI, realm).",
+      "tags": [
+        "config"
+      ],
+      "complexity": "simple",
+      "filePath": "src/models/oidcConfig.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:sign-in-sign-out:wrap-app-with-auth-provider",
+      "type": "step",
+      "name": "Wrap app with auth provider",
+      "summary": "Next.js custom App component that wraps every page with the OIDC auth provider among other global providers.",
+      "tags": [
+        "context"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/pages/_app.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:sign-in-sign-out:trigger-sign-in-redirect",
+      "type": "step",
+      "name": "Trigger sign-in redirect",
+      "summary": "Renders a mobile link or desktop button that triggers the OIDC sign-in redirect.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/SignInButton.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:sign-in-sign-out:show-signed-in-user-avatar",
+      "type": "step",
+      "name": "Show signed-in user avatar",
+      "summary": "Renders the signed-in user's initial in an avatar that links out to their Keycloak account page.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/UserAvatar.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:sign-in-sign-out:trigger-sign-out",
+      "type": "step",
+      "name": "Trigger sign-out",
+      "summary": "Renders a mobile link or desktop button that triggers the OIDC removeUser sign-out flow.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/SignOutButton.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "flow:share-entity-page",
+      "type": "flow",
+      "name": "Share an Entity Page",
+      "summary": "Lets a visitor copy a shareable link, generate an embeddable iframe snippet, or post an entity page to social media.",
+      "tags": [
+        "sharing",
+        "social"
+      ],
+      "complexity": "simple",
+      "domainMeta": {
+        "entryPoint": "Share icon click on a profile page",
+        "entryType": "manual"
+      }
+    },
+    {
+      "id": "step:share-entity-page:open-share-dialog",
+      "type": "step",
+      "name": "Open share dialog",
+      "summary": "Current Share dialog component that lets a user copy a share link, embed an iframe snippet, or post to social media.",
+      "tags": [
+        "ui",
+        "dialog"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/Share.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:share-entity-page:copy-shareable-link",
+      "type": "step",
+      "name": "Copy shareable link",
+      "summary": "Copies the canonical share link to the clipboard, showing a confirmation state.",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/Share.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:share-entity-page:generate-embed-snippet",
+      "type": "step",
+      "name": "Generate embed snippet",
+      "summary": "Generates an embeddable iframe snippet for the current entity page.",
+      "tags": [
+        "embed"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/Share.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "step:share-entity-page:post-to-social-media",
+      "type": "step",
+      "name": "Post to social media",
+      "summary": "Offers Twitter/Facebook posting options for the current entity page.",
+      "tags": [
+        "social"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/Share.js",
+      "lineRange": [
+        0,
+        0
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "domain:map-exploration-search",
+      "target": "flow:browse-interactive-map",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:browse-interactive-map",
+      "target": "step:browse-interactive-map:initialize-map-context",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:browse-interactive-map",
+      "target": "step:browse-interactive-map:configure-initial-location",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:browse-interactive-map",
+      "target": "step:browse-interactive-map:mount-map-component-and-wire-handlers",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:browse-interactive-map",
+      "target": "step:browse-interactive-map:track-markers-and-compute-arrow",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:browse-interactive-map",
+      "target": "step:browse-interactive-map:resolve-url-on-marker-click",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:browse-interactive-map",
+      "target": "step:browse-interactive-map:show-details-in-drawer",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "domain:map-exploration-search",
+      "target": "flow:filter-trees-by-date",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:filter-trees-by-date",
+      "target": "step:filter-trees-by-date:parse-timeline-query-param",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:filter-trees-by-date",
+      "target": "step:filter-trees-by-date:render-date-range-picker",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:filter-trees-by-date",
+      "target": "step:filter-trees-by-date:validate-and-apply-filter",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:filter-trees-by-date",
+      "target": "step:filter-trees-by-date:update-url-to-reflect-filter",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "domain:map-exploration-search",
+      "target": "flow:search-entities",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:search-entities",
+      "target": "step:search-entities:trigger-search-ui",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:search-entities",
+      "target": "step:search-entities:debounce-keyword-input",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:search-entities",
+      "target": "step:search-entities:fetch-matching-results",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:search-entities",
+      "target": "step:search-entities:render-live-results",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:search-entities",
+      "target": "step:search-entities:show-recent-search-history",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:entity-profile-pages",
+      "target": "flow:view-tree-detail",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:view-tree-detail",
+      "target": "step:view-tree-detail:fetch-tree-by-id",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:view-tree-detail",
+      "target": "step:view-tree-detail:fetch-related-captures",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:view-tree-detail",
+      "target": "step:view-tree-detail:show-loading-skeleton",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:view-tree-detail",
+      "target": "step:view-tree-detail:render-species-and-tag",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:view-tree-detail",
+      "target": "step:view-tree-detail:render-full-tree-info-dialog",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:entity-profile-pages",
+      "target": "flow:view-capture-detail",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:view-capture-detail",
+      "target": "step:view-capture-detail:fetch-capture-by-id",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:view-capture-detail",
+      "target": "step:view-capture-detail:fetch-grower-and-stakeholder",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:view-capture-detail",
+      "target": "step:view-capture-detail:render-capture-geolocation",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:view-capture-detail",
+      "target": "step:view-capture-detail:render-capture-photo",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "domain:entity-profile-pages",
+      "target": "flow:view-planter-profile",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:view-planter-profile",
+      "target": "step:view-planter-profile:fetch-planter-by-id",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:view-planter-profile",
+      "target": "step:view-planter-profile:fetch-species-planted",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:view-planter-profile",
+      "target": "step:view-planter-profile:render-avatar-and-quote",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:view-planter-profile",
+      "target": "step:view-planter-profile:focus-map-on-planter-location",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:view-planter-profile",
+      "target": "step:view-planter-profile:list-associated-organizations",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:entity-profile-pages",
+      "target": "flow:view-organization-profile",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:view-organization-profile",
+      "target": "step:view-organization-profile:fetch-organization-by-id",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:view-organization-profile",
+      "target": "step:view-organization-profile:aggregate-org-links",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:view-organization-profile",
+      "target": "step:view-organization-profile:render-organization-cover",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:view-organization-profile",
+      "target": "step:view-organization-profile:focus-map-on-organization-location",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:view-organization-profile",
+      "target": "step:view-organization-profile:list-planters-and-species",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:wallet-token-tracking",
+      "target": "flow:view-wallet-profile",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:view-wallet-profile",
+      "target": "step:view-wallet-profile:fetch-wallet-by-id",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:view-wallet-profile",
+      "target": "step:view-wallet-profile:fetch-species-by-wallet",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:view-wallet-profile",
+      "target": "step:view-wallet-profile:compute-token-region-statistics",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:view-wallet-profile",
+      "target": "step:view-wallet-profile:render-token-list-and-map-view",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:view-wallet-profile",
+      "target": "step:view-wallet-profile:render-species-cards",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:wallet-token-tracking",
+      "target": "flow:view-token-provenance",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:view-token-provenance",
+      "target": "step:view-token-provenance:fetch-token-by-id",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:view-token-provenance",
+      "target": "step:view-token-provenance:resolve-tree-photo-and-location",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:view-token-provenance",
+      "target": "step:view-token-provenance:fetch-transaction-history",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:view-token-provenance",
+      "target": "step:view-token-provenance:render-ownership-history",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:view-token-provenance",
+      "target": "step:view-token-provenance:render-token-image",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:impact-leaderboard",
+      "target": "flow:view-leaderboard",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:view-leaderboard",
+      "target": "step:view-leaderboard:fetch-featured-trees",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:view-leaderboard",
+      "target": "step:view-leaderboard:fetch-country-leaderboard",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:view-leaderboard",
+      "target": "step:view-leaderboard:render-ranked-country-list",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:view-leaderboard",
+      "target": "step:view-leaderboard:render-world-map-tooltips",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:view-leaderboard",
+      "target": "step:view-leaderboard:render-featured-sliders",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:impact-leaderboard",
+      "target": "flow:view-homepage-impact",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:view-homepage-impact",
+      "target": "step:view-homepage-impact:set-seo-meta-tags",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:view-homepage-impact",
+      "target": "step:view-homepage-impact:render-hero-section",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:view-homepage-impact",
+      "target": "step:view-homepage-impact:reload-map-view-on-cta-click",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:view-homepage-impact",
+      "target": "step:view-homepage-impact:render-impact-stat-cards",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "domain:site-admin-customization",
+      "target": "flow:admin-authentication",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:admin-authentication",
+      "target": "step:admin-authentication:run-keycloak-ssr-authentication",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:admin-authentication",
+      "target": "step:admin-authentication:decode-rpt-permissions-token",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:admin-authentication",
+      "target": "step:admin-authentication:conditionally-render-admin-ui",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:admin-authentication",
+      "target": "step:admin-authentication:redirect-unauthorized-visitors",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "domain:site-admin-customization",
+      "target": "flow:configure-dashboard-branding",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:configure-dashboard-branding",
+      "target": "step:configure-dashboard-branding:load-persisted-dashboard-config",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:configure-dashboard-branding",
+      "target": "step:configure-dashboard-branding:edit-navbar-items",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:configure-dashboard-branding",
+      "target": "step:configure-dashboard-branding:edit-logo-url",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:configure-dashboard-branding",
+      "target": "step:configure-dashboard-branding:update-initial-map-location",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:configure-dashboard-branding",
+      "target": "step:configure-dashboard-branding:persist-config-changes",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:site-admin-customization",
+      "target": "flow:customize-theme",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:customize-theme",
+      "target": "step:customize-theme:load-persisted-theme",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:customize-theme",
+      "target": "step:customize-theme:render-live-iframe-preview",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:customize-theme",
+      "target": "step:customize-theme:edit-palette-colors",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:customize-theme",
+      "target": "step:customize-theme:edit-typography-and-fonts",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:customize-theme",
+      "target": "step:customize-theme:toggle-light-dark-mode",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "flow:customize-theme",
+      "target": "step:customize-theme:preview-against-design-sandbox",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "domain:auth-sharing",
+      "target": "flow:sign-in-sign-out",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:sign-in-sign-out",
+      "target": "step:sign-in-sign-out:configure-oidc-client",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:sign-in-sign-out",
+      "target": "step:sign-in-sign-out:wrap-app-with-auth-provider",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:sign-in-sign-out",
+      "target": "step:sign-in-sign-out:trigger-sign-in-redirect",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:sign-in-sign-out",
+      "target": "step:sign-in-sign-out:show-signed-in-user-avatar",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "flow:sign-in-sign-out",
+      "target": "step:sign-in-sign-out:trigger-sign-out",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:auth-sharing",
+      "target": "flow:share-entity-page",
+      "type": "contains_flow",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "flow:share-entity-page",
+      "target": "step:share-entity-page:open-share-dialog",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.1
+    },
+    {
+      "source": "flow:share-entity-page",
+      "target": "step:share-entity-page:copy-shareable-link",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.2
+    },
+    {
+      "source": "flow:share-entity-page",
+      "target": "step:share-entity-page:generate-embed-snippet",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.3
+    },
+    {
+      "source": "flow:share-entity-page",
+      "target": "step:share-entity-page:post-to-social-media",
+      "type": "flow_step",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "domain:map-exploration-search",
+      "target": "domain:entity-profile-pages",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Clicking a marker or selecting a search result navigates into a tree, planter, or organization profile page.",
+      "weight": 0.7
+    },
+    {
+      "source": "domain:map-exploration-search",
+      "target": "domain:wallet-token-tracking",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "pathResolver resolves wallet and token identifiers from the map URL context.",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:entity-profile-pages",
+      "target": "domain:wallet-token-tracking",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Both domains share the api.js/apiPaths.js HTTP client and overlapping tree/wallet data.",
+      "weight": 0.5
+    },
+    {
+      "source": "domain:entity-profile-pages",
+      "target": "domain:impact-leaderboard",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Featured trees and planters on the Top/homepage pages are the same entities rendered by profile pages.",
+      "weight": 0.4
+    },
+    {
+      "source": "domain:impact-leaderboard",
+      "target": "domain:map-exploration-search",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Leaderboard rows and the world map link back into the main map view.",
+      "weight": 0.4
+    },
+    {
+      "source": "domain:site-admin-customization",
+      "target": "domain:auth-sharing",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Admin pages are gated by the OIDC/Keycloak session established by Authentication & Sharing.",
+      "weight": 0.6
+    },
+    {
+      "source": "domain:site-admin-customization",
+      "target": "domain:map-exploration-search",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "Dashboard branding, navbar config, and theme choices drive the map's navbar, initial location, and styling.",
+      "weight": 0.6
+    },
+    {
+      "source": "domain:auth-sharing",
+      "target": "domain:entity-profile-pages",
+      "type": "cross_domain",
+      "direction": "forward",
+      "description": "The Share dialog is invoked from tree, planter, organization, and wallet profile pages.",
+      "weight": 0.4
+    }
+  ],
+  "layers": [],
+  "tour": []
+}
