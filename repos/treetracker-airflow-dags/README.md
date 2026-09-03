@@ -10,7 +10,7 @@ by a shared `lib/` of job modules over PostGIS/CKAN.
 - **Source commit:** [`a537231`](https://github.com/Greenstand/treetracker-airflow-dags/commit/a5372312efc52797b7a2f5cd620507ab65fff871)
 - **Snapshot date:** 2026-09-02
 - **Files analyzed:** 69
-- **Graph:** 119 nodes, 214 edges, 6 architecture layers, 10-step guided tour
+- **Graph:** 118 nodes, 214 edges, 6 architecture layers, 10-step guided tour
 - **Domain graph:** 6 domains, 21 flows, 72 steps
 
 ## Contents

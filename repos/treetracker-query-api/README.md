@@ -12,7 +12,7 @@ repositories), Joi validation, an OpenAPI spec, and rascal/RabbitMQ messaging.
 - **Snapshot date:** 2026-09-03
 - **Primary language:** TypeScript
 - **Files analyzed:** 189
-- **Graph:** 242 nodes, 344 edges, 8 architecture layers, 13-step guided tour
+- **Graph:** 241 nodes, 344 edges, 8 architecture layers, 13-step guided tour
 - **Domain graph:** 5 domains, 13 flows, 56 steps
 
 ## View it

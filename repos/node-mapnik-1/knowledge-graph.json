@@ -6778,19 +6778,6 @@
       "complexity": "simple"
     },
     {
-      "id": "file:.ua/.understandignore",
-      "type": "file",
-      "name": ".understandignore",
-      "filePath": ".ua/.understandignore",
-      "summary": "Ignore list for the Understand-Anything analyzer, excluding vendored and generated paths from the knowledge graph scan.",
-      "tags": [
-        "configuration",
-        "tooling",
-        "ignore-list"
-      ],
-      "complexity": "simple"
-    },
-    {
       "id": "file:bin/mapnik-index.js",
       "type": "file",
       "name": "mapnik-index.js",

@@ -9,7 +9,7 @@ Joi/express-validator validation, Swagger docs, and RabbitMQ (rascal/amqplib) me
 - **Source commit:** [`85258c8`](https://github.com/Greenstand/treetracker-api/commit/85258c8ee5f1cae66a3de3e7d8b3b37faf1ae35c)
 - **Snapshot date:** 2026-09-02
 - **Files analyzed:** 307
-- **Graph:** 383 nodes, 434 edges, 9 architecture layers, 12-step guided tour
+- **Graph:** 382 nodes, 434 edges, 9 architecture layers, 12-step guided tour
 - **Domain graph:** 5 domains, 12 flows, 46 steps
 
 ## Contents

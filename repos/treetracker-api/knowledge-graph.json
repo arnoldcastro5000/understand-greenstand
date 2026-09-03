@@ -4645,19 +4645,6 @@
       "complexity": "simple"
     },
     {
-      "id": "config:.ua/.understandignore",
-      "type": "config",
-      "name": ".understandignore",
-      "filePath": ".ua/.understandignore",
-      "summary": "Ignore-list controlling which paths the Understand-Anything analyzer skips when scanning the repository.",
-      "tags": [
-        "configuration",
-        "tooling",
-        "analysis"
-      ],
-      "complexity": "simple"
-    },
-    {
       "id": "config:CODEOWNERS",
       "type": "config",
       "name": "CODEOWNERS",

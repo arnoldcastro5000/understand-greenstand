@@ -4801,19 +4801,6 @@
       "complexity": "simple"
     },
     {
-      "id": "config:.ua/.understandignore",
-      "type": "config",
-      "name": ".understandignore",
-      "filePath": ".ua/.understandignore",
-      "summary": "Tool-generated ignore-pattern file for the Understand-Anything analysis run, listing commented-out gitignore-style excludes such as config/ and key files.",
-      "tags": [
-        "configuration",
-        "tooling",
-        "generated"
-      ],
-      "complexity": "simple"
-    },
-    {
       "id": "config:CODEOWNERS",
       "type": "config",
       "name": "CODEOWNERS",

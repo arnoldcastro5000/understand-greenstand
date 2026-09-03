@@ -10,7 +10,7 @@ wallet API, built with Material UI (MUI), axios, react-router, and react-quill.
 - **Snapshot date:** 2026-09-03
 - **Primary language:** JavaScript
 - **Files analyzed:** 131
-- **Graph:** 233 nodes, 450 edges, 8 architecture layers, 12-step guided tour
+- **Graph:** 232 nodes, 450 edges, 8 architecture layers, 12-step guided tour
 - **Domain graph:** 5 domains, 10 flows, 43 steps
 
 ## Contents

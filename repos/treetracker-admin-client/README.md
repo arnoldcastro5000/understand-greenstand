@@ -10,7 +10,7 @@ Treetracker app, mid-migration from a legacy dedicated API to Greenstand microse
 - **Source commit:** [`ecbfe05`](https://github.com/Greenstand/treetracker-admin-client/commit/ecbfe050405695a5ca31ab630614ee3e122cddc4)
 - **Snapshot date:** 2026-09-03
 - **Files analyzed:** 241
-- **Graph:** 454 nodes, 1031 edges, 8 architecture layers, 10-step guided tour
+- **Graph:** 453 nodes, 1031 edges, 8 architecture layers, 10-step guided tour
 - **Domain graph:** 8 domains, 17 flows, 87 steps
 
 ## Contents

@@ -3068,19 +3068,6 @@
       "complexity": "simple"
     },
     {
-      "id": "file:.ua/.understandignore",
-      "type": "file",
-      "name": ".understandignore",
-      "filePath": ".ua/.understandignore",
-      "summary": "Ignore rules excluding files and directories from Understand-Anything analysis.",
-      "tags": [
-        "configuration",
-        "tooling",
-        "ignore-rules"
-      ],
-      "complexity": "simple"
-    },
-    {
       "id": "file:CODEOWNERS",
       "type": "file",
       "name": "CODEOWNERS",

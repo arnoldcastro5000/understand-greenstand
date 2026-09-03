@@ -12,10 +12,10 @@ WorkManager, the AWS S3 SDK, and MapLibre.
 - **Snapshot date:** 2026-09-03
 - **Primary language:** Kotlin
 - **Files analyzed:** 445
-- **Graph:** 911 nodes, 1680 edges, 8 architecture layers, 12-step guided tour
+- **Graph:** 910 nodes, 1680 edges, 8 architecture layers, 12-step guided tour
 - **Domain graph:** 6 domains, 18 flows, 65 steps
 
-> Kotlin parsed to 220 classes + 246 functions (the rest of the 911 nodes are 317 files, 69 config, 45 document, and 14 pipeline nodes).
+> Kotlin parsed to 220 classes + 246 functions (the rest of the 910 nodes are 317 files, 69 config, 45 document, and 14 pipeline nodes).
 
 ## Contents
 

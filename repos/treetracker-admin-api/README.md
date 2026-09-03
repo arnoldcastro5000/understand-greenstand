@@ -11,7 +11,7 @@ spec, and RabbitMQ (rascal/amqplib) domain-event messaging.
 - **Snapshot date:** 2026-09-03
 - **Primary language:** TypeScript
 - **Files analyzed:** 130
-- **Graph:** 184 nodes, 230 edges, 9 architecture layers, 14-step guided tour
+- **Graph:** 183 nodes, 230 edges, 9 architecture layers, 14-step guided tour
 - **Domain graph:** 5 domains, 14 flows, 58 steps
 
 ## Contents

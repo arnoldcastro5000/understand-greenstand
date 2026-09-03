@@ -13,7 +13,7 @@ treetracker main) using Knex, with Joi/express-validator validation, Swagger doc
 - **Snapshot date:** 2026-09-03
 - **Primary language:** JavaScript
 - **Files analyzed:** 217
-- **Graph:** 280 nodes, 365 edges, 10 architecture layers, 12-step guided tour
+- **Graph:** 279 nodes, 365 edges, 10 architecture layers, 12-step guided tour
 - **Domain graph:** 6 domains, 15 flows, 60 steps
 
 ## Contents

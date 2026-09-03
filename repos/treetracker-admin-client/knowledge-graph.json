@@ -6432,21 +6432,6 @@
       "complexity": "simple"
     },
     {
-      "id": "config:.ua/.understandignore",
-      "type": "config",
-      "name": ".understandignore",
-      "filePath": ".ua/.understandignore",
-      "summary": "Generated ignore-pattern file for the Understand-Anything analysis tool itself, listing commented-out suggestions for excluding directories and test files from codebase analysis.",
-      "tags": [
-        "tool-artifact",
-        "generated",
-        "ignore-file",
-        "configuration"
-      ],
-      "complexity": "simple",
-      "languageNotes": "This file is an output artifact of the Understand-Anything analysis pipeline, not a project source file."
-    },
-    {
       "id": "config:CODEOWNERS",
       "type": "config",
       "name": "CODEOWNERS",

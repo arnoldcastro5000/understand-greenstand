@@ -10,7 +10,7 @@ Material UI 5 and Keycloak/OIDC authentication.
 - **Source commit:** [`0f4d5b0`](https://github.com/Greenstand/treetracker-web-map-client/commit/0f4d5b00539575498821b84657f4f3f61c5bac6d)
 - **Snapshot date:** 2026-09-03
 - **Files analyzed:** 379
-- **Graph:** 615 nodes, 888 edges, 8 architecture layers, 14-step guided tour
+- **Graph:** 614 nodes, 888 edges, 8 architecture layers, 14-step guided tour
 - **Domain graph:** 6 domains, 16 flows, 77 steps
 - **Primary language:** JavaScript (Next.js / React)
 

@@ -14,7 +14,7 @@ Machine-generated documentation for [`Greenstand/node-mapnik-1`](https://github.
 - **Source commit:** [`35fff37`](https://github.com/Greenstand/node-mapnik-1/commit/35fff37f7f10af483a128b199520b2264164d1fb)
 - **Snapshot date:** 2026-09-02
 - **Files analyzed:** 206 (303 upstream test/asset files excluded)
-- **Graph:** 465 nodes, 617 edges, 7 architecture layers, 12-step guided tour
+- **Graph:** 464 nodes, 617 edges, 7 architecture layers, 12-step guided tour
 - **Domain graph:** 6 domains, 9 flows, 33 steps
 
 ## Contents

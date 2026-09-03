@@ -10,7 +10,7 @@ managing wallets, trust relationships between wallets, and token/bundle transfer
 - **Source commit:** [`e95c15a`](https://github.com/Greenstand/treetracker-wallet-api/commit/e95c15a933e969eea4b4bdaab73e96bac95f5f8f)
 - **Snapshot date:** 2026-09-03
 - **Files analyzed:** 268
-- **Graph:** 401 nodes, 752 edges, 10 architecture layers, 13-step guided tour
+- **Graph:** 400 nodes, 752 edges, 10 architecture layers, 13-step guided tour
 - **Domain graph:** 6 domains, 20 flows, 53 steps
 - **Primary language:** JavaScript
 

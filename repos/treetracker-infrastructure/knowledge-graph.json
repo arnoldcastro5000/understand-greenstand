@@ -4834,19 +4834,6 @@
       "complexity": "simple"
     },
     {
-      "id": "file:.ua/.understandignore",
-      "type": "file",
-      "name": ".understandignore",
-      "filePath": ".ua/.understandignore",
-      "summary": "Ignore-list controlling which paths the Understand-Anything analyzer skips when scanning this repository.",
-      "tags": [
-        "configuration",
-        "tooling",
-        "ignore-list"
-      ],
-      "complexity": "simple"
-    },
-    {
       "id": "document:README.md",
       "type": "document",
       "name": "README.md",

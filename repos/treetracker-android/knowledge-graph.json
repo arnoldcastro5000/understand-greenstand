@@ -11562,19 +11562,6 @@
       "complexity": "simple"
     },
     {
-      "id": "file:.ua/.understandignore",
-      "type": "file",
-      "name": ".understandignore",
-      "filePath": ".ua/.understandignore",
-      "summary": "Ignore list for the Understand-Anything analyzer that excludes generated and vendored paths from the knowledge graph scan.",
-      "tags": [
-        "configuration",
-        "ignore-file",
-        "tooling"
-      ],
-      "complexity": "simple"
-    },
-    {
       "id": "file:CODEOWNERS",
       "type": "file",
       "name": "CODEOWNERS",

@@ -13,7 +13,7 @@ is Terraform/HCL.
 - **Snapshot date:** 2026-09-03
 - **Primary language:** Terraform / HCL (HCL parsed to 306 resource nodes)
 - **Files analyzed:** 332
-- **Graph:** 507 nodes, 400 edges, 10 architecture layers, 13-step guided tour
+- **Graph:** 506 nodes, 400 edges, 10 architecture layers, 13-step guided tour
 - **Domain graph:** 6 domains, 17 flows, 55 steps
 - **Interactive viewer:** https://arnoldcastro5000.github.io/understand-greenstand/treetracker-infrastructure/
 

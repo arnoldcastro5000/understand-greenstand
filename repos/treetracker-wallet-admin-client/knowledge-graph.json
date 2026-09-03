@@ -3495,19 +3495,6 @@
       "complexity": "simple"
     },
     {
-      "id": "file:.ua/.understandignore",
-      "type": "file",
-      "name": ".understandignore",
-      "filePath": ".ua/.understandignore",
-      "summary": "Ignore rules for the Understand-Anything analysis tooling, using gitignore-style globs to exclude files and directories from the knowledge graph scan.",
-      "tags": [
-        "configuration",
-        "tooling",
-        "documentation"
-      ],
-      "complexity": "simple"
-    },
-    {
       "id": "file:src/components/UI/quill.snow.css",
       "type": "file",
       "name": "quill.snow.css",

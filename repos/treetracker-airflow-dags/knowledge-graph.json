@@ -1522,19 +1522,6 @@
       "complexity": "simple"
     },
     {
-      "id": "file:.ua/.understandignore",
-      "type": "file",
-      "name": ".understandignore",
-      "filePath": ".ua/.understandignore",
-      "summary": "Ignore-pattern list for the Understand-Anything analysis tooling, excluding files from the knowledge-graph scan.",
-      "tags": [
-        "configuration",
-        "tooling",
-        "ignore-file"
-      ],
-      "complexity": "simple"
-    },
-    {
       "id": "document:README.md",
       "type": "document",
       "name": "README.md",

@@ -3527,19 +3527,6 @@
       "complexity": "simple"
     },
     {
-      "id": "config:.ua/.understandignore",
-      "type": "config",
-      "name": ".understandignore",
-      "filePath": ".ua/.understandignore",
-      "summary": "Ignore patterns for the Understand-Anything analyzer, excluding vendored and generated paths from scanning.",
-      "tags": [
-        "configuration",
-        "tooling",
-        "ignore-file"
-      ],
-      "complexity": "simple"
-    },
-    {
       "id": "file:assets/greenstand.webp",
       "type": "file",
       "name": "greenstand.webp",
