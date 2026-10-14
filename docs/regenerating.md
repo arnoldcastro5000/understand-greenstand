@@ -44,7 +44,9 @@ repo's directory.
 - `treetracker` is a large monorepo. Expect a longer run.
 - `treetracker-android` is Kotlin and `treetracker-infrastructure` is HCL. Confirm the
   suite handles both, or record any gap in that repo's `README.md`.
-- The secrets scan (`.github/workflows/secrets-scan.yml`) also has a private-terms rule from
-  the `PRIVATE_TERMS_TOML` Actions secret: names of private Greenstand repos must not appear
-  here. If a finding is a real secret, rotate it first. If it is a false positive, add its
-  fingerprint from the job summary to `.gitleaksignore` with a reason.
+- The secrets scan (`.github/workflows/secrets-scan.yml`) also checks for names of private
+  Greenstand repos (`.github/scripts/private-names.sh`, name list from the
+  `PRIVATE_REPO_NAMES` Actions secret). Those names must not appear here, except in mirrored
+  text listed in `.private-names-exceptions`. If a finding is a real secret, rotate it first.
+  If it is a false positive, add its fingerprint from the job summary to `.gitleaksignore`
+  with a reason.
