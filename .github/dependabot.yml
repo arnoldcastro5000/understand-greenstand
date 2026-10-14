@@ -1,0 +1,11 @@
+# Keep the SHA-pinned GitHub Actions current. The scanner CLI versions in
+# secrets-scan.yml are pinned by hand (version + SHA-256) and are not tracked here.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
