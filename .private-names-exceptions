@@ -1,0 +1,4 @@
+# Mirrored-text exceptions for the private-name check (.github/scripts/private-names.sh).
+# One per line: <SHA-256 of the exact name, no trailing newline> <path regex, no spaces>
+# Add an entry only after a code search shows that public Greenstand source contains the name.
+# The hash keeps the name out of this public file.

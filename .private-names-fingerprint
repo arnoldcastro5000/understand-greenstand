@@ -1,0 +1,3 @@
+# SHA-256 of the sorted private-repo-name list (one name per line). It shows when the
+# CI list is stale, without revealing names. Update with: private-names.sh refresh
+420134cb157b802697ee25be509f8eaa8ef9ac45a719387987ae37c4ce54b6e8

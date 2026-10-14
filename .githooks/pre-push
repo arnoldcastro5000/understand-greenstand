@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Block a push that would publish a secret or a private Greenstand repo name.
+# Enable once per clone:  git config core.hooksPath .githooks
+# Bypass on purpose:      git push --no-verify
+exec "$(git rev-parse --show-toplevel)/.github/scripts/private-names.sh" push "$@"
