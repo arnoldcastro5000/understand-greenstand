@@ -17,11 +17,18 @@ report="$2"
       echo "No findings."
     else
       echo "**${count} finding(s).** Rotate any real secret first, then remove it."
-      echo "For a false positive, add its fingerprint to \`.gitleaksignore\` with a reason."
+      echo "- In a file: for a false positive, add its fingerprint to \`.gitleaksignore\` with a reason."
+      # One echo per bullet: the summary renderer turns a newline into a line break.
+      echo "- In issue or pull request text: edit or delete that text. The edit history keeps the old text, so treat a real secret there as exposed."
       echo
       echo "| Rule | Location | Line | Commit | Fingerprint |"
       echo "|---|---|---|---|---|"
-      jq -r '.[] | "| \(.RuleID) | \(.File) | \(.StartLine) | \(.Commit[0:7]) | `\(.Fingerprint)` |"' "$report"
+      # Findings from the GitHub API have no file; betterleaks puts the issue or pull request
+      # URL in Attributes.url. Their fingerprint is not unique per issue, so do not show it.
+      jq -r '.[]
+        | (if .File != "" then .File else (.Attributes.url // "unknown") end) as $location
+        | (if .File != "" then "`\(.Fingerprint)`" else "n/a: edit the text" end) as $fingerprint
+        | "| \(.RuleID) | \($location) | \(.StartLine) | \(.Commit[0:7]) | \($fingerprint) |"' "$report"
     fi
   fi
   echo
