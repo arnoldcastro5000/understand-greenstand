@@ -8,6 +8,8 @@
 # Usage:
 #   private-names.sh push <remote> [<url>]   pre-push hook; git's ref lines on stdin
 #   private-names.sh text <label>            check text on stdin; <label> names its origin
+#   private-names.sh messages <rev-list args> check the commit messages in a range (CI)
+#   private-names.sh config <path>           write the generated scanner config (CI)
 #   private-names.sh fingerprint-check       exit 1 when the name list differs from
 #                                            .private-names-fingerprint
 #   private-names.sh refresh                 maintainer: write the live name list to the CI
@@ -18,6 +20,8 @@
 #   1. PRIVATE_REPO_NAMES (one name per line). CI reads it from the secret of that name.
 #   2. Live from `gh`, when the user is an active member of the Greenstand org.
 #   Otherwise only the secrets scan runs, with a notice.
+#   PRIVATE_NAMES_EXTRA_TERMS (one term per line) adds test terms to the rule. They never
+#   change the list fingerprint. Use only fake terms, for end-to-end tests.
 #
 # Mirrored-text exceptions: .private-names-exceptions holds "<sha256 of the name> <path regex>"
 # lines. A name whose hash matches is allowed in files whose path matches. Text on stdin has
@@ -39,9 +43,13 @@ trap 'rm -rf "$tmp"' EXIT
 
 say() { printf 'private-names: %s\n' "$*" >&2; }
 
-# names: the name list. names_source: env, live, or none.
+# names: the name list. names_source: env, live, or none. extra: test terms (not fingerprinted).
 names=()
 names_source="none"
+extra=()
+if [ -n "${PRIVATE_NAMES_EXTRA_TERMS:-}" ]; then
+  mapfile -t extra < <(printf '%s\n' "$PRIVATE_NAMES_EXTRA_TERMS" | tr -d '\r' | sed '/^[[:space:]]*$/d')
+fi
 
 load_names() {
   if [ -n "${PRIVATE_REPO_NAMES+x}" ]; then
@@ -99,9 +107,10 @@ regex_escape() { printf '%s' "$1" | sed 's/[][\.^$*+?(){}|/]/\\&/g'; }
 # Write the scanner config to $tmp/scan.toml.
 build_config() {
   local config="$tmp/scan.toml" alternation="" name hash path_regex
+  local -a terms=("${names[@]}" "${extra[@]}")
   printf '[extend]\npath = "%s"\n' "$root/.gitleaks.toml" > "$config"
-  [ "${#names[@]}" -gt 0 ] || return 0
-  for name in "${names[@]}"; do
+  [ "${#terms[@]}" -gt 0 ] || return 0
+  for name in "${terms[@]}"; do
     alternation="${alternation:+$alternation|}$(regex_escape "$name")"
   done
   {
@@ -110,7 +119,7 @@ build_config() {
     printf "regex = '''(?i)\\\\b(%s)\\\\b'''\n" "$alternation"
   } >> "$config"
   [ -f "$exceptions_file" ] || return 0
-  for name in "${names[@]}"; do
+  for name in "${terms[@]}"; do
     hash="$(printf '%s' "$name" | sha256sum | cut -d' ' -f1)"
     while read -r path_regex; do
       [ -n "$path_regex" ] || continue
@@ -219,6 +228,34 @@ cmd_text() {
   fi
 }
 
+# messages <rev-list args>: check each commit message in a range.
+cmd_messages() {
+  local commit found=0
+  local -a commits=()
+  [ "$#" -gt 0 ] || { say "usage: private-names.sh messages <rev-list args>"; exit 2; }
+  require_scanners
+  load_names
+  build_config
+  mapfile -t commits < <(git -C "$root" rev-list "$@")
+  for commit in "${commits[@]}"; do
+    git -C "$root" log -1 --format=%B "$commit" | scan_text "commit ${commit:0:7} message" || found=1
+  done
+  say "checked ${#commits[@]} commit message(s)."
+  if [ "$found" -ne 0 ]; then
+    say "blocked: reword the commit messages above."
+    exit 1
+  fi
+}
+
+# config <path>: write the generated scanner config, for tools that take --config.
+cmd_config() {
+  local path="${1:?usage: private-names.sh config <path>}"
+  load_names
+  build_config
+  cp "$tmp/scan.toml" "$path"
+  say "wrote $path (${#names[@]} names from $names_source, ${#extra[@]} test terms)."
+}
+
 cmd_fingerprint_check() {
   load_names
   if [ "${#names[@]}" -eq 0 ]; then
@@ -262,8 +299,10 @@ cmd_install() {
 case "${1:-}" in
   push) shift; cmd_push "$@" ;;
   text) shift; cmd_text "$@" ;;
+  messages) shift; cmd_messages "$@" ;;
+  config) shift; cmd_config "$@" ;;
   fingerprint-check) cmd_fingerprint_check ;;
   refresh) cmd_refresh ;;
   install) cmd_install ;;
-  *) sed -n '2,30p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2; exit 2 ;;
+  *) sed -n '2,34p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2; exit 2 ;;
 esac
