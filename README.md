@@ -18,6 +18,9 @@ the [Understand-Anything](https://github.com/Egonex-AI/Understand-Anything) skil
 The layout is regenerate-ready. See [`docs/regenerating.md`](./docs/regenerating.md) for
 how to refresh a repo's docs.
 
+Before you push, read [`docs/private-names.md`](./docs/private-names.md): names of private
+Greenstand repos must not appear here, and a `pre-push` hook and CI checks enforce that.
+
 ## Repository index
 
 The [live landing page](https://arnoldcastro5000.github.io/understand-greenstand/) lists all

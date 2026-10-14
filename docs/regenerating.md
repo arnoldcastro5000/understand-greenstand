@@ -20,9 +20,9 @@ repo's directory.
 
 2. Run the understand suite against the clone, in order:
 
-   - `/understand-anything:understand` — builds the `knowledge-graph.json`.
-   - `/understand-anything:understand-domain` — extracts the business domain flow.
-   - `/understand-anything:understand-onboard` — renders the onboarding guide.
+   - `/understand-anything:understand`: builds the `knowledge-graph.json`.
+   - `/understand-anything:understand-domain`: extracts the business domain flow.
+   - `/understand-anything:understand-onboard`: renders the onboarding guide.
 
 3. Land the outputs under `repos/<repo-name>/`:
 
@@ -34,8 +34,8 @@ repo's directory.
 4. Record the source commit SHA and the snapshot date in that repo's `README.md`.
 
 5. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
-   a pull request, and the `gitleaks` and `betterleaks` checks must pass. The merge
-   redeploys the viewers.
+   a pull request, and the `gitleaks`, `betterleaks`, and `private-names` checks must pass.
+   The merge redeploys the viewers.
 
 ## Notes
 
@@ -44,9 +44,6 @@ repo's directory.
 - `treetracker` is a large monorepo. Expect a longer run.
 - `treetracker-android` is Kotlin and `treetracker-infrastructure` is HCL. Confirm the
   suite handles both, or record any gap in that repo's `README.md`.
-- The secrets scan (`.github/workflows/secrets-scan.yml`) also checks for names of private
-  Greenstand repos (`.github/scripts/private-names.sh`, name list from the
-  `PRIVATE_REPO_NAMES` Actions secret). Those names must not appear here, except in mirrored
-  text listed in `.private-names-exceptions`. If a finding is a real secret, rotate it first.
-  If it is a false positive, add its fingerprint from the job summary to `.gitleaksignore`
-  with a reason.
+- The `pre-push` hook and the CI checks block secrets and names of private Greenstand repos.
+  A new graph can mirror such a name from its source. Set up the hook before you push, and
+  read [`private-names.md`](./private-names.md) for what to do when a check stops you.
