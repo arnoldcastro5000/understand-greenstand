@@ -6,7 +6,7 @@ repo's directory.
 
 ## Prerequisites
 
-- The [Understand-Anything](https://github.com/) plugin installed and active in Claude
+- The [Understand-Anything](https://github.com/Egonex-AI/Understand-Anything) plugin installed and active in Claude
   Code (`understand`, `understand-domain`, `understand-onboard` skills).
 - `gh` logged in with push access to this repo.
 
@@ -33,7 +33,9 @@ repo's directory.
 
 4. Record the source commit SHA and the snapshot date in that repo's `README.md`.
 
-5. Commit and push.
+5. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
+   a pull request, and the `gitleaks` and `betterleaks` checks must pass. The merge
+   redeploys the viewers.
 
 ## Notes
 
@@ -42,3 +44,7 @@ repo's directory.
 - `treetracker` is a large monorepo. Expect a longer run.
 - `treetracker-android` is Kotlin and `treetracker-infrastructure` is HCL. Confirm the
   suite handles both, or record any gap in that repo's `README.md`.
+- The secrets scan (`.github/workflows/secrets-scan.yml`) also has a private-terms rule from
+  the `PRIVATE_TERMS_TOML` Actions secret: names of private Greenstand repos must not appear
+  here. If a finding is a real secret, rotate it first. If it is a false positive, add its
+  fingerprint from the job summary to `.gitleaksignore` with a reason.
