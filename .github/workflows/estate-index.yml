@@ -1,8 +1,8 @@
 name: Estate index
 
 # Fails when the README.md estate index does not match estate.json and repos/*/meta.json,
-# or when a repos/<name>/ directory has no estate.json entry. Fix: run
-# `node .github/scripts/build-index.mjs` and commit README.md.
+# when a repos/<name>/ directory has no estate.json entry, or when it lacks a file that the
+# index links to. Fix: run `node .github/scripts/build-index.mjs` and commit README.md.
 # No path filter: a path-filtered check stays pending forever if it is ever made required.
 
 on:
