@@ -1,12 +1,55 @@
 #!/usr/bin/env node
 // Render a Markdown file to a styled, standalone HTML page.
 // Usage: node render-md.mjs <inFile> <outFile> <title> <backHref> <backLabel>
+// <inFile> is a path in the docs repo (repos/<name>/README.md, or GLOSSARY.md at the root).
+// Headings get GitHub's anchors, so "#anchor" links work as they do on GitHub. Relative links
+// to a page that the site renders point to that page (ONBOARDING.md -> onboarding.html); other
+// relative links point to the file on GitHub at this commit.
 import { readFileSync, writeFileSync } from "node:fs";
+import { posix } from "node:path";
 import { marked } from "marked";
+import { slugger } from "./slug.mjs";
 
 const [, , inFile, outFile, title, backHref = "./", backLabel = "Viewer"] = process.argv;
 
-marked.setOptions({ gfm: true });
+// The path of a docs-repo file on the Pages site, or null if the site does not serve it.
+function sitePath(path) {
+  let m;
+  if ((m = path.match(/^repos\/([^/]+)\/(README|ONBOARDING|GLOSSARY)\.md$/))) return `${m[1]}/${m[2].toLowerCase()}.html`;
+  if ((m = path.match(/^repos\/([^/]+)\/((?:knowledge-graph|domain-graph|meta)\.json)$/))) return `${m[1]}/${m[2]}`;
+  if (path === "GLOSSARY.md") return "glossary.html";
+  return null;
+}
+
+const from = posix.normalize(inFile);
+const here = sitePath(from);
+const atRoot = here !== null && !here.includes("/");
+const { GITHUB_REPOSITORY: repo, GITHUB_SHA: sha } = process.env;
+
+function rewrite(href) {
+  if (!here || /^([a-z][a-z0-9+.-]*:|#|\/)/i.test(href)) return href;
+  const [path, hash = ""] = href.split(/(?=#)/);
+  const target = posix.normalize(posix.join(posix.dirname(from), path));
+  if (target.startsWith("..")) return href;
+  const page = sitePath(target);
+  if (page) return posix.relative(posix.dirname(here), page) + hash;
+  return repo && sha ? `https://github.com/${repo}/blob/${sha}/${target}${hash}` : href;
+}
+
+const slug = slugger();
+const text = (html) =>
+  html.replace(/<[^>]*>/g, "").replace(/&(amp|lt|gt|quot|#39);/g, (m, e) => ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" })[e]);
+marked.use({
+  gfm: true,
+  renderer: {
+    heading(html, level) {
+      return `<h${level} id="${slug(text(html))}">${html}</h${level}>\n`;
+    },
+    link(href, title, html) {
+      return marked.Renderer.prototype.link.call(this, rewrite(href), title, html);
+    },
+  },
+});
 const body = marked.parse(readFileSync(inFile, "utf8"));
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -47,7 +90,7 @@ const html = `<!doctype html>
 </style>
 </head>
 <body>
-<nav><a href="${esc(backHref)}">&larr; ${esc(backLabel)}</a><a href="../">All viewers</a></nav>
+<nav><a href="${esc(backHref)}">&larr; ${esc(backLabel)}</a>${atRoot ? "" : '<a href="../">All viewers</a>'}</nav>
 ${body}
 </body>
 </html>
