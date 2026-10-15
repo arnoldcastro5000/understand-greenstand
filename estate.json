@@ -4,6 +4,7 @@
   "areas": [
     {
       "title": "Start here",
+      "featured": true,
       "intro": "New to Greenstand? Read the overview first: the mission, the platform big picture, and how to make a first contribution.",
       "repos": [
         {

@@ -6,9 +6,9 @@ Machine-generated documentation for the core-active Greenstand repository estate
 
 **[Open the live site → https://arnoldcastro5000.github.io/understand-greenstand/](https://arnoldcastro5000.github.io/understand-greenstand/)**
 
-The landing page indexes every documented repo. Each one has an interactive knowledge-graph
-viewer (structural + domain views, a guided tour, and inline source loaded from GitHub) plus a
-rendered onboarding guide and README.
+The landing page indexes every documented repo by area, like the index below. Each one has an
+interactive knowledge-graph viewer (structural + domain views, a guided tour, and inline source
+loaded from GitHub) plus a rendered onboarding guide and README.
 
 Each source repo also has one directory under [`repos/`](./repos/). A directory holds that
 repo's `knowledge-graph.json` plus rendered domain and onboarding markdown, produced by

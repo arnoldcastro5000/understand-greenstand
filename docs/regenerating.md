@@ -42,13 +42,15 @@ repo's directory.
    node .github/scripts/build-index.mjs
    ```
 
-   The `Estate index` check fails a pull request if the index is stale, or if a `repos/`
-   directory has no `estate.json` entry.
+   The `Estate index` check fails a pull request if the index is stale, if a `repos/`
+   directory has no `estate.json` entry, or if a repo directory lacks its graph, `README.md`,
+   or `ONBOARDING.md`. The deploy builds the landing page of the live site from the same
+   `estate.json` (`.github/scripts/build-landing.mjs`), so the landing page needs no edit.
 
 6. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
    a pull request, and the `gitleaks`, `betterleaks`, `private-names`, and `estate-index`
    checks must pass.
-   The merge redeploys the viewers.
+   The merge redeploys the viewers and the landing page.
 
 ## Notes
 
