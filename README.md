@@ -46,7 +46,7 @@ Go deeper: [Documentation](https://github.com/Greenstand/greenstand-documentatio
 ### Core API
 
 - **[treetracker-api](repos/treetracker-api/)**: The core Treetracker API: captures, trees, grower accounts, and tags. Node.js, Express, PostgreSQL, RabbitMQ.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-api/) · [Onboarding](repos/treetracker-api/ONBOARDING.md) · [README](repos/treetracker-api/README.md) · [Source](https://github.com/Greenstand/treetracker-api) · Snapshot 2026-09-02 at [`85258c8`](https://github.com/Greenstand/treetracker-api/commit/85258c8ee5f1cae66a3de3e7d8b3b37faf1ae35c)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-api/) · [Onboarding](repos/treetracker-api/ONBOARDING.md) · [README](repos/treetracker-api/README.md) · [Source](https://github.com/Greenstand/treetracker-api) · Snapshot 2026-09-01 at [`85258c8`](https://github.com/Greenstand/treetracker-api/commit/85258c8ee5f1cae66a3de3e7d8b3b37faf1ae35c)
 - **[treetracker-query-api](repos/treetracker-query-api/)**: The read API that serves map and client data: captures, growers, organizations, and trees. Node.js, Express.\
   [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-query-api/) · [Onboarding](repos/treetracker-query-api/ONBOARDING.md) · [README](repos/treetracker-query-api/README.md) · [Source](https://github.com/Greenstand/treetracker-query-api) · Snapshot 2026-09-03 at [`42897d6`](https://github.com/Greenstand/treetracker-query-api/commit/42897d62c4a9e5fa4a49e99720ed28f3a254bb97)
 - **[images-api](repos/images-api/)**: The image service: it fetches remote images and resizes them. Node.js, Express, Sharp.\
