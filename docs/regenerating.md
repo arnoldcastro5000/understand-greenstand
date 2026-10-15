@@ -46,7 +46,8 @@ repo's directory.
    directory has no `estate.json` entry.
 
 6. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
-   a pull request, and the `gitleaks`, `betterleaks`, and `private-names` checks must pass.
+   a pull request, and the `gitleaks`, `betterleaks`, `private-names`, and `estate-index`
+   checks must pass.
    The merge redeploys the viewers.
 
 ## Notes
