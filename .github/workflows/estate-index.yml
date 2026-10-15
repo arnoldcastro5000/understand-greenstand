@@ -5,6 +5,8 @@ name: Estate index
 # index links to. Fix: run `node .github/scripts/build-index.mjs` and commit README.md.
 # Also fails when the "Run it locally" section of an ONBOARDING.md is missing or does not
 # match repos/<name>/run-locally.json. Fix: run `node .github/scripts/build-onboarding.mjs`.
+# Also fails when a glossary (repos/<name>/GLOSSARY.md, or the estate GLOSSARY.md) does not
+# match the domain graphs. Fix: run `node .github/scripts/build-glossary.mjs`.
 # No path filter: a path-filtered check stays pending forever if it is ever made required.
 
 on:
@@ -35,3 +37,6 @@ jobs:
 
       - name: Check the Run it locally sections
         run: node .github/scripts/build-onboarding.mjs --check
+
+      - name: Check the glossaries
+        run: node .github/scripts/build-glossary.mjs --check

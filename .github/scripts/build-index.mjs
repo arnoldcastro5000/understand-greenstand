@@ -20,6 +20,7 @@ function item({ name, description, sha, date, source }) {
   const links = [
     `[Viewer](${estate.siteUrl}${name}/)`,
     `[Onboarding](repos/${name}/ONBOARDING.md)`,
+    `[Glossary](repos/${name}/GLOSSARY.md)`,
     `[README](repos/${name}/README.md)`,
     `[Source](${source})`,
     `Snapshot ${date} at ${commit}`,

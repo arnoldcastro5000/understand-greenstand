@@ -48,7 +48,17 @@ repo's directory.
    overview). The `Estate index` check fails a pull request if a section is missing or stale,
    or if `sourceCommit` does not match `meta.json`.
 
-6. Refresh the index in the top `README.md`. For a new repo, first add an entry with its area
+6. Refresh the glossaries. Run:
+
+   ```
+   node .github/scripts/build-glossary.mjs
+   ```
+
+   The script writes `repos/<repo-name>/GLOSSARY.md` and the estate glossary `GLOSSARY.md`
+   from the domain graphs alone, so it needs no other input. The `Estate index` check fails a
+   pull request if a glossary is missing or stale.
+
+7. Refresh the index in the top `README.md`. For a new repo, first add an entry with its area
    and a one-line description to [`estate.json`](../estate.json). Then run:
 
    ```
@@ -60,7 +70,7 @@ repo's directory.
    or `ONBOARDING.md`. The deploy builds the landing page of the live site from the same
    `estate.json` (`.github/scripts/build-landing.mjs`), so the landing page needs no edit.
 
-7. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
+8. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
    a pull request, and the `gitleaks`, `betterleaks`, `private-names`, and `estate-index`
    checks must pass.
    The merge redeploys the viewers and the landing page.

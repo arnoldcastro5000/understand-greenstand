@@ -17,10 +17,11 @@ if (!site) {
 const { areas, count, errors } = loadEstate();
 
 // The deploy workflow assembles these files beside each viewer.
-const ASSEMBLED = ["index.html", "knowledge-graph.json", "onboarding.html", "readme.html"];
+const ASSEMBLED = ["index.html", "knowledge-graph.json", "onboarding.html", "readme.html", "glossary.html"];
 for (const { name } of areas.flatMap((a) => a.repos)) {
   for (const f of ASSEMBLED) if (!existsSync(join(site, name, f))) errors.push(`${site}/${name}/${f} is missing`);
 }
+if (!existsSync(join(site, "glossary.html"))) errors.push(`${site}/glossary.html is missing`);
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const link = (href, text) => `<a href="${esc(href)}">${text}</a>`;
@@ -30,6 +31,7 @@ function item({ name, description, sha, date, source }) {
   const links = [
     link(`./${name}/`, "Viewer"),
     link(`./${name}/onboarding.html`, "Onboarding"),
+    link(`./${name}/glossary.html`, "Glossary"),
     link(`./${name}/readme.html`, "README"),
     link(source, "Source"),
   ].join(" · ");
@@ -107,8 +109,9 @@ const html = `<!doctype html>
 <body>
 <h1>understand-greenstand</h1>
 <p class="lede">Machine-generated documentation for the core-active Greenstand estate. Each repo has an
-interactive knowledge-graph viewer, an onboarding guide, and a README. The snapshot is the
-source commit that the docs describe.</p>
+interactive knowledge-graph viewer, an onboarding guide, a glossary, and a README. The snapshot is
+the source commit that the docs describe. The ${link("./glossary.html", "estate glossary")} lists the
+business terms of all repos.</p>
 ${featured.map(section).join("\n")}
 <nav class="jump" aria-label="Areas">
 <span>Areas:</span>

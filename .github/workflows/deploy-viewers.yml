@@ -10,10 +10,12 @@ on:
     paths:
       - "repos/**"
       - "estate.json"
+      - "GLOSSARY.md"
       - "viewer/**"
       - ".github/scripts/build-landing.mjs"
       - ".github/scripts/estate.mjs"
       - ".github/scripts/render-md.mjs"
+      - ".github/scripts/slug.mjs"
       - ".github/workflows/deploy-viewers.yml"
   workflow_dispatch:
 
@@ -116,8 +118,13 @@ jobs:
               cp "$dir/README.md" "$OUT/$repo/README.md"
               node .github/scripts/render-md.mjs "$dir/README.md" "$OUT/$repo/readme.html" "$repo: README" "./index.html" "Viewer"
             fi
+            if [ -f "$dir/GLOSSARY.md" ]; then
+              node .github/scripts/render-md.mjs "$dir/GLOSSARY.md" "$OUT/$repo/glossary.html" "$repo: Glossary" "./index.html" "Viewer"
+            fi
             echo "  assembled: $repo"
           done
+          # The estate glossary, linked from the landing page and from each repo glossary.
+          node .github/scripts/render-md.mjs GLOSSARY.md "$OUT/glossary.html" "Estate glossary" "./" "All viewers"
           # Landing index: the areas and links of estate.json, as in the README.md index.
           # It fails if an estate repo lacks a page that the landing page links to.
           node .github/scripts/build-landing.mjs "$OUT"
