@@ -37,27 +37,27 @@ function snapshot(name) {
   return { sha, date: at?.slice(0, 10) };
 }
 
-const cell = (s) => s.replace(/\|/g, "\\|");
-
-function row({ name, description }) {
+// One list item per repo: name and description, then a hard line break ("\") and the links.
+// A list, not a table: tables overflow on narrow screens and misalign across areas.
+function item({ name, description }) {
   const snap = snapshot(name);
   if (!snap) return "";
   const source = `https://github.com/${estate.sourceOrg}/${name}`;
-  const explore = [
+  const commit = `[\`${snap.sha.slice(0, 7)}\`](${source}/commit/${snap.sha})`;
+  const links = [
     `[Viewer](${estate.siteUrl}${name}/)`,
     `[Onboarding](repos/${name}/ONBOARDING.md)`,
     `[README](repos/${name}/README.md)`,
     `[Source](${source})`,
+    `Snapshot ${snap.date} at ${commit}`,
   ].join(" · ");
-  const commit = `[\`${snap.sha.slice(0, 7)}\`](${source}/commit/${snap.sha})`;
-  return `| [${name}](repos/${name}/) | ${cell(description)} | ${explore} | ${snap.date}, ${commit} |`;
+  return `- **[${name}](repos/${name}/)**: ${description}\\\n  ${links}`;
 }
 
 const sections = estate.areas.map((area) => {
   const lines = [`### ${area.title}`, ""];
   if (area.intro) lines.push(area.intro, "");
-  lines.push("| Repo | What it is | Explore | Snapshot |", "|---|---|---|---|");
-  lines.push(...area.repos.map(row));
+  lines.push(...area.repos.map(item));
   if (area.seeAlso) lines.push("", `Go deeper: ${area.seeAlso.map((l) => `[${l.text}](${l.url})`).join(" · ")}`);
   return lines.join("\n");
 });
