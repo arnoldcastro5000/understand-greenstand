@@ -52,7 +52,9 @@ npm ci
 This container uses the CI image. It is for local use only: PostgreSQL accepts connections without a password.
 
 ```bash
-docker run -d --name treetracker-wallet-api-db -e POSTGRES_HOST_AUTH_METHOD=trust -p 5432:5432 postgres
+docker run -d --name treetracker-wallet-api-db -p 5432:5432 \
+  -e POSTGRES_HOST_AUTH_METHOD=trust \
+  postgres
 ```
 
 ### 4. Set the connection URL

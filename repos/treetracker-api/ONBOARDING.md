@@ -50,8 +50,12 @@ npm ci
 These containers use the CI images. They are for local use only: PostgreSQL accepts connections without a password, and RabbitMQ accepts its default `guest` user from your machine. Use the `rabbitmq:3` image: RabbitMQ 4.1 and later refuse connections from the AMQP client in this repo (`frame_max` 4096 is below the new minimum).
 
 ```bash
-docker run -d --name treetracker-api-db -e POSTGRES_HOST_AUTH_METHOD=trust -p 5432:5432 postgis/postgis
-docker run -d --name treetracker-api-mq -e RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS='-rabbit loopback_users []' -p 5672:5672 rabbitmq:3
+docker run -d --name treetracker-api-db -p 5432:5432 \
+  -e POSTGRES_HOST_AUTH_METHOD=trust \
+  postgis/postgis
+docker run -d --name treetracker-api-mq -p 5672:5672 \
+  -e RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS='-rabbit loopback_users []' \
+  rabbitmq:3
 ```
 
 ### 4. Set the connection URLs

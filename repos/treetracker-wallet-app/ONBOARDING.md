@@ -76,7 +76,9 @@ yarn web:dev
 The user API needs a PostgreSQL database for its message queue. This local database accepts connections without a password.
 
 ```bash
-docker run -d --name treetracker-wallet-app-db -e POSTGRES_HOST_AUTH_METHOD=trust -p 5432:5432 postgres:16
+docker run -d --name treetracker-wallet-app-db -p 5432:5432 \
+  -e POSTGRES_HOST_AUTH_METHOD=trust \
+  postgres:16
 ```
 
 ### 6. Start the user API

@@ -15,7 +15,9 @@
       "title": "Start Airflow",
       "text": "The `standalone` command starts the scheduler and the web server with a local SQLite database. This repo is the DAGs folder. Use the `apache/airflow:2.9.3` image: in the 2.10.5 image, 18 DAGs fail to import, because its Postgres provider no longer has `airflow.providers.postgres.operators`.",
       "code": [
-        "docker run -d --name treetracker-airflow -p 8080:8080 -v \"$PWD\":/opt/airflow/dags apache/airflow:2.9.3 standalone"
+        "docker run -d --name treetracker-airflow -p 8080:8080 \\",
+        "  -v \"$PWD\":/opt/airflow/dags \\",
+        "  apache/airflow:2.9.3 standalone"
       ]
     },
     {
@@ -31,7 +33,8 @@
     {
       "title": "Run the tests",
       "text": "Only `lib/utils_test.py` runs without Greenstand services. The other tests in `lib/` need a Greenstand database (`DB_URL`), AWS keys, or calls to live URLs.",
-      "code": ["docker exec -w /opt/airflow/dags/lib treetracker-airflow python -m unittest utils_test"]
+      "code": ["docker exec -w /opt/airflow/dags/lib treetracker-airflow \\",
+        "  python -m unittest utils_test"]
     }
   ]
 }
