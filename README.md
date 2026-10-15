@@ -8,12 +8,16 @@ Machine-generated documentation for the core-active Greenstand repository estate
 
 The landing page indexes every documented repo by area, like the index below. Each one has an
 interactive knowledge-graph viewer (structural + domain views, a guided tour, and inline source
-loaded from GitHub) plus a rendered onboarding guide and README.
+loaded from GitHub) plus a rendered onboarding guide, glossary, and README.
+
+The [estate glossary](GLOSSARY.md) lists the business terms of all repos, A to Z, and links each
+term to the repos and domains that use it.
 
 Each source repo also has one directory under [`repos/`](./repos/). A directory holds that
 repo's `knowledge-graph.json` plus rendered domain and onboarding markdown, produced by
 the [Understand-Anything](https://github.com/Egonex-AI/Understand-Anything) skill suite
-(`understand`, `understand-domain`, `understand-onboard`).
+(`understand`, `understand-domain`, `understand-onboard`). Its `GLOSSARY.md` is generated from
+the domain graph.
 
 The layout is regenerate-ready. See [`docs/regenerating.md`](./docs/regenerating.md) for
 how to refresh a repo's docs.
@@ -27,6 +31,8 @@ The repos are grouped by area. For each repo:
 
 - **Viewer** opens the interactive knowledge graph on the live site.
 - **Onboarding** is the generated onboarding guide.
+- **Glossary** lists the business terms of the repo by domain, with the rules and flows of each
+  domain.
 - **README** is the summary of that repo's docs.
 - **Source** is the Greenstand source repo.
 - **Snapshot** is the date of the docs and the source commit that they describe. The source
@@ -39,58 +45,58 @@ The repos are grouped by area. For each repo:
 New to Greenstand? Read the overview first: the mission, the platform big picture, and how to make a first contribution.
 
 - **[Greenstand-Overview](repos/Greenstand-Overview/)**: The org overview and onboarding repo: contributor guide, roadmap, and team directory. Docs, not code.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/Greenstand-Overview/) · [Onboarding](repos/Greenstand-Overview/ONBOARDING.md) · [README](repos/Greenstand-Overview/README.md) · [Source](https://github.com/Greenstand/Greenstand-Overview) · Snapshot 2026-09-03 at [`6861717`](https://github.com/Greenstand/Greenstand-Overview/commit/68617178870590e198bd045e835e718562235e55)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/Greenstand-Overview/) · [Onboarding](repos/Greenstand-Overview/ONBOARDING.md) · [Glossary](repos/Greenstand-Overview/GLOSSARY.md) · [README](repos/Greenstand-Overview/README.md) · [Source](https://github.com/Greenstand/Greenstand-Overview) · Snapshot 2026-09-03 at [`6861717`](https://github.com/Greenstand/Greenstand-Overview/commit/68617178870590e198bd045e835e718562235e55)
 
 Go deeper: [Documentation](https://github.com/Greenstand/greenstand-documentation) · [Architecture decisions](https://github.com/Greenstand/treetracker-decisions)
 
 ### Core API
 
 - **[treetracker-api](repos/treetracker-api/)**: The core Treetracker API: captures, trees, grower accounts, and tags. Node.js, Express, PostgreSQL, RabbitMQ.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-api/) · [Onboarding](repos/treetracker-api/ONBOARDING.md) · [README](repos/treetracker-api/README.md) · [Source](https://github.com/Greenstand/treetracker-api) · Snapshot 2026-09-02 at [`85258c8`](https://github.com/Greenstand/treetracker-api/commit/85258c8ee5f1cae66a3de3e7d8b3b37faf1ae35c)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-api/) · [Onboarding](repos/treetracker-api/ONBOARDING.md) · [Glossary](repos/treetracker-api/GLOSSARY.md) · [README](repos/treetracker-api/README.md) · [Source](https://github.com/Greenstand/treetracker-api) · Snapshot 2026-09-02 at [`85258c8`](https://github.com/Greenstand/treetracker-api/commit/85258c8ee5f1cae66a3de3e7d8b3b37faf1ae35c)
 - **[treetracker-query-api](repos/treetracker-query-api/)**: The read API that serves map and client data: captures, growers, organizations, and trees. Node.js, Express.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-query-api/) · [Onboarding](repos/treetracker-query-api/ONBOARDING.md) · [README](repos/treetracker-query-api/README.md) · [Source](https://github.com/Greenstand/treetracker-query-api) · Snapshot 2026-09-03 at [`42897d6`](https://github.com/Greenstand/treetracker-query-api/commit/42897d62c4a9e5fa4a49e99720ed28f3a254bb97)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-query-api/) · [Onboarding](repos/treetracker-query-api/ONBOARDING.md) · [Glossary](repos/treetracker-query-api/GLOSSARY.md) · [README](repos/treetracker-query-api/README.md) · [Source](https://github.com/Greenstand/treetracker-query-api) · Snapshot 2026-09-03 at [`42897d6`](https://github.com/Greenstand/treetracker-query-api/commit/42897d62c4a9e5fa4a49e99720ed28f3a254bb97)
 - **[images-api](repos/images-api/)**: The image service: it fetches remote images and resizes them. Node.js, Express, Sharp.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/images-api/) · [Onboarding](repos/images-api/ONBOARDING.md) · [README](repos/images-api/README.md) · [Source](https://github.com/Greenstand/images-api) · Snapshot 2026-09-03 at [`9d761d1`](https://github.com/Greenstand/images-api/commit/9d761d1697fd84c6a58c1da3fae2f8834c63ddc5)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/images-api/) · [Onboarding](repos/images-api/ONBOARDING.md) · [Glossary](repos/images-api/GLOSSARY.md) · [README](repos/images-api/README.md) · [Source](https://github.com/Greenstand/images-api) · Snapshot 2026-09-03 at [`9d761d1`](https://github.com/Greenstand/images-api/commit/9d761d1697fd84c6a58c1da3fae2f8834c63ddc5)
 
 ### Wallet
 
 - **[treetracker-wallet-api](repos/treetracker-wallet-api/)**: The wallet service: wallets, trust relationships, and token transfers. Node.js, Express, PostgreSQL.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-wallet-api/) · [Onboarding](repos/treetracker-wallet-api/ONBOARDING.md) · [README](repos/treetracker-wallet-api/README.md) · [Source](https://github.com/Greenstand/treetracker-wallet-api) · Snapshot 2026-09-03 at [`e95c15a`](https://github.com/Greenstand/treetracker-wallet-api/commit/e95c15a933e969eea4b4bdaab73e96bac95f5f8f)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-wallet-api/) · [Onboarding](repos/treetracker-wallet-api/ONBOARDING.md) · [Glossary](repos/treetracker-wallet-api/GLOSSARY.md) · [README](repos/treetracker-wallet-api/README.md) · [Source](https://github.com/Greenstand/treetracker-wallet-api) · Snapshot 2026-09-03 at [`e95c15a`](https://github.com/Greenstand/treetracker-wallet-api/commit/e95c15a933e969eea4b4bdaab73e96bac95f5f8f)
 - **[treetracker-wallet-app](repos/treetracker-wallet-app/)**: The wallet app monorepo: a Next.js web wallet, an Expo mobile wallet, and a NestJS backend.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-wallet-app/) · [Onboarding](repos/treetracker-wallet-app/ONBOARDING.md) · [README](repos/treetracker-wallet-app/README.md) · [Source](https://github.com/Greenstand/treetracker-wallet-app) · Snapshot 2026-09-03 at [`51ae4e3`](https://github.com/Greenstand/treetracker-wallet-app/commit/51ae4e337957e06e372cd73346ead9c9e6c471eb)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-wallet-app/) · [Onboarding](repos/treetracker-wallet-app/ONBOARDING.md) · [Glossary](repos/treetracker-wallet-app/GLOSSARY.md) · [README](repos/treetracker-wallet-app/README.md) · [Source](https://github.com/Greenstand/treetracker-wallet-app) · Snapshot 2026-09-03 at [`51ae4e3`](https://github.com/Greenstand/treetracker-wallet-app/commit/51ae4e337957e06e372cd73346ead9c9e6c471eb)
 - **[treetracker-wallet-admin-client](repos/treetracker-wallet-admin-client/)**: The admin panel for the wallet service. React, Material UI.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-wallet-admin-client/) · [Onboarding](repos/treetracker-wallet-admin-client/ONBOARDING.md) · [README](repos/treetracker-wallet-admin-client/README.md) · [Source](https://github.com/Greenstand/treetracker-wallet-admin-client) · Snapshot 2026-09-03 at [`62a60f3`](https://github.com/Greenstand/treetracker-wallet-admin-client/commit/62a60f30956b2c364ca0483509569e5fdcb7ed4b)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-wallet-admin-client/) · [Onboarding](repos/treetracker-wallet-admin-client/ONBOARDING.md) · [Glossary](repos/treetracker-wallet-admin-client/GLOSSARY.md) · [README](repos/treetracker-wallet-admin-client/README.md) · [Source](https://github.com/Greenstand/treetracker-wallet-admin-client) · Snapshot 2026-09-03 at [`62a60f3`](https://github.com/Greenstand/treetracker-wallet-admin-client/commit/62a60f30956b2c364ca0483509569e5fdcb7ed4b)
 
 ### Admin
 
 - **[treetracker-admin-client](repos/treetracker-admin-client/)**: The admin panel to verify, process, and manage the tree data that the app collects. React, Material UI.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-admin-client/) · [Onboarding](repos/treetracker-admin-client/ONBOARDING.md) · [README](repos/treetracker-admin-client/README.md) · [Source](https://github.com/Greenstand/treetracker-admin-client) · Snapshot 2026-09-03 at [`ecbfe05`](https://github.com/Greenstand/treetracker-admin-client/commit/ecbfe050405695a5ca31ab630614ee3e122cddc4)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-admin-client/) · [Onboarding](repos/treetracker-admin-client/ONBOARDING.md) · [Glossary](repos/treetracker-admin-client/GLOSSARY.md) · [README](repos/treetracker-admin-client/README.md) · [Source](https://github.com/Greenstand/treetracker-admin-client) · Snapshot 2026-09-03 at [`ecbfe05`](https://github.com/Greenstand/treetracker-admin-client/commit/ecbfe050405695a5ca31ab630614ee3e122cddc4)
 - **[treetracker-admin-api](repos/treetracker-admin-api/)**: The legacy API for the admin panel. TypeScript, LoopBack 4, PostgreSQL.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-admin-api/) · [Onboarding](repos/treetracker-admin-api/ONBOARDING.md) · [README](repos/treetracker-admin-api/README.md) · [Source](https://github.com/Greenstand/treetracker-admin-api) · Snapshot 2026-09-03 at [`1f25d3e`](https://github.com/Greenstand/treetracker-admin-api/commit/1f25d3e63c2a0d13190427c21a61f7cd99e9b898)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-admin-api/) · [Onboarding](repos/treetracker-admin-api/ONBOARDING.md) · [Glossary](repos/treetracker-admin-api/GLOSSARY.md) · [README](repos/treetracker-admin-api/README.md) · [Source](https://github.com/Greenstand/treetracker-admin-api) · Snapshot 2026-09-03 at [`1f25d3e`](https://github.com/Greenstand/treetracker-admin-api/commit/1f25d3e63c2a0d13190427c21a61f7cd99e9b898)
 
 ### Web map
 
 - **[treetracker-web-map-client](repos/treetracker-web-map-client/)**: The public web map of trees, planters, organizations, and tokens. Next.js, React, Leaflet.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-web-map-client/) · [Onboarding](repos/treetracker-web-map-client/ONBOARDING.md) · [README](repos/treetracker-web-map-client/README.md) · [Source](https://github.com/Greenstand/treetracker-web-map-client) · Snapshot 2026-09-03 at [`0f4d5b0`](https://github.com/Greenstand/treetracker-web-map-client/commit/0f4d5b00539575498821b84657f4f3f61c5bac6d)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-web-map-client/) · [Onboarding](repos/treetracker-web-map-client/ONBOARDING.md) · [Glossary](repos/treetracker-web-map-client/GLOSSARY.md) · [README](repos/treetracker-web-map-client/README.md) · [Source](https://github.com/Greenstand/treetracker-web-map-client) · Snapshot 2026-09-03 at [`0f4d5b0`](https://github.com/Greenstand/treetracker-web-map-client/commit/0f4d5b00539575498821b84657f4f3f61c5bac6d)
 - **[node-mapnik-1](repos/node-mapnik-1/)**: A fork of node-mapnik. The Greenstand part is the tile server that renders the web map tiles from PostGIS.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/node-mapnik-1/) · [Onboarding](repos/node-mapnik-1/ONBOARDING.md) · [README](repos/node-mapnik-1/README.md) · [Source](https://github.com/Greenstand/node-mapnik-1) · Snapshot 2026-09-02 at [`35fff37`](https://github.com/Greenstand/node-mapnik-1/commit/35fff37f7f10af483a128b199520b2264164d1fb)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/node-mapnik-1/) · [Onboarding](repos/node-mapnik-1/ONBOARDING.md) · [Glossary](repos/node-mapnik-1/GLOSSARY.md) · [README](repos/node-mapnik-1/README.md) · [Source](https://github.com/Greenstand/node-mapnik-1) · Snapshot 2026-09-02 at [`35fff37`](https://github.com/Greenstand/node-mapnik-1/commit/35fff37f7f10af483a128b199520b2264164d1fb)
 
 ### Mobile
 
 - **[treetracker-android](repos/treetracker-android/)**: The Android app: growers capture trees (photo and GPS) offline and sync them later. Kotlin, Jetpack Compose.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-android/) · [Onboarding](repos/treetracker-android/ONBOARDING.md) · [README](repos/treetracker-android/README.md) · [Source](https://github.com/Greenstand/treetracker-android) · Snapshot 2026-09-03 at [`949d962`](https://github.com/Greenstand/treetracker-android/commit/949d9624a8782ea2805d67e1ff7dfae7ef97e4cd)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-android/) · [Onboarding](repos/treetracker-android/ONBOARDING.md) · [Glossary](repos/treetracker-android/GLOSSARY.md) · [README](repos/treetracker-android/README.md) · [Source](https://github.com/Greenstand/treetracker-android) · Snapshot 2026-09-03 at [`949d962`](https://github.com/Greenstand/treetracker-android/commit/949d9624a8782ea2805d67e1ff7dfae7ef97e4cd)
 
 ### Data ingest
 
 - **[treetracker-field-data](repos/treetracker-field-data/)**: The service that owns the raw tree data that devices upload. Node.js, Express, PostgreSQL.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-field-data/) · [Onboarding](repos/treetracker-field-data/ONBOARDING.md) · [README](repos/treetracker-field-data/README.md) · [Source](https://github.com/Greenstand/treetracker-field-data) · Snapshot 2026-09-03 at [`a6dfe14`](https://github.com/Greenstand/treetracker-field-data/commit/a6dfe14903d2ab2ca2cc60bea2fe18411ca02449)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-field-data/) · [Onboarding](repos/treetracker-field-data/ONBOARDING.md) · [Glossary](repos/treetracker-field-data/GLOSSARY.md) · [README](repos/treetracker-field-data/README.md) · [Source](https://github.com/Greenstand/treetracker-field-data) · Snapshot 2026-09-03 at [`a6dfe14`](https://github.com/Greenstand/treetracker-field-data/commit/a6dfe14903d2ab2ca2cc60bea2fe18411ca02449)
 - **[treetracker-airflow-dags](repos/treetracker-airflow-dags/)**: The Apache Airflow pipelines: data export, migration, reports, and map precompute. Python.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-airflow-dags/) · [Onboarding](repos/treetracker-airflow-dags/ONBOARDING.md) · [README](repos/treetracker-airflow-dags/README.md) · [Source](https://github.com/Greenstand/treetracker-airflow-dags) · Snapshot 2026-09-02 at [`a537231`](https://github.com/Greenstand/treetracker-airflow-dags/commit/a5372312efc52797b7a2f5cd620507ab65fff871)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-airflow-dags/) · [Onboarding](repos/treetracker-airflow-dags/ONBOARDING.md) · [Glossary](repos/treetracker-airflow-dags/GLOSSARY.md) · [README](repos/treetracker-airflow-dags/README.md) · [Source](https://github.com/Greenstand/treetracker-airflow-dags) · Snapshot 2026-09-02 at [`a537231`](https://github.com/Greenstand/treetracker-airflow-dags/commit/a5372312efc52797b7a2f5cd620507ab65fff871)
 
 ### Infrastructure
 
 - **[treetracker-infrastructure](repos/treetracker-infrastructure/)**: The infrastructure as code: Kubernetes, PostgreSQL, and observability on DigitalOcean and AWS. Terraform.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-infrastructure/) · [Onboarding](repos/treetracker-infrastructure/ONBOARDING.md) · [README](repos/treetracker-infrastructure/README.md) · [Source](https://github.com/Greenstand/treetracker-infrastructure) · Snapshot 2026-09-03 at [`a740d11`](https://github.com/Greenstand/treetracker-infrastructure/commit/a740d11ffe60cb8d7f05b5006cf80583bd267aa5)
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-infrastructure/) · [Onboarding](repos/treetracker-infrastructure/ONBOARDING.md) · [Glossary](repos/treetracker-infrastructure/GLOSSARY.md) · [README](repos/treetracker-infrastructure/README.md) · [Source](https://github.com/Greenstand/treetracker-infrastructure) · Snapshot 2026-09-03 at [`a740d11`](https://github.com/Greenstand/treetracker-infrastructure/commit/a740d11ffe60cb8d7f05b5006cf80583bd267aa5)
 
 <!-- END estate index -->
 
