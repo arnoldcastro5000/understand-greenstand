@@ -1,0 +1,111 @@
+{
+  "siteUrl": "https://arnoldcastro5000.github.io/understand-greenstand/",
+  "sourceOrg": "Greenstand",
+  "areas": [
+    {
+      "title": "Start here",
+      "intro": "New to Greenstand? Read the overview first: the mission, the platform big picture, and how to make a first contribution.",
+      "repos": [
+        {
+          "name": "Greenstand-Overview",
+          "description": "The org overview and onboarding repo: contributor guide, roadmap, and team directory. Docs, not code."
+        }
+      ],
+      "seeAlso": [
+        { "text": "Documentation", "url": "https://github.com/Greenstand/greenstand-documentation" },
+        { "text": "Architecture decisions", "url": "https://github.com/Greenstand/treetracker-decisions" }
+      ]
+    },
+    {
+      "title": "Core API",
+      "repos": [
+        {
+          "name": "treetracker-api",
+          "description": "The core Treetracker API: captures, trees, grower accounts, and tags. Node.js, Express, PostgreSQL, RabbitMQ."
+        },
+        {
+          "name": "treetracker-query-api",
+          "description": "The read API that serves map and client data: captures, growers, organizations, and trees. Node.js, Express."
+        },
+        {
+          "name": "images-api",
+          "description": "The image service: it fetches remote images and resizes them. Node.js, Express, Sharp."
+        }
+      ]
+    },
+    {
+      "title": "Wallet",
+      "repos": [
+        {
+          "name": "treetracker-wallet-api",
+          "description": "The wallet service: wallets, trust relationships, and token transfers. Node.js, Express, PostgreSQL."
+        },
+        {
+          "name": "treetracker-wallet-app",
+          "description": "The wallet app monorepo: a Next.js web wallet, an Expo mobile wallet, and a NestJS backend."
+        },
+        {
+          "name": "treetracker-wallet-admin-client",
+          "description": "The admin panel for the wallet service. React, Material UI."
+        }
+      ]
+    },
+    {
+      "title": "Admin",
+      "repos": [
+        {
+          "name": "treetracker-admin-client",
+          "description": "The admin panel to verify, process, and manage the tree data that the app collects. React, Material UI."
+        },
+        {
+          "name": "treetracker-admin-api",
+          "description": "The legacy API for the admin panel. TypeScript, LoopBack 4, PostgreSQL."
+        }
+      ]
+    },
+    {
+      "title": "Web map",
+      "repos": [
+        {
+          "name": "treetracker-web-map-client",
+          "description": "The public web map of trees, planters, organizations, and tokens. Next.js, React, Leaflet."
+        },
+        {
+          "name": "node-mapnik-1",
+          "description": "A fork of node-mapnik. The Greenstand part is the tile server that renders the web map tiles from PostGIS."
+        }
+      ]
+    },
+    {
+      "title": "Mobile",
+      "repos": [
+        {
+          "name": "treetracker-android",
+          "description": "The Android app: growers capture trees (photo and GPS) offline and sync them later. Kotlin, Jetpack Compose."
+        }
+      ]
+    },
+    {
+      "title": "Data ingest",
+      "repos": [
+        {
+          "name": "treetracker-field-data",
+          "description": "The service that owns the raw tree data that devices upload. Node.js, Express, PostgreSQL."
+        },
+        {
+          "name": "treetracker-airflow-dags",
+          "description": "The Apache Airflow pipelines: data export, migration, reports, and map precompute. Python."
+        }
+      ]
+    },
+    {
+      "title": "Infrastructure",
+      "repos": [
+        {
+          "name": "treetracker-infrastructure",
+          "description": "The infrastructure as code: Kubernetes, PostgreSQL, and observability on DigitalOcean and AWS. Terraform."
+        }
+      ]
+    }
+  ]
+}
