@@ -1,0 +1,39 @@
+{
+  "sourceCommit": "0f4d5b00539575498821b84657f4f3f61c5bac6d",
+  "sources": [
+    "README.md",
+    "package.json",
+    ".env.development",
+    "Dockerfile-dev",
+    ".github/workflows/pull-request-ci.yml"
+  ],
+  "prerequisites": [
+    "Node.js 16 and npm. The README says that the project must use Node 16, and the Docker images use Node 16."
+  ],
+  "steps": [
+    {
+      "title": "Install the dependencies",
+      "text": "The install also downloads the Cypress app for the browser tests. If that download fails, see the Troubleshooting section of the README.",
+      "code": ["npm ci"]
+    },
+    {
+      "title": "Set the API URL (optional)",
+      "text": "`npm run dev` reads `.env.development`, so the map calls the Greenstand dev query API at `https://dev-k8s.treetracker.org/query` (`NEXT_PUBLIC_API`). To use a local query API instead, put its URL in `.env.local`. For example, treetracker-query-api listens on port 3006 by default:",
+      "code": ["echo 'NEXT_PUBLIC_API=http://localhost:3006' > .env.local"]
+    },
+    {
+      "title": "Run the tests",
+      "text": "These are the Jest unit tests and the lint that CI runs. At this commit, 53 tests pass and 2 are skipped, and the lint reports warnings only. CI also runs the Cypress tests (`npm run cypress:run:component` and `npm run cypress:run:fast`).",
+      "code": ["npx jest --ci", "npm run lint"]
+    },
+    {
+      "title": "Build the app",
+      "code": ["npm run build"]
+    },
+    {
+      "title": "Start the app",
+      "text": "Open http://localhost:3000. To work without an API, use mock data instead: `npm run dev:mock`.",
+      "code": ["npm run dev"]
+    }
+  ]
+}

@@ -13,7 +13,8 @@ loaded from GitHub) plus a rendered onboarding guide and README.
 Each source repo also has one directory under [`repos/`](./repos/). A directory holds that
 repo's `knowledge-graph.json` plus rendered domain and onboarding markdown, produced by
 the [Understand-Anything](https://github.com/Egonex-AI/Understand-Anything) skill suite
-(`understand`, `understand-domain`, `understand-onboard`).
+(`understand`, `understand-domain`, `understand-onboard`). Its `run-locally.json` holds the
+steps to run the source repo locally; a script writes them into the onboarding guide.
 
 The layout is regenerate-ready. See [`docs/regenerating.md`](./docs/regenerating.md) for
 how to refresh a repo's docs.
@@ -26,7 +27,8 @@ Greenstand repos must not appear here, and a `pre-push` hook and CI checks enfor
 The repos are grouped by area. For each repo:
 
 - **Viewer** opens the interactive knowledge graph on the live site.
-- **Onboarding** is the generated onboarding guide.
+- **Onboarding** is the generated onboarding guide. Its "Run it locally" section gives the
+  steps to set up, test, and run the repo.
 - **README** is the summary of that repo's docs.
 - **Source** is the Greenstand source repo.
 - **Snapshot** is the date of the docs and the source commit that they describe. The source

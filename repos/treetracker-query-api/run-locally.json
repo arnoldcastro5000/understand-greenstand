@@ -1,0 +1,40 @@
+{
+  "sourceCommit": "42897d62c4a9e5fa4a49e99720ed28f3a254bb97",
+  "sources": [
+    "README.md",
+    "package.json",
+    ".github/workflows/pull-request-ci.yml",
+    ".env.example"
+  ],
+  "intro": "This API only reads data. The repo has no migrations, so a new local database stays empty. To see real data, the server needs a database that already holds the Treetracker data.",
+  "prerequisites": [
+    "Node.js 20 and npm. CI tests on Node 20.",
+    "A `DATABASE_URL` for a database with the Treetracker data. The README asks you to join the Greenstand Slack channel for help with the database."
+  ],
+  "steps": [
+    {
+      "title": "Install the dependencies",
+      "code": ["npm ci"]
+    },
+    {
+      "title": "Build the app",
+      "text": "This step compiles the TypeScript, as CI does.",
+      "code": ["npm run build"]
+    },
+    {
+      "title": "Run the tests",
+      "text": "These are the CI checks. The unit and repository tests need no database. At this commit, the integration tests do not run: `sh: 1: mocha: not found` (`mocha` is not in `package.json`). `npm test` still exits 0, because the repository tests run last.",
+      "code": ["npm run lint", "npm test"]
+    },
+    {
+      "title": "Set the connection URL",
+      "text": "Use the URL that you got from the team. You can also put it in a `.env` file (see `.env.example`). If you see `self signed certificate in certificate chain`, also set `NODE_TLS_REJECT_UNAUTHORIZED=0`, as the README says.",
+      "code": ["export DATABASE_URL='postgresql://<user>:<password>@<host>:<port>/<database>'"]
+    },
+    {
+      "title": "Start the server",
+      "text": "The API listens on http://localhost:3006 (for example, `/trees`). If the server cannot reach the database, it still starts, but each data request returns HTTP 500.",
+      "code": ["npm run dev"]
+    }
+  ]
+}

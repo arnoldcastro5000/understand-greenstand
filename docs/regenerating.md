@@ -35,7 +35,20 @@ repo's directory.
 
 4. Record the source commit SHA and the snapshot date in that repo's `README.md`.
 
-5. Refresh the index in the top `README.md`. For a new repo, first add an entry with its area
+5. Refresh the "Run it locally" section of `ONBOARDING.md`. `/understand-onboard` does not
+   write it: [`run-locally.json`](#the-run-locallyjson-file) in the repo directory holds it.
+   Check each step against the source repo at the new commit (best: run the steps), update the
+   file, and set `sourceCommit` to the new `gitCommitHash`. Then run:
+
+   ```
+   node .github/scripts/build-onboarding.mjs
+   ```
+
+   The script writes the section after the first section of `ONBOARDING.md` (the project
+   overview). The `Estate index` check fails a pull request if a section is missing or stale,
+   or if `sourceCommit` does not match `meta.json`.
+
+6. Refresh the index in the top `README.md`. For a new repo, first add an entry with its area
    and a one-line description to [`estate.json`](../estate.json). Then run:
 
    ```
@@ -47,10 +60,34 @@ repo's directory.
    or `ONBOARDING.md`. The deploy builds the landing page of the live site from the same
    `estate.json` (`.github/scripts/build-landing.mjs`), so the landing page needs no edit.
 
-6. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
+7. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
    a pull request, and the `gitleaks`, `betterleaks`, `private-names`, and `estate-index`
    checks must pass.
    The merge redeploys the viewers and the landing page.
+
+## The run-locally.json file
+
+Each repo directory has a `run-locally.json`. It is the source of the "Run it locally" section
+of `ONBOARDING.md`. The section is generated: do not edit it by hand.
+
+- `sourceCommit`: the full SHA that the steps were checked against. It must equal
+  `gitCommitHash` in `meta.json`.
+- `sources`: the paths in the source repo that the steps come from. The section links each
+  path at `sourceCommit`.
+- `intro` (optional): Markdown text before the prerequisites.
+- `prerequisites`: Markdown list items: the tools and their versions.
+- `steps`: each step has a `title`, and `text` (Markdown), `code` (a list of lines), or both.
+  `lang` sets the language of the code block (default `bash`). The script adds step 1, "Get
+  the code", itself.
+
+Rules for the content:
+
+- Write the commands that a volunteer types on their own machine. Run services (PostgreSQL,
+  RabbitMQ) in Docker.
+- Prefer the commands of the source repo's CI workflow: CI shows that they work. The source
+  README can be older than the code.
+- Write only facts that the sources or a test run show. Record a failure that you see at the
+  snapshot as "At this commit, ...", with the error text.
 
 ## Notes
 

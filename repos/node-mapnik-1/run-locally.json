@@ -1,0 +1,33 @@
+{
+  "sourceCommit": "35fff37f7f10af483a128b199520b2264164d1fb",
+  "sources": [
+    "README.md",
+    "package.json",
+    "Dockerfile",
+    ".env",
+    ".github/workflows/build-deploy.yml",
+    "greenstand/app.js"
+  ],
+  "intro": "This repo is the Greenstand map tile server (`treetracker-map-tile-server` in `package.json`). It is a fork of node-mapnik, the Node.js bindings to Mapnik. The `greenstand/` directory holds the tile server; the rest is the node-mapnik addon. The addon needs the Mapnik libraries, so build and run it in Docker, as CI does.",
+  "prerequisites": [
+    "Docker. The Dockerfile starts from the `dadiorchen/tile2:first` image, which holds the Mapnik libraries, and installs Node.js 14.",
+    "A PostgreSQL database with Treetracker data, to serve map tiles. The repo does not include one."
+  ],
+  "steps": [
+    {
+      "title": "Build the image",
+      "text": "The build compiles the addon with `make release_base`. CI builds the same Dockerfile.",
+      "code": ["docker build -t treetracker-map-tile-server ."]
+    },
+    {
+      "title": "Run the tests",
+      "text": "At this commit, 3 of the 3,237 test assertions fail: one in `test/fonts.test.js` and two in `test/vector-tile.query.test.js`.",
+      "code": ["docker run --rm treetracker-map-tile-server npm test"]
+    },
+    {
+      "title": "Start the server",
+      "text": "Set `DB_URL` first: the full `postgresql://` URL of a database with Treetracker data, with the user, the password, the host, the port, and the database name. The other settings come from the committed `.env` file. The server listens on port 23300: http://localhost:23300/ shows a welcome line, and http://localhost:23300/viewer/ shows a map viewer. Tile requests (`/{z}/{x}/{y}.png`) need the Treetracker tables. With an empty database, the server logs `relation \"active_tree_region\" does not exist`, and the request gets no answer.",
+      "code": ["docker run --rm -e DB_URL -p 23300:23300 treetracker-map-tile-server"]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "sourceCommit": "a740d11ffe60cb8d7f05b5006cf80583bd267aa5",
+  "sources": [
+    "README.md",
+    ".pre-commit-config.yaml",
+    ".github/workflows/pre-commit.yaml",
+    "pgpool/README.md"
+  ],
+  "intro": "This repo describes the Greenstand cloud infrastructure: Terraform modules and Kubernetes manifests. There is no app to run. Do not run `terraform apply`, `kubectl apply`, or the deploy scripts: they change live Greenstand systems and need Greenstand credentials. The checks below run on your machine and need no credentials.",
+  "prerequisites": [
+    "Git.",
+    "Terraform. CI installs the latest version with `hashicorp/setup-terraform`.",
+    "pre-commit (https://pre-commit.com/), or uv to run it with `uvx`.",
+    "kubectl, to render the Kubernetes manifests (optional)."
+  ],
+  "steps": [
+    {
+      "title": "Install the Git hook",
+      "text": "The hook runs `terraform fmt` on your changed Terraform files before each commit. With uv, run `uvx pre-commit install` instead.",
+      "code": ["pre-commit install"]
+    },
+    {
+      "title": "Check the configuration",
+      "text": "CI runs the same `terraform fmt` check on each pull request. CI does not fail the pull request when the check fails (`continue-on-error: true`), so run the check before you push. With uv, run `uvx pre-commit run -a` instead.",
+      "code": ["pre-commit run --all-files"]
+    },
+    {
+      "title": "Render the Kubernetes manifests (optional)",
+      "text": "`kubectl kustomize` prints the manifests of one overlay and changes nothing. The pgpool, rabbitmq, and keycloak deployments each have a development, a test, and a production overlay.",
+      "code": ["kubectl kustomize pgpool/deployment/overlays/development/"]
+    }
+  ]
+}

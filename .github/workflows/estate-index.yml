@@ -3,6 +3,8 @@ name: Estate index
 # Fails when the README.md estate index does not match estate.json and repos/*/meta.json,
 # when a repos/<name>/ directory has no estate.json entry, or when it lacks a file that the
 # index links to. Fix: run `node .github/scripts/build-index.mjs` and commit README.md.
+# Also fails when the "Run it locally" section of an ONBOARDING.md is missing or does not
+# match repos/<name>/run-locally.json. Fix: run `node .github/scripts/build-onboarding.mjs`.
 # No path filter: a path-filtered check stays pending forever if it is ever made required.
 
 on:
@@ -30,3 +32,6 @@ jobs:
 
       - name: Check the estate index
         run: node .github/scripts/build-index.mjs --check
+
+      - name: Check the Run it locally sections
+        run: node .github/scripts/build-onboarding.mjs --check
