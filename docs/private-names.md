@@ -18,12 +18,17 @@ a name by its hash or by a count ("1 name, 76 hits").
 
 ## The guards
 
-| Guard | What it checks | When |
-|---|---|---|
-| `pre-push` hook (`.githooks/pre-push`) | Pushed commits, their messages, and the branch name | Before the push leaves your machine |
-| `private-names` check (CI, required) | Commit messages, the branch name, the pull request title and body | Each push and pull request |
-| `gitleaks` and `betterleaks` checks (CI, required) | The full git history | Each push and pull request |
-| Issue scan (`secrets-scan-issues.yml`) | Issues, pull requests, and their comments | Each issue event, and every hour |
+<!-- A list, not a table: a three-column table overflows on narrow screens. -->
+- **`pre-push` hook** (`.githooks/pre-push`): pushed commits, their messages, and the branch
+  name.\
+  When: before the push leaves your machine.
+- **`private-names` check** (CI, required): commit messages, the branch name, the pull request
+  title and body.\
+  When: each push and pull request.
+- **`gitleaks` and `betterleaks` checks** (CI, required): the full git history.\
+  When: each push and pull request.
+- **Issue scan** (`secrets-scan-issues.yml`): issues, pull requests, and their comments.\
+  When: each issue event, and every hour.
 
 All guards use one script, `.github/scripts/private-names.sh`. It runs gitleaks and
 betterleaks, so each run also checks for secrets. Output shows the rule, the location, and the
