@@ -1,0 +1,30 @@
+{
+  "sourceCommit": "9d761d1697fd84c6a58c1da3fae2f8834c63ddc5",
+  "sources": [
+    "README.md",
+    "package.json",
+    ".github/workflows/treetracker-api-pull-request-ci.yml",
+    "server/routes.js",
+    "server/services/ResizeImageService.js"
+  ],
+  "intro": "This service needs no database: it downloads an image from a URL and resizes it. The database setup in the README comes from the microservice template, and the repo has no migrations.",
+  "prerequisites": [
+    "Node.js 16 and npm. CI tests on Node 16."
+  ],
+  "steps": [
+    {
+      "title": "Install the dependencies",
+      "code": ["npm ci"]
+    },
+    {
+      "title": "Run the tests",
+      "text": "These are the CI checks. The tests mock the image download, so they need no network access.",
+      "code": ["npm run lint", "npm test"]
+    },
+    {
+      "title": "Start the server",
+      "text": "The server listens on http://localhost:3006, and `/` returns the version. To resize an image, request `/img/<image host>/<options>/<image path>`. The options are `w` and `h` (pixels), `r` (rotation in degrees), and `q` (JPEG quality, 1 to 100), for example `w=100,h=50`. The server gets the image from `https://<image host>/<image path>` and returns a JPEG.",
+      "code": ["npm run server"]
+    }
+  ]
+}

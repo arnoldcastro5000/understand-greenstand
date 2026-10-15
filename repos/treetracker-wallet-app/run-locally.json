@@ -1,0 +1,60 @@
+{
+  "sourceCommit": "51ae4e337957e06e372cd73346ead9c9e6c471eb",
+  "sources": [
+    "README.md",
+    "CONTRIBUTING.md",
+    "package.json",
+    ".github/workflows/pr-ci-cd-all.yml",
+    ".github/workflows/ci-cd-pr-user-wallet.yml",
+    ".github/workflows/ci-cd-pr-web-wallet.yml",
+    "apps/web/.env.example",
+    "apps/user/.env.example",
+    "apps/native/README.md",
+    "packages/queue/pgClient.js"
+  ],
+  "intro": "This monorepo holds three apps: the web wallet (`apps/web`), the user API (`apps/user`), and the mobile wallet (`apps/native`). One install serves all three. Start only the apps that you need.",
+  "prerequisites": [
+    "Node.js 20 and Corepack (Corepack comes with Node.js). CI uses Node 20. Corepack installs the Yarn version that `package.json` names (Yarn 4.9.4).",
+    "Docker, to run PostgreSQL for the user API.",
+    "For the mobile app: an Android emulator or an Android device."
+  ],
+  "steps": [
+    {
+      "title": "Install the dependencies",
+      "code": ["corepack enable", "yarn install --immutable"]
+    },
+    {
+      "title": "Run the tests",
+      "text": "This runs the unit tests of the user API. The web app has Cypress component tests: `yarn cypress-component-test`. CI runs the user API integration and e2e tests with Keycloak secrets that are not public.",
+      "code": ["yarn user:test:unit"]
+    },
+    {
+      "title": "Start the web app",
+      "text": "The web app opens on http://localhost:3000. The example file points the wallet API at the Greenstand dev server. The web app reads `apps/web/.env`; the README copies the file to `apps/user/.env` instead.",
+      "code": ["cp apps/web/.env.example apps/web/.env", "yarn web:dev"]
+    },
+    {
+      "title": "Start PostgreSQL",
+      "text": "The user API needs a PostgreSQL database for its message queue. This local database accepts connections without a password.",
+      "code": [
+        "docker run -d --name treetracker-wallet-app-db -p 5432:5432 \\",
+        "  -e POSTGRES_HOST_AUTH_METHOD=trust \\",
+        "  postgres:16"
+      ]
+    },
+    {
+      "title": "Start the user API",
+      "text": "The user API listens on http://localhost:8080. The Swagger UI is at http://localhost:8080/swagger. At this commit, the user API does not read `DATABASE_URL` from `.dev.env`: without the `export`, it stops with `error in connecting to DB`. Registration and login call the Greenstand Keycloak server. Ask a maintainer for the `PRIVATE_KEYCLOAK_*` values in `apps/user/.dev.env`.",
+      "code": [
+        "cp apps/user/.env.example apps/user/.dev.env",
+        "export DATABASE_URL=postgresql://postgres@localhost:5432/postgres",
+        "yarn user:dev"
+      ]
+    },
+    {
+      "title": "Start the mobile app",
+      "text": "Metro starts on http://localhost:8081. Press `a` to open the app in an Android emulator. To build and install a native debug app, follow `apps/native/README.md`.",
+      "code": ["yarn native:start"]
+    }
+  ]
+}

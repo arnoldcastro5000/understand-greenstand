@@ -1,0 +1,50 @@
+{
+  "sourceCommit": "949d9624a8782ea2805d67e1ff7dfae7ef97e4cd",
+  "sources": [
+    "README.md",
+    "docs/getting-started/environment-setup.md",
+    "docs/getting-started/build-variants.md",
+    "docs/getting-started/common-commands.md",
+    ".github/workflows/pull_request.yml",
+    "build.gradle",
+    "gradle/libs.versions.toml"
+  ],
+  "prerequisites": [
+    "JDK 17. CI builds with Temurin JDK 17.",
+    "The Android SDK with platform 36 (`compileSdk` in `gradle/libs.versions.toml`). Android Studio installs it.",
+    "An Android device or an emulator, to run the app."
+  ],
+  "steps": [
+    {
+      "title": "Create the keys file",
+      "text": "The build reads `treetracker.keys.properties` in the repo root. The Android team shares the real file in the `#android_chat` Slack channel. To build and test without it, create the placeholder file that CI uses. The placeholder keys are not real credentials.",
+      "code": [
+        "cat > treetracker.keys.properties <<'EOF'",
+        "treetracker_client_id=dummy-id",
+        "treetracker_client_secret=dummy-secret",
+        "s3_dev_identity_pool_id=dummy-pool-id-dev",
+        "s3_test_identity_pool_id=dummy-pool-id-test",
+        "EOF"
+      ]
+    },
+    {
+      "title": "Run the tests",
+      "text": "This runs the JVM unit tests of the `dev` variant. CI runs the unit tests of all variants with `./gradlew test`.",
+      "code": ["./gradlew testDevUnitTest"]
+    },
+    {
+      "title": "Check the code style",
+      "text": "CI runs both checks on each pull request.",
+      "code": ["./gradlew ktlintCheck", "./gradlew detekt"]
+    },
+    {
+      "title": "Build the app",
+      "text": "Use the `dev` variant for local development: it lets you add trees without a specific accuracy.",
+      "code": ["./gradlew assembleDev"]
+    },
+    {
+      "title": "Start the app",
+      "text": "Open the project in Android Studio, select the `dev` build variant, and run it on a device or an emulator."
+    }
+  ]
+}

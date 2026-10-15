@@ -1,0 +1,40 @@
+{
+  "sourceCommit": "62a60f30956b2c364ca0483509569e5fdcb7ed4b",
+  "sources": [
+    "README.md",
+    "package.json",
+    ".nvmrc",
+    ".env.development",
+    ".github/workflows/treetracker-wallet-admin-pr.yaml"
+  ],
+  "prerequisites": [
+    "Node.js 20 and npm. CI builds on Node 20, `.nvmrc` names Node 20, and `package.json` asks for Node 19 or 20. The README still names Node 18."
+  ],
+  "steps": [
+    {
+      "title": "Install the dependencies",
+      "text": "CI installs with the `--legacy-peer-deps` flag. Without it, `npm ci` stops: it reports that `package-lock.json` is not in sync with `package.json`.",
+      "code": ["npm ci --legacy-peer-deps"]
+    },
+    {
+      "title": "Set the API URL (optional)",
+      "text": "`npm start` reads `.env.development`, so the app calls the Greenstand dev wallet API at `https://dev-k8s.treetracker.org/wallet/v2` (`REACT_APP_WALLET_API_ROOT`). To use a local wallet API instead, put its URL in `.env.local`. For example, treetracker-wallet-api listens on port 3006 by default:",
+      "code": ["echo 'REACT_APP_WALLET_API_ROOT=http://localhost:3006' > .env.local"]
+    },
+    {
+      "title": "Run the tests",
+      "text": "`CI=true` runs the tests once, as in CI. Without it, `npm test` starts in watch mode. At this commit, 44 tests pass and 6 are skipped.",
+      "code": ["npm run lint", "CI=true npm test"]
+    },
+    {
+      "title": "Build the app",
+      "text": "The build goes to the `build/` folder.",
+      "code": ["npm run build"]
+    },
+    {
+      "title": "Start the app",
+      "text": "Open http://localhost:3000. The app sends you to a login page. To sign in, you need a wallet account on the API that the app calls.",
+      "code": ["npm start"]
+    }
+  ]
+}

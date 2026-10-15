@@ -1,0 +1,59 @@
+{
+  "sourceCommit": "85258c8ee5f1cae66a3de3e7d8b3b37faf1ae35c",
+  "sources": [
+    "README.md",
+    "package.json",
+    ".github/workflows/treetracker-api-pull-request-ci.yml",
+    "database/migrations/sqls/20210219042951-domain-event-up.sql"
+  ],
+  "prerequisites": [
+    "Node.js 16 and npm. CI tests on Node 16.",
+    "Docker, to run PostgreSQL with PostGIS and RabbitMQ."
+  ],
+  "steps": [
+    {
+      "title": "Install the dependencies",
+      "code": ["npm ci"]
+    },
+    {
+      "title": "Start PostgreSQL and RabbitMQ",
+      "text": "These containers use the CI images. They are for local use only: PostgreSQL accepts connections without a password, and RabbitMQ accepts its default `guest` user from your machine. Use the `rabbitmq:3` image: RabbitMQ 4.1 and later refuse connections from the AMQP client in this repo (`frame_max` 4096 is below the new minimum).",
+      "code": [
+        "docker run -d --name treetracker-api-db -p 5432:5432 \\",
+        "  -e POSTGRES_HOST_AUTH_METHOD=trust \\",
+        "  postgis/postgis",
+        "docker run -d --name treetracker-api-mq -p 5672:5672 \\",
+        "  -e RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS='-rabbit loopback_users []' \\",
+        "  rabbitmq:3"
+      ]
+    },
+    {
+      "title": "Set the connection URLs",
+      "text": "The migrations, the tests, the seed, and the server read these variables. Set them again in each new terminal.",
+      "code": [
+        "export DATABASE_URL=postgresql://postgres@localhost:5432/postgres",
+        "export DATABASE_URL_SEEDER=$DATABASE_URL",
+        "export RABBIT_MQ_URL=amqp://localhost"
+      ]
+    },
+    {
+      "title": "Create the tables",
+      "code": ["npm run db-migrate-ci"]
+    },
+    {
+      "title": "Run the tests",
+      "text": "At this commit, 5 of the 45 integration tests fail with `no partition of relation \"domain_event_handled\" found for row`: the migrations add date partitions only up to the end of 2023. Because of that, `npm test` stops before the repository tests. Run them with `npm run test-repository`.",
+      "code": ["npm test"]
+    },
+    {
+      "title": "Add sample data (optional)",
+      "text": "The seed first deletes all trees, captures, and grower accounts. Then it adds about 19,000 sample captures, 3,300 trees, and 54 grower accounts.",
+      "code": ["npm run seed-dev"]
+    },
+    {
+      "title": "Start the server",
+      "text": "The API listens on http://localhost:3006 (for example, `/trees`). The Swagger UI is at http://localhost:3006/api-docs/.",
+      "code": ["npm run server"]
+    }
+  ]
+}

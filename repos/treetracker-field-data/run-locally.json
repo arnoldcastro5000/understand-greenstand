@@ -1,0 +1,54 @@
+{
+  "sourceCommit": "a6dfe14903d2ab2ca2cc60bea2fe18411ca02449",
+  "sources": [
+    "README.md",
+    "package.json",
+    ".github/workflows/pull-request-ci.yml",
+    "config/config.js"
+  ],
+  "intro": "The README quick start connects to the Greenstand development database and needs a token from the engineering leads. The steps below use local containers instead, as CI does.",
+  "prerequisites": [
+    "Node.js 20 and npm. CI tests on Node 20.",
+    "Docker, to run PostgreSQL with PostGIS and RabbitMQ."
+  ],
+  "steps": [
+    {
+      "title": "Install the dependencies",
+      "code": ["npm ci"]
+    },
+    {
+      "title": "Start PostgreSQL and RabbitMQ",
+      "text": "These containers use the CI images. They are for local use only: PostgreSQL accepts connections without a password, and RabbitMQ accepts its default `guest` user from your machine. Use the `rabbitmq:3` image: RabbitMQ 4.1 and later refuse connections from amqplib 0.8, which this repo uses (`frame_max` 4096 is below the new minimum).",
+      "code": [
+        "docker run -d --name treetracker-field-data-db -p 5432:5432 \\",
+        "  -e POSTGRES_HOST_AUTH_METHOD=trust \\",
+        "  postgis/postgis",
+        "docker run -d --name treetracker-field-data-mq -p 5672:5672 \\",
+        "  -e RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS='-rabbit loopback_users []' \\",
+        "  rabbitmq:3"
+      ]
+    },
+    {
+      "title": "Set the connection URLs",
+      "text": "The migrations, the tests, and the server read these variables. The service also connects to the legacy Treetracker database. For local work, point it at the same database, as CI does. Set the variables again in each new terminal.",
+      "code": [
+        "export DATABASE_URL=postgresql://postgres@localhost:5432/postgres",
+        "export DATABASE_URL_LEGACYDB=$DATABASE_URL",
+        "export RABBIT_MQ_URL=amqp://localhost"
+      ]
+    },
+    {
+      "title": "Create the tables",
+      "code": ["npm run db-migrate-ci"]
+    },
+    {
+      "title": "Run the tests",
+      "code": ["npm test"]
+    },
+    {
+      "title": "Start the server",
+      "text": "The API listens on http://localhost:3006 (for example, `/raw-captures`). The Swagger UI is at http://localhost:3006/docs/.",
+      "code": ["npm run server"]
+    }
+  ]
+}

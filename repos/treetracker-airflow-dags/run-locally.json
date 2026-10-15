@@ -1,0 +1,40 @@
+{
+  "sourceCommit": "a5372312efc52797b7a2f5cd620507ab65fff871",
+  "sources": [
+    "README.md",
+    "lib/utils_test.py",
+    "migrate_captures_dag.py",
+    "species_id_dag.py"
+  ],
+  "intro": "This repo has no build step and no CI. The steps below run the DAGs in the official Airflow Docker image. Most DAGs and most tests read the Greenstand databases. For access, ask in the automations-working-group Slack channel, as the README says.",
+  "prerequisites": [
+    "Docker. The Airflow image includes Python 3.12 and the Postgres, Kubernetes, and Amazon providers."
+  ],
+  "steps": [
+    {
+      "title": "Start Airflow",
+      "text": "The `standalone` command starts the scheduler and the web server with a local SQLite database. This repo is the DAGs folder. Use the `apache/airflow:2.9.3` image: in the 2.10.5 image, 18 DAGs fail to import, because its Postgres provider no longer has `airflow.providers.postgres.operators`.",
+      "code": [
+        "docker run -d --name treetracker-airflow -p 8080:8080 \\",
+        "  -v \"$PWD\":/opt/airflow/dags \\",
+        "  apache/airflow:2.9.3 standalone"
+      ]
+    },
+    {
+      "title": "Open the web UI",
+      "text": "Wait about one minute, then open http://localhost:8080 and log in as `admin`. Airflow writes the generated login for `admin` to a file in the container. This command shows it.",
+      "code": ["docker exec treetracker-airflow cat /opt/airflow/standalone_admin_password.txt"]
+    },
+    {
+      "title": "Check the DAGs",
+      "text": "At this commit, 25 DAGs load and 3 files fail to import. `migrate_captures_dag.py` and `migrate_stakeholders_dag.py` need Airflow variables from the Greenstand environment (for example, `DATABASE_LOGIN`). `species_id_dag.py` has a syntax error.",
+      "code": ["docker exec treetracker-airflow airflow dags list-import-errors"]
+    },
+    {
+      "title": "Run the tests",
+      "text": "Only `lib/utils_test.py` runs without Greenstand services. The other tests in `lib/` need a Greenstand database (`DB_URL`), AWS keys, or calls to live URLs.",
+      "code": ["docker exec -w /opt/airflow/dags/lib treetracker-airflow \\",
+        "  python -m unittest utils_test"]
+    }
+  ]
+}

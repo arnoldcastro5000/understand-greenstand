@@ -1,0 +1,25 @@
+{
+  "sourceCommit": "68617178870590e198bd045e835e718562235e55",
+  "sources": ["README.md"],
+  "intro": "This repo holds Markdown documents only: the contributor guide, the roadmap, the team directory, and other org documents. There is nothing to install, build, or run.",
+  "prerequisites": [
+    "Git.",
+    "A GitHub account, to fork the repo and open a pull request."
+  ],
+  "steps": [
+    {
+      "title": "Read the documents",
+      "text": "Start with `README.md`. It describes the project and how to make a first contribution. `Roadmap.md` gives the feature plans, `TEAM.md` the team directory, `BDD-GUIDE.md` the BDD process, and `Issues-lndex.md` the issue lists of the repos. GitHub renders all of them. On your machine, any Markdown viewer shows them."
+    },
+    {
+      "title": "Propose an edit",
+      "text": "Greenstand uses the fork and pull model. Make your change on a new branch of your fork, then open a pull request against the `master` branch. Keep each pull request small and focused on one issue.",
+      "code": [
+        "git switch -c fix-readme-typo",
+        "# Edit a document, then:",
+        "git commit -am \"Fix a typo in README.md\"",
+        "git push origin fix-readme-typo"
+      ]
+    }
+  ]
+}

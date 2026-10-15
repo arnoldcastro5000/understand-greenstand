@@ -1,0 +1,48 @@
+{
+  "sourceCommit": "e95c15a933e969eea4b4bdaab73e96bac95f5f8f",
+  "sources": [
+    "README.md",
+    "package.json",
+    ".github/workflows/treetracker-wallet-api-pull-request-ci.yml",
+    ".env.ci",
+    "server/services/TrustService.spec.js"
+  ],
+  "prerequisites": [
+    "Node.js 20 and npm. CI tests on Node 20.",
+    "Docker, to run PostgreSQL."
+  ],
+  "steps": [
+    {
+      "title": "Install the dependencies",
+      "code": ["npm ci"]
+    },
+    {
+      "title": "Start PostgreSQL",
+      "text": "This container uses the CI image. It is for local use only: PostgreSQL accepts connections without a password.",
+      "code": [
+        "docker run -d --name treetracker-wallet-api-db -p 5432:5432 \\",
+        "  -e POSTGRES_HOST_AUTH_METHOD=trust \\",
+        "  postgres"
+      ]
+    },
+    {
+      "title": "Set the connection URL",
+      "text": "The migrations, the tests, and the server read this variable. Set it again in each new terminal.",
+      "code": ["export DATABASE_URL=postgresql://postgres@localhost:5432/postgres"]
+    },
+    {
+      "title": "Create the tables",
+      "code": ["npm run db-migrate-ci"]
+    },
+    {
+      "title": "Run the tests",
+      "text": "At this commit, `npm test` stops before any test runs: `server/services/TrustService.spec.js` fails with `TypeError: Cannot stub non-existent property trustRelationshipGetById`. Run the integration tests and the repository tests one at a time. Both pass.",
+      "code": ["npm run test-integration-ci", "npm run test-repository"]
+    },
+    {
+      "title": "Start the server",
+      "text": "The server reads a JWT key pair from `.env.development`. For local work, copy the test key pair from `.env.ci`. To make your own key pair, follow the README. The API listens on http://localhost:3006. A request without an API key, for example to `/wallets`, gets a 401 response.",
+      "code": ["cp .env.ci .env.development", "npm run server"]
+    }
+  ]
+}
