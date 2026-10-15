@@ -30,10 +30,22 @@ repo's directory.
    - the domain markdown and domain graph
    - the onboarding guide
    - a short per-repo `README.md`
+   - `meta.json` (`gitCommitHash`, `lastAnalyzedAt`): the viewer loads source at that
+     commit, and the top `README.md` index shows both values
 
 4. Record the source commit SHA and the snapshot date in that repo's `README.md`.
 
-5. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
+5. Refresh the index in the top `README.md`. For a new repo, first add an entry with its area
+   and a one-line description to [`estate.json`](../estate.json). Then run:
+
+   ```
+   node .github/scripts/build-index.mjs
+   ```
+
+   The `Estate index` check fails a pull request if the index is stale, or if a `repos/`
+   directory has no `estate.json` entry.
+
+6. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
    a pull request, and the `gitleaks`, `betterleaks`, and `private-names` checks must pass.
    The merge redeploys the viewers.
 
