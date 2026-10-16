@@ -7,7 +7,10 @@
 // and asks the GitHub compare API what changed since. Set GITHUB_TOKEN for the 5000/hour API
 // limit: a run makes about 2 requests per repo, and the anonymous limit is 60/hour.
 // The report is public (job summary, log, issue). It shows repo names, counts, and compare links
-// only: commit messages and file paths of a source repo can mirror a private repo name.
+// only: commit messages and file paths of a source repo can mirror a private repo name. In GitHub
+// Actions the shared private-name check (private-names.sh) reads the whole text before any of it
+// is printed or posted.
+import { spawnSync } from "node:child_process";
 import { appendFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadEstate, root } from "./estate.mjs";
@@ -166,21 +169,35 @@ if (missing.length) {
   if (!inActions) lines.push("", ...missing.map((r) => `- ${r.name}`));
 }
 const report = lines.join("\n") + "\n";
+const dueNames = due.map((r) => r.name);
+const body = `${[MARKER, ...dueNames, "-->"].join(" ")}\n${report}`;
+
+// In Actions all output is public: pass each text through the shared check before it goes out.
+function check(text, label) {
+  if (!inActions) return;
+  const run = spawnSync(join(root, ".github/scripts/private-names.sh"), ["text", label], {
+    input: text,
+    stdio: ["pipe", "inherit", "inherit"],
+  });
+  if (run.status !== 0) fail([`the private-name check of ${label} did not pass (exit ${run.status}): it was not published`]);
+}
+
+check(body, "the drift report");
 
 process.stdout.write(report);
 if (summaryFile) appendFileSync(summaryFile, report);
 
-if (syncIssue) await sync(due.map((r) => r.name));
+if (syncIssue) await sync();
 if (missing.length) fail([`${plural(missing.length, "source repo")} not found`]);
 
 // One issue holds the report. A run opens or reopens it when a repo is due, edits it on each
 // run, and closes it when no repo is due. A comment (it notifies) says when the due list changes.
-async function sync(dueNames) {
-  const body = `${[MARKER, ...dueNames, "-->"].join(" ")}\n${report}`;
+async function sync() {
   const issue = await findIssue();
   const before = issue?.body?.split("\n", 1)[0].slice(MARKER.length).replace("-->", "").trim().split(/\s+/).filter(Boolean) ?? [];
   const added = dueNames.filter((n) => !before.includes(n));
-  const dropped = before.filter((n) => !dueNames.includes(n));
+  // A repo that is not found now may be private: the "Not found" section covers it, without a name.
+  const dropped = before.filter((n) => !dueNames.includes(n) && !missing.some((r) => r.name === n));
   const note = [
     added.length && `Now due: ${added.join(", ")}.`,
     dropped.length && `No longer due: ${dropped.join(", ")}.`,
@@ -189,8 +206,10 @@ async function sync(dueNames) {
 
   if (!dueNames.length) {
     if (!issue || issue.state === "closed") return console.error("issue: no repo is due, and no issue is open");
+    const comment = `${note} No repo is due now, so this issue closes.`.trim();
+    check(comment, "the issue comment");
     await api("PATCH", `${path}/${issue.number}`, { body });
-    await api("POST", `${path}/${issue.number}/comments`, { body: `${note} No repo is due now, so this issue closes.`.trim() });
+    await api("POST", `${path}/${issue.number}/comments`, { body: comment });
     await api("PATCH", `${path}/${issue.number}`, { state: "closed", state_reason: "completed" });
     return console.error(`issue: closed #${issue.number}`);
   }
@@ -199,9 +218,10 @@ async function sync(dueNames) {
     return console.error(`issue: opened #${made.number}`);
   }
   const reopen = issue.state === "closed";
+  const comment = note || (reopen ? `Due again: ${dueNames.join(", ")}.` : "");
+  if (comment) check(comment, "the issue comment");
   const edit = issue.body !== body || reopen;
   if (edit) await api("PATCH", `${path}/${issue.number}`, { body, ...(reopen && { state: "open" }) });
-  const comment = note || (reopen ? `Due again: ${dueNames.join(", ")}.` : "");
   if (comment) await api("POST", `${path}/${issue.number}/comments`, { body: comment });
   const done = reopen ? "reopened" : edit ? "updated" : "unchanged";
   console.error(`issue: ${done} #${issue.number}${comment ? ` (${comment})` : ""}`);
