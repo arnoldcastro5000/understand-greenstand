@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 // Render a Markdown file to a styled, standalone HTML page.
 // Usage: node render-md.mjs <inFile> <outFile> <title> <backHref> <backLabel>
-// <inFile> is a path in the docs repo (repos/<name>/README.md, or GLOSSARY.md at the root).
+// <inFile> is a path in the docs repo: repos/<name>/README.md, GLOSSARY.md at the root, or
+// docs/contribute-to-greenstand.md.
 // Headings get GitHub's anchors, so "#anchor" links work as they do on GitHub. Relative links
-// to a page that the site renders point to that page (ONBOARDING.md -> onboarding.html); other
-// relative links point to the file on GitHub at this commit.
+// to a page that the site renders point to that page (ONBOARDING.md -> onboarding.html, and
+// the top README.md -> the landing page); other relative links point to the file on GitHub at
+// this commit.
 import { readFileSync, writeFileSync } from "node:fs";
 import { posix } from "node:path";
 import { marked } from "marked";
@@ -18,6 +20,9 @@ function sitePath(path) {
   if ((m = path.match(/^repos\/([^/]+)\/(README|ONBOARDING|GLOSSARY)\.md$/))) return `${m[1]}/${m[2].toLowerCase()}.html`;
   if ((m = path.match(/^repos\/([^/]+)\/((?:knowledge-graph|domain-graph|meta)\.json)$/))) return `${m[1]}/${m[2]}`;
   if (path === "GLOSSARY.md") return "glossary.html";
+  if (path === "docs/contribute-to-greenstand.md") return "contribute.html";
+  // The landing page shows the estate index of README.md.
+  if (path === "README.md") return "index.html";
   return null;
 }
 

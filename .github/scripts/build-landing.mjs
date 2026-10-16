@@ -21,7 +21,10 @@ const ASSEMBLED = ["index.html", "knowledge-graph.json", "onboarding.html", "rea
 for (const { name } of areas.flatMap((a) => a.repos)) {
   for (const f of ASSEMBLED) if (!existsSync(join(site, name, f))) errors.push(`${site}/${name}/${f} is missing`);
 }
-if (!existsSync(join(site, "glossary.html"))) errors.push(`${site}/glossary.html is missing`);
+// The deploy workflow renders these pages at the site root: the estate glossary and the
+// volunteer guide.
+const ROOT_PAGES = ["glossary.html", "contribute.html"];
+for (const f of ROOT_PAGES) if (!existsSync(join(site, f))) errors.push(`${site}/${f} is missing`);
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const link = (href, text) => `<a href="${esc(href)}">${text}</a>`;
@@ -86,7 +89,8 @@ const html = `<!doctype html>
   h2 { font-size: 1.25rem; line-height: 1.25; margin: 0 0 .5rem; }
   p { margin: 0; }
   code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .88em; }
-  .lede { margin-bottom: 1.5rem; }
+  .lede { margin-bottom: .75rem; }
+  .welcome { margin-bottom: 1.5rem; }
   .area { margin-top: 2rem; scroll-margin-top: 1rem; }
   .intro { margin-bottom: .75rem; }
   ul { list-style: none; padding: 0; margin: 0; }
@@ -112,6 +116,8 @@ const html = `<!doctype html>
 interactive knowledge-graph viewer, an onboarding guide, a glossary, and a README. The snapshot is
 the source commit that the docs describe. The ${link("./glossary.html", "estate glossary")} lists the
 business terms of all repos.</p>
+<p class="welcome"><strong>New volunteer?</strong> Read ${link("./contribute.html", "How to contribute to Greenstand")}:
+how to join the community, pick a first task, and get help.</p>
 ${featured.map(section).join("\n")}
 <nav class="jump" aria-label="Areas">
 <span>Areas:</span>

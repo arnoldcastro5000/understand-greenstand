@@ -11,6 +11,7 @@ on:
       - "repos/**"
       - "estate.json"
       - "GLOSSARY.md"
+      - "docs/contribute-to-greenstand.md"
       - "viewer/**"
       - ".github/scripts/build-landing.mjs"
       - ".github/scripts/estate.mjs"
@@ -125,8 +126,10 @@ jobs:
           done
           # The estate glossary, linked from the landing page and from each repo glossary.
           node .github/scripts/render-md.mjs GLOSSARY.md "$OUT/glossary.html" "Estate glossary" "./" "All viewers"
+          # The volunteer guide, linked from the landing page and from README.md.
+          node .github/scripts/render-md.mjs docs/contribute-to-greenstand.md "$OUT/contribute.html" "How to contribute to Greenstand" "./" "All viewers"
           # Landing index: the areas and links of estate.json, as in the README.md index.
-          # It fails if an estate repo lacks a page that the landing page links to.
+          # It fails if a page that the landing page links to is missing.
           node .github/scripts/build-landing.mjs "$OUT"
 
       - name: Upload Pages artifact
