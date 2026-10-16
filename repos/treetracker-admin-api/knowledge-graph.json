@@ -4556,7 +4556,6 @@
         "file:.nvmrc",
         "file:.prettierignore",
         "file:.releaserc",
-        "file:.ua/.understandignore",
         "file:CODEOWNERS",
         "file:commitlint.config.js",
         "file:jest.config.js",

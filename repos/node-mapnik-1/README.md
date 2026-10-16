@@ -48,5 +48,4 @@ Machine-generated documentation for [`Greenstand/node-mapnik-1`](https://github.
 
 ## Regenerating
 
-See [`../../docs/regenerating.md`](../../docs/regenerating.md). Analysis excluded the upstream
-`test/`, `bench/`, `docs/`, `deps/`, examples, and binary assets via `.understandignore`.
+See [`../../docs/regenerating.md`](../../docs/regenerating.md).

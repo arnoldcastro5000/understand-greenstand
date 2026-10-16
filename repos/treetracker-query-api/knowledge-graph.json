@@ -18,7 +18,7 @@
       "Docker",
       "GitHub Actions"
     ],
-    "description": "RESTful API that exposes Greenstand treetracker data (captures, planters, organizations, trees and more) for clients such as the web map app. It follows a Domain Driven Design layered architecture with Express protocol routers, a business model layer, and a knex/pg repository layer. Note: this project has over 100 source files; consider scoping analysis to a subdirectory for faster results.",
+    "description": "RESTful API that exposes Greenstand treetracker data (captures, planters, organizations, trees and more) for clients such as the web map app. It follows a Domain Driven Design layered architecture with Express protocol routers, a business model layer, and a knex/pg repository layer.",
     "analyzedAt": "2026-09-03T05:22:29.591Z",
     "gitCommitHash": "42897d62c4a9e5fa4a49e99720ed28f3a254bb97"
   },
@@ -6110,7 +6110,6 @@
         "file:.prettierignore",
         "file:.prettierrc.js",
         "file:.releaserc",
-        "file:.ua/.understandignore",
         "file:CODEOWNERS",
         "file:commitlint.config.js",
         "file:config/config.js",

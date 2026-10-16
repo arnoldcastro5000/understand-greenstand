@@ -11870,8 +11870,7 @@
         "file:.releaserc",
         "file:binding.gyp",
         "file:commitlint.config.js",
-        "file:common.gypi",
-        "file:.ua/.understandignore"
+        "file:common.gypi"
       ]
     }
   ],

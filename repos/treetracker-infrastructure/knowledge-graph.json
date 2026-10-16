@@ -24,7 +24,7 @@
       "Terraform",
       "GitHub Actions"
     ],
-    "description": "Cloud infrastructure for the treetracker project. Note: this project has over 100 source files; consider scoping analysis to a subdirectory for faster results.",
+    "description": "Cloud infrastructure for the treetracker project.",
     "analyzedAt": "2026-09-03T00:00:00Z",
     "gitCommitHash": "a740d11ffe60cb8d7f05b5006cf80583bd267aa5"
   },
@@ -11202,7 +11202,6 @@
         "file:scripts/setup_keys.sh",
         "file:scripts/vagrant-setup.sh",
         "config:.pre-commit-config.yaml",
-        "file:.ua/.understandignore",
         "document:README.md",
         "config:docs/_config.yml",
         "document:docs/index.md"

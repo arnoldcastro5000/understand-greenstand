@@ -3505,8 +3505,7 @@
       "nodeIds": [
         "config:.env.local",
         "document:README.md",
-        "config:map/scripts/package.json",
-        "file:.ua/.understandignore"
+        "config:map/scripts/package.json"
       ]
     }
   ],

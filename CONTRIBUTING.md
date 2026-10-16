@@ -38,6 +38,7 @@ generated file, change its input or the recipe.
    node .github/scripts/build-repo-readmes.mjs --check
    node .github/scripts/build-onboarding.mjs --check
    node .github/scripts/check-former-names.mjs
+   node .github/scripts/check-graphs.mjs
    ```
 
 6. Open a pull request. `main` accepts changes only through a pull request. The required checks

@@ -26318,7 +26318,6 @@
         "config:app/fabric.properties",
         "config:app/google-services.json",
         "file:.geminiignore",
-        "file:.ua/.understandignore",
         "file:CODEOWNERS",
         "file:Gemfile",
         "file:app/proguard-rules.pro",
