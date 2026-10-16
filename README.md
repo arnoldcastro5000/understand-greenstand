@@ -26,6 +26,7 @@ The layout is regenerate-ready. See [`docs/regenerating.md`](./docs/regenerating
 regenerate a repo's docs, and [when](./docs/regenerating.md#when-to-regenerate): a weekly drift
 report lists the repos that are due.
 
+To report a problem in these docs or to change them, read [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 Before you push, read [`docs/private-names.md`](./docs/private-names.md): names of private
 Greenstand repos must not appear here, and a `pre-push` hook and CI checks enforce that.
 
