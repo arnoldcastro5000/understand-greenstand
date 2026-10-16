@@ -33,7 +33,9 @@ generated file, change its input or the recipe.
 
    ```
    node .github/scripts/build-index.mjs --check
+   node .github/scripts/build-ecosystem-maps.mjs --check
    node .github/scripts/build-glossary.mjs --check
+   node .github/scripts/build-repo-readmes.mjs --check
    ```
 
 6. Open a pull request. `main` accepts changes only through a pull request. The required checks

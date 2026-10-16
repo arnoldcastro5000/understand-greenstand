@@ -6,7 +6,7 @@
 //        node build-glossary.mjs --check   exit 1 if a glossary is missing or stale (CI)
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { loadEstate, root } from "./estate.mjs";
+import { loadEstate, readDocsFile, root } from "./estate.mjs";
 import { slugger } from "./slug.mjs";
 
 const SCRIPT = ".github/scripts/build-glossary.mjs";
@@ -23,14 +23,8 @@ const byName = (a, b) => a.localeCompare(b, "en", { sensitivity: "base" }) || a.
 // Read one domain graph: its domains (name, summary, terms, rules, flows) in graph order.
 function readGraph(name) {
   const at = `repos/${name}/domain-graph.json`;
-  const file = join(root, at);
-  if (!existsSync(file)) return errors.push(`${at} is missing`), null;
-  let graph;
-  try {
-    graph = JSON.parse(readFileSync(file, "utf8"));
-  } catch (e) {
-    return errors.push(`${at}: ${e.message}`), null;
-  }
+  const graph = readDocsFile(at, errors, JSON.parse);
+  if (graph === null) return null;
   if (!Array.isArray(graph.nodes) || !Array.isArray(graph.edges)) return errors.push(`${at}: nodes and edges must be lists`), null;
   const before = errors.length;
   const domains = new Map();
