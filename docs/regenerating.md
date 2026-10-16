@@ -132,7 +132,24 @@ Limits:
    stale, or not first. It also fails if a per-repo README has an em dash, or tells how to view
    the graphs outside the section.
 
-8. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
+8. Clean up the onboarding guides. Run:
+
+   ```
+   node .github/scripts/build-onboarding.mjs
+   ```
+
+   `/understand-anything:understand-onboard` picks the format of a guide again on each run. The
+   script changes two parts of its output:
+
+   - Each table becomes a list with one item for each row, because a table is too wide for a
+     phone.
+   - The first em dash of a list item or a heading becomes a colon. A pair of em dashes in one
+     sentence becomes a pair of parentheses. Any other em dash becomes a colon.
+
+   Code stays as it is. The `Estate index` check fails a pull request if an onboarding guide has
+   a table or an em dash outside code.
+
+9. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
    a pull request, and the `gitleaks`, `betterleaks`, `private-names`, and `estate-index`
    checks must pass.
    The merge redeploys the viewers and the landing page.

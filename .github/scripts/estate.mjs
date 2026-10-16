@@ -1,18 +1,37 @@
 // Load the estate: estate.json (areas, descriptions, URLs) plus repos/*/meta.json (snapshots).
 // build-index.mjs (the README.md index), build-landing.mjs (the Pages landing page),
 // build-moved.mjs (the moved pages of renamed repos), build-glossary.mjs,
-// build-repo-readmes.mjs, build-ecosystem-maps.mjs, and drift-report.mjs read it, so the
-// outputs cannot drift apart.
+// build-repo-readmes.mjs, build-onboarding.mjs, build-ecosystem-maps.mjs, and drift-report.mjs
+// read it, so the outputs cannot drift apart.
 // Returns { estate, areas, repos, count, errors }. Each repo in areas gets its snapshot, its
 // Source URL, and its valid former names (a list, often empty). repos lists the repos of all
 // areas, in order. errors lists every problem at once; the caller prints them and exits.
 // Also exports the helpers that the build scripts share: readDocsFile, markedBlock,
-// replaceMarked, and formerNamesText.
+// replaceMarked, formerNamesText, EM_DASH, and fencedLines.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+
+// The em dash. This repo's text uses none, and the checks look for it.
+export const EM_DASH = String.fromCharCode(0x2014);
+
+// Which lines of a Markdown text are fenced code: a fence line, or a line between an opening
+// fence and its closing fence. As in CommonMark, a closing fence uses the character of the
+// opening fence ("`" or "~"), is at least as long, and holds nothing else.
+export function fencedLines(lines) {
+  let open = null; // the opening fence, for example "```"
+  return lines.map((line) => {
+    const fence = line.match(/^\s*(`{3,}|~{3,})/)?.[1];
+    if (open === null) {
+      open = fence ?? null;
+      return Boolean(fence);
+    }
+    if (fence?.[0] === open[0] && fence.length >= open.length && line.trim() === fence) open = null;
+    return true;
+  });
+}
 
 // Each repos/<name>/ directory must hold these files: both indexes link to them.
 const REQUIRED_FILES = ["knowledge-graph.json", "README.md", "ONBOARDING.md"];

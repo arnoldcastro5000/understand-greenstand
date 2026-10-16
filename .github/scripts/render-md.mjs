@@ -69,7 +69,7 @@ const html = `<!doctype html>
   :root { color-scheme: light dark; }
   body { font: 16px/1.6 -apple-system, system-ui, "Segoe UI", sans-serif;
     max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 4rem;
-    color: #1f2328; background: #fff; }
+    color: #1f2328; background: #fff; overflow-wrap: break-word; }
   @media (prefers-color-scheme: dark) { body { color: #e6edf3; background: #0d1117; } }
   nav { display: flex; gap: 1rem; padding-bottom: 1rem; margin-bottom: 1.5rem;
     border-bottom: 1px solid #d0d7de; font-size: .9rem; }

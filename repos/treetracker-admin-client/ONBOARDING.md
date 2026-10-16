@@ -1,4 +1,4 @@
-# Onboarding Guide — treetracker-admin-client (Treetracker Admin Panel Client)
+# Onboarding Guide: treetracker-admin-client (Treetracker Admin Panel Client)
 
 _Generated from the Understand-Anything knowledge graph. Source commit `ecbfe05`._
 
@@ -21,21 +21,35 @@ Earnings/Payments), all gated behind a global `AppContext` for auth/session/perm
 
 ## Architecture Layers
 
-| Layer | Files | What it holds |
-|---|---|---|
-| **UI Layer** | 124 | React components, views, and the root App shell rendering all admin screens (captures, growers, species, messaging, payments, earnings, stakeholders) using Material UI. |
-| **Service Layer** | 22 | API client modules (`src/api/*.js`) and React Context providers (`src/context/*.js`) that fetch data from Greenstand microservices/legacy API and expose it to the UI, plus app bootstrap and service-worker wiring. |
-| **Data Layer** | 6 | Domain model classes (`Filter`, `FilterGrower`, `FilterRegion`, `FilterStakeholder`, `auth`) encapsulating query/filter state, plus the Rematch model barrel file. |
-| **Utility Layer** | 6 | Shared pure helpers for numbers, locale, icon paths, and general utilities reused across components and services. |
-| **Test Layer** | 52 | Cypress end-to-end and component specs with support pages/fixtures/plugins, plus Jest unit tests, mocks, and setup. |
-| **Infrastructure & CI/CD** | 12 | GitHub Actions workflows (PR checks, build & release, deploy) and their job steps, plus the staging deploy script. |
-| **Configuration** | 21 | Env files, package/lint/release config, Storybook setup, static public assets (PWA manifest, sample earnings dataset). |
-| **Documentation** | 6 | README, CHANGELOG, PR template, and architecture/Rematch guides in `docs/`. |
+- **UI Layer**\
+  Files: 124\
+  What it holds: React components, views, and the root App shell rendering all admin screens (captures, growers, species, messaging, payments, earnings, stakeholders) using Material UI.
+- **Service Layer**\
+  Files: 22\
+  What it holds: API client modules (`src/api/*.js`) and React Context providers (`src/context/*.js`) that fetch data from Greenstand microservices/legacy API and expose it to the UI, plus app bootstrap and service-worker wiring.
+- **Data Layer**\
+  Files: 6\
+  What it holds: Domain model classes (`Filter`, `FilterGrower`, `FilterRegion`, `FilterStakeholder`, `auth`) encapsulating query/filter state, plus the Rematch model barrel file.
+- **Utility Layer**\
+  Files: 6\
+  What it holds: Shared pure helpers for numbers, locale, icon paths, and general utilities reused across components and services.
+- **Test Layer**\
+  Files: 52\
+  What it holds: Cypress end-to-end and component specs with support pages/fixtures/plugins, plus Jest unit tests, mocks, and setup.
+- **Infrastructure & CI/CD**\
+  Files: 12\
+  What it holds: GitHub Actions workflows (PR checks, build & release, deploy) and their job steps, plus the staging deploy script.
+- **Configuration**\
+  Files: 21\
+  What it holds: Env files, package/lint/release config, Storybook setup, static public assets (PWA manifest, sample earnings dataset).
+- **Documentation**\
+  Files: 6\
+  What it holds: README, CHANGELOG, PR template, and architecture/Rematch guides in `docs/`.
 
 ## Key Concepts
 
 - **Context-per-feature pattern.** Beyond the global `AppContext` (auth, session, permissions,
-  organization — 44 incoming references, the most depended-upon module in the codebase), each
+  organization: 44 incoming references, the most depended-upon module in the codebase), each
   feature area gets its own React Context provider (`CapturesContext`, `VerifyContext`,
   `GrowerContext`, `MessagingContext`, `RegionContext`, `StakeholdersContext`) that owns data
   fetching and local state for that slice of the app.
@@ -58,27 +72,27 @@ Earnings/Payments), all gated behind a global `AppContext` for auth/session/perm
 
 Follow these steps in order to learn the codebase end to end:
 
-1. **Project Overview** — `README.md` and `package.json` establish the purpose (Admin Panel
+1. **Project Overview**: `README.md` and `package.json` establish the purpose (Admin Panel
    frontend), the API migration context, and the Material UI + Redux/Rematch + CRA foundation.
-2. **Application Bootstrap** — `src/index.js` renders the app and registers the service worker,
+2. **Application Bootstrap**: `src/index.js` renders the app and registers the service worker,
    delegating to `src/init.js` for early setup before `src/App.js` becomes the root component.
-3. **Routing and Global Providers** — `Routers.js` wires every route (Verify, Growers,
+3. **Routing and Global Providers**: `Routers.js` wires every route (Verify, Growers,
    Messaging, Species, Payments, Earnings, Stakeholders) behind `AppContext`; `theme.js` supplies
    the shared Material UI theme.
-4. **API / Service Layer** — `treeTrackerApi.js` is the central API client; `apiUtils.js`
+4. **API / Service Layer**: `treeTrackerApi.js` is the central API client; `apiUtils.js`
    provides shared request helpers; `growers.js` shows the per-microservice module pattern.
-5. **The Context / State Pattern** — `CapturesContext`, `VerifyContext`, and
+5. **The Context / State Pattern**: `CapturesContext`, `VerifyContext`, and
    `CaptureDetailContext` show the recurring Context-wraps-API pattern repeated per feature.
-6. **Feature Vertical: Capture Verification** — `Verify.js`, `CaptureFilter.js`, and
+6. **Feature Vertical: Capture Verification**: `Verify.js`, `CaptureFilter.js`, and
    `Captures/CaptureTable.js` compose a full workflow screen on top of the Context layer.
-7. **The Filter Domain Model** — `models/Filter.js` and `FilterGrower.js` show the
+7. **The Filter Domain Model**: `models/Filter.js` and `FilterGrower.js` show the
    `getWhereObj()` convention; `models/auth.js` adds permission-checking helpers.
-8. **Feature Vertical: Messaging** — `MessagingContext`, `api/messaging.js`, `Messaging.js`,
+8. **Feature Vertical: Messaging**: `MessagingContext`, `api/messaging.js`, `Messaging.js`,
    and `MessageBody.js` reinforce the pattern with a chat-style UI shape.
-9. **CI/CD Pipeline** — `treetracker-frontend-pr.yml` (lint/build on PR),
+9. **CI/CD Pipeline**: `treetracker-frontend-pr.yml` (lint/build on PR),
    `build_and_release.yaml` (build, semantic-release, deploy to dev CDN on push), and
    `deploy.yaml` (manual promotion to staging/production via S3/CloudFront).
-10. **Testing Strategy: Jest and Cypress** — `verify.test.js` (Jest/RTL),
+10. **Testing Strategy: Jest and Cypress**: `verify.test.js` (Jest/RTL),
     `capturesFilter.spec.py.js` (Cypress E2E), and `Filter.spec.py.js` (Cypress component test)
     show the three testing tiers.
 
@@ -110,27 +124,27 @@ Follow these steps in order to learn the codebase end to end:
 
 ## Complexity Hotspots
 
-Approach these areas carefully — they carry the most logic or the largest connectivity
+Approach these areas carefully: they carry the most logic or the largest connectivity
 (51 file-level nodes rated complex; the most connected ones are listed here):
 
-- **`src/context/AppContext.js`** (complex, 44 edges) — global auth/session/permission state;
+- **`src/context/AppContext.js`** (complex, 44 edges): global auth/session/permission state;
   the most depended-upon module in the codebase.
-- **`src/components/Verify.js`** (complex, 24 edges) — main capture verification page,
+- **`src/components/Verify.js`** (complex, 24 edges): main capture verification page,
   composing filter, side-panel, and detail-dialog components.
-- **`src/components/Home/Home.js`** (complex, 24 edges) — dashboard home page composing stat
+- **`src/components/Home/Home.js`** (complex, 24 edges): dashboard home page composing stat
   and reporting cards with a time-range filter.
-- **`src/api/growers.js`** (complex, 24 edges) — grower CRUD/query REST client.
-- **`src/api/treeTrackerApi.js`** (complex, 20 edges) — central API client for captures,
+- **`src/api/growers.js`** (complex, 24 edges): grower CRUD/query REST client.
+- **`src/api/treeTrackerApi.js`** (complex, 20 edges): central API client for captures,
   growers, species, tags.
-- **`src/components/Captures/CaptureTable.js`**, **`GrowerDetail.js`** (complex, 18 edges each)
-  — capture/grower tabular and detail views.
+- **`src/components/Captures/CaptureTable.js`**, **`GrowerDetail.js`** (complex, 18 edges each):
+  capture/grower tabular and detail views.
 - **`src/components/CaptureFilter.js`**, **`reportingCards/ReportingCard.js`**,
   **`src/context/GrowerContext.js`**, **`Messaging/MessageBody.js`** (complex, 16 edges each).
-- **`src/components/common/CustomTable/CustomTable.js`** — generic reusable data table with
+- **`src/components/common/CustomTable/CustomTable.js`**: generic reusable data table with
   sort/pagination/CSV export/row drill-down, used across many feature tables.
-- **`src/components/tests/verify.test.js`** (complex) — large Jest/RTL suite exercising the
+- **`src/components/tests/verify.test.js`** (complex): large Jest/RTL suite exercising the
   Verify page end-to-end within the test runner.
-- **`CHANGELOG.md`**, **`README.md`** (complex, large docs) — big but low-risk; skim for
+- **`CHANGELOG.md`**, **`README.md`** (complex, large docs): big but low-risk; skim for
   context rather than logic.
 
 ---

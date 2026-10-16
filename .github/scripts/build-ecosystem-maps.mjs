@@ -8,7 +8,7 @@
 //        node build-ecosystem-maps.mjs --check   exit 1 if a map is stale (CI)
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { loadEstate, readDocsFile, replaceMarked, root } from "./estate.mjs";
+import { EM_DASH, loadEstate, readDocsFile, replaceMarked, root } from "./estate.mjs";
 
 const SCRIPT = ".github/scripts/build-ecosystem-maps.mjs";
 const DOC = "ARCHITECTURE.md";
@@ -45,7 +45,7 @@ function validEcosystem(eco, codeRepos) {
     if (!viewIds.has(e.view)) fail(`${at}: unknown view "${e.view}"`);
     if (!ARROWS[e.arrow ?? "plain"]) fail(`${at}: unknown arrow "${e.arrow}"`);
     // Mermaid ends a label at a double quote; this repo's text uses no em dash.
-    if (!e.label || e.label.includes('"') || e.label.includes("\u2014")) fail(`${at}: the label must be set, with no double quote and no em dash`);
+    if (!e.label || e.label.includes('"') || e.label.includes(EM_DASH)) fail(`${at}: the label must be set, with no double quote and no em dash`);
     if (!e.evidence) fail(`${at}: has no evidence`);
   });
   for (const v of viewIds) if (!eco.edges.some((e) => e.view === v)) fail(`view "${v}" has no edges`);
