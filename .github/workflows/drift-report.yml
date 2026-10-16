@@ -1,0 +1,42 @@
+name: Drift report
+
+# Reports the drift of each source repo since its snapshot, and which repos are due for
+# regeneration (.github/scripts/drift-report.mjs). The report goes to the job summary and to one
+# "Docs drift report" issue: the job opens or reopens it when a repo is due, edits it on each
+# run, comments when the due list changes, and closes it when no repo is due.
+# It never regenerates: that needs Claude Code and a human (docs/regenerating.md).
+# The job fails only when the GitHub API fails or a source repo is not found.
+
+on:
+  # Weekly. GitHub can delay or skip a scheduled run, and stops schedules in a public repo
+  # after 60 days without activity.
+  schedule:
+    - cron: "41 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: drift-report
+  cancel-in-progress: false
+
+jobs:
+  drift-report:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Report drift and sync the issue
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .github/scripts/drift-report.mjs --sync-issue
