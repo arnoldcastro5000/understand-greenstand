@@ -11,6 +11,7 @@ on:
       - "repos/**"
       - "estate.json"
       - "GLOSSARY.md"
+      - "ARCHITECTURE.md"
       - "docs/contribute-to-greenstand.md"
       - "viewer/**"
       - ".github/scripts/build-landing.mjs"
@@ -35,6 +36,10 @@ concurrency:
 env:
   # Pin the viewer source. Nearest public tag to the plugin (2.9.4) is v2.9.0.
   UA_REF: v2.9.0
+  # Pin Mermaid, which draws the ecosystem maps: the version and the SHA-512 of its npm tarball
+  # (`npm view mermaid@<version> dist.integrity` holds the same hash in base64).
+  MERMAID_VERSION: 12.2.0
+  MERMAID_SHA512: c3b9ebfd216b2ceec16954ecddd413bd8495ea7612063d18cbd0e3061b0826d01c1ea4735d2ab83e0df6ba31d9fc0756b0030d12fbe16e6e5db7d136b4e887cf
 
 jobs:
   build:
@@ -84,6 +89,17 @@ jobs:
       - name: Install markdown renderer
         run: npm install marked@12
 
+      - name: Get Mermaid (pinned)
+        # Check the tarball against the pinned hash. Keep the license, the ESM entry, and its
+        # chunks (no source maps). npm pack runs no install scripts.
+        run: |
+          set -euo pipefail
+          mkdir _mermaid && cd _mermaid
+          npm pack "mermaid@${MERMAID_VERSION}" --silent
+          echo "${MERMAID_SHA512}  mermaid-${MERMAID_VERSION}.tgz" | sha512sum --check --strict
+          tar -xzf "mermaid-${MERMAID_VERSION}.tgz" --exclude='*.map' \
+            package/LICENSE package/dist/mermaid.esm.min.mjs package/dist/chunks/mermaid.esm.min
+
       - name: Assemble the Pages site
         run: |
           set -euo pipefail
@@ -91,6 +107,10 @@ jobs:
           OUT="_site"
           rm -rf "$OUT"; mkdir -p "$OUT"
           touch "$OUT/.nojekyll"
+          # Mermaid for the pages with a Mermaid block. render-md.mjs fails without it.
+          mkdir -p "$OUT/vendor/mermaid"
+          cp _mermaid/package/LICENSE _mermaid/package/dist/mermaid.esm.min.mjs "$OUT/vendor/mermaid/"
+          cp -r _mermaid/package/dist/chunks "$OUT/vendor/mermaid/"
           for dir in repos/*/; do
             repo="$(basename "$dir")"
             [ -f "$dir/knowledge-graph.json" ] || continue
@@ -130,6 +150,8 @@ jobs:
           node .github/scripts/render-md.mjs GLOSSARY.md "$OUT/glossary.html" "Estate glossary" "./" "All viewers"
           # The volunteer guide, linked from the landing page and from README.md.
           node .github/scripts/render-md.mjs docs/contribute-to-greenstand.md "$OUT/contribute.html" "How to contribute to Greenstand" "./" "All viewers"
+          # The ecosystem maps, linked from the landing page and from the volunteer guide.
+          node .github/scripts/render-md.mjs ARCHITECTURE.md "$OUT/architecture.html" "How the Greenstand repos work together" "./" "All viewers"
           # Moved pages: the old subpath of a renamed repo sends readers to the new subpath.
           node .github/scripts/build-moved.mjs "$OUT"
           # Landing index: the areas and links of estate.json, as in the README.md index.

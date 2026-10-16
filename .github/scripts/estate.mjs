@@ -42,6 +42,11 @@ export function loadEstate() {
 
   if (!estate.siteUrl?.endsWith("/")) errors.push("estate.json: siteUrl must end with '/'");
 
+  // The landing page shows the featured area in its "Start here" box, and it lists the ecosystem
+  // maps there. Thus exactly one area is featured.
+  const featured = estate.areas.filter((a) => a.featured).length;
+  if (featured !== 1) errors.push(`estate.json must have exactly one featured area (the "Start here" box of the landing page); it has ${featured}`);
+
   // Every repos/<name>/ directory needs exactly one entry, and every entry a directory.
   const dirs = readdirSync(join(root, "repos"), { withFileTypes: true })
     .filter((d) => d.isDirectory())

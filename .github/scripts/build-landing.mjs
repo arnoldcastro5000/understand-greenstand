@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Build the landing page of the Pages site (<site-dir>/index.html) from the estate
-// (estate.mjs), so it shows the same areas, repos, and links as the README.md index.
+// (estate.mjs), so it shows the same areas, repos, and links as the README.md index. Like the top
+// of README.md, it also links the estate glossary, the volunteer guide, and the ecosystem maps.
 // The deploy workflow runs it after it assembles <site-dir>/<repo>/. It fails if a page
 // that the landing page links to is missing there.
 // Usage: node build-landing.mjs <site-dir>
@@ -22,13 +23,18 @@ const ASSEMBLED = ["index.html", "knowledge-graph.json", "onboarding.html", "rea
 for (const { name } of repos) {
   for (const f of ASSEMBLED) if (!existsSync(join(site, name, f))) errors.push(`${site}/${name}/${f} is missing`);
 }
-// The deploy workflow renders these pages at the site root: the estate glossary and the
-// volunteer guide.
-const ROOT_PAGES = ["glossary.html", "contribute.html"];
+// The deploy workflow renders these pages at the site root: the estate glossary, the volunteer
+// guide, and the ecosystem maps.
+const ROOT_PAGES = ["glossary.html", "contribute.html", "architecture.html"];
 for (const f of ROOT_PAGES) if (!existsSync(join(site, f))) errors.push(`${site}/${f} is missing`);
 
 const link = (href, text) => `<a href="${esc(href)}">${text}</a>`;
 const anchor = (title) => title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+// One entry of an area list: a name that links to a page, a description, and more lines.
+function entry(href, name, description, more = []) {
+  return ["<li>", `<a class="name" href="${esc(href)}">${name}</a>`, `<p class="desc">${description}</p>`, ...more, "</li>"].join("\n");
+}
 
 function item({ name, description, formerNames, sha, date, source }) {
   const links = [
@@ -39,20 +45,27 @@ function item({ name, description, formerNames, sha, date, source }) {
     link(source, "Source"),
   ].join(" · ");
   const commit = link(`${source}/commit/${sha}`, `<code>${sha.slice(0, 7)}</code>`);
-  return [
-    "<li>",
-    `<a class="name" href="./${esc(name)}/">${esc(name)}</a>`,
-    `<p class="desc">${esc(description)}${formerNamesText(formerNames, (n) => `<code>${esc(n)}</code>`)}</p>`,
-    `<p class="links"><span>${links}</span><span class="snap">Snapshot ${esc(date)} at ${commit}</span></p>`,
-    "</li>",
-  ].join("\n");
+  return entry(
+    `./${name}/`,
+    esc(name),
+    `${esc(description)}${formerNamesText(formerNames, (n) => `<code>${esc(n)}</code>`)}`,
+    [`<p class="links"><span>${links}</span><span class="snap">Snapshot ${esc(date)} at ${commit}</span></p>`],
+  );
 }
 
-function section(area) {
+// The ecosystem maps show how the code repos work together. The "Start here" box lists them below
+// its repos.
+const MAPS_ITEM = entry(
+  "./architecture.html",
+  "Ecosystem maps",
+  "How the code repos work together at run time: which app calls which API, and which data they share.",
+);
+
+function section(area, extra = []) {
   const id = anchor(area.title);
   const lines = [`<section id="${id}" class="area${area.featured ? " featured" : ""}">`, `<h2>${esc(area.title)}</h2>`];
   if (area.intro) lines.push(`<p class="intro">${esc(area.intro)}</p>`);
-  lines.push("<ul>", ...area.repos.map(item), "</ul>");
+  lines.push("<ul>", ...area.repos.map(item), ...extra, "</ul>");
   if (area.seeAlso) lines.push(`<p class="deeper">Go deeper: ${area.seeAlso.map((l) => link(l.url, esc(l.text))).join(" · ")}</p>`);
   lines.push("</section>");
   return lines.join("\n");
@@ -63,8 +76,9 @@ if (errors.length) {
   process.exit(1);
 }
 
-// Featured areas ("Start here") go first, in a box. The jump links list the other areas.
-const featured = areas.filter((a) => a.featured);
+// The featured area ("Start here") goes first, in a box. The jump links list the other areas.
+// estate.mjs makes sure that exactly one area is featured.
+const start = areas.find((a) => a.featured);
 const others = areas.filter((a) => !a.featured);
 const jump = others.map((a) => link(`#${anchor(a.title)}`, esc(a.title))).join("\n");
 
@@ -110,12 +124,12 @@ the source commit that the docs describe. The ${link("./glossary.html", "estate 
 business terms of all repos.</p>
 <p class="welcome"><strong>New volunteer?</strong> Read ${link("./contribute.html", "How to contribute to Greenstand")}:
 how to join the community, pick a first task, and get help.</p>
-${featured.map(section).join("\n")}
+${section(start, [MAPS_ITEM])}
 <nav class="jump" aria-label="Areas">
 <span>Areas:</span>
 ${jump}
 </nav>
-${others.map(section).join("\n")}
+${others.map((area) => section(area)).join("\n")}
 </body>
 </html>
 `;
