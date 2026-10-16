@@ -5,7 +5,10 @@ name: Drift report
 # "Docs drift report" issue: the job opens or reopens it when a repo is due, edits it on each
 # run, comments when the due list changes, and closes it when no repo is due.
 # It never regenerates: that needs Claude Code and a human (docs/regenerating.md).
-# The job fails only when the GitHub API fails or a source repo is not found.
+# The issue text is authored text on a public surface, and GitHub starts no workflow (so no issue
+# scan) for what GITHUB_TOKEN writes. So the script runs the shared private-name check on the
+# whole text before it prints or posts any of it, and the job refuses to run without the name list.
+# The job fails when the GitHub API fails, a source repo is not found, or the check finds a name.
 
 on:
   # Weekly. GitHub can delay or skip a scheduled run, and stops schedules in a public repo
@@ -27,6 +30,10 @@ jobs:
     permissions:
       contents: read
       issues: write
+    env:
+      PRIVATE_REPO_NAMES: ${{ secrets.PRIVATE_REPO_NAMES }}
+      # Fake terms for end-to-end tests only; normally unset.
+      PRIVATE_NAMES_EXTRA_TERMS: ${{ vars.PRIVATE_NAMES_EXTRA_TERMS }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -36,7 +43,23 @@ jobs:
         with:
           node-version: 22
 
-      - name: Report drift and sync the issue
+      - name: Load scanner pins
+        run: grep -E '^[A-Z0-9_]+=' .github/scanner-versions.env >> "$GITHUB_ENV"
+
+      - name: Install scanners
+        run: |
+          .github/scripts/install-scanner.sh gitleaks "$GITLEAKS_VERSION" "$GITLEAKS_SHA256"
+          .github/scripts/install-scanner.sh betterleaks "$BETTERLEAKS_VERSION" "$BETTERLEAKS_SHA256"
+
+      - name: Check that the CI name list is set and current
+        run: |
+          if [ -z "$PRIVATE_REPO_NAMES" ]; then
+            echo "::error::PRIVATE_REPO_NAMES is not set. The report publishes only after a private-name check."
+            exit 1
+          fi
+          .github/scripts/private-names.sh fingerprint-check
+
+      - name: Report drift, check it, and sync the issue
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node .github/scripts/drift-report.mjs --sync-issue

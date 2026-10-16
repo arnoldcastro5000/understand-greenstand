@@ -40,6 +40,10 @@ the issue when a repo is due, edits it on each run, comments when the list of du
 changes, and closes it when no repo is due. Do not close the issue by hand: the next run opens
 it again while a repo is due. A repo stays due until you regenerate it.
 
+The report shows only repo names, counts, and compare links. Before the job prints or posts any
+text, it runs the private-name check on it (see [`private-names.md`](./private-names.md)). The
+job needs the `PRIVATE_REPO_NAMES` secret, and fails without it.
+
 To see the report now, run it locally. It prints the report and changes nothing:
 
 ```

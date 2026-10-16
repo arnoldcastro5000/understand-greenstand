@@ -27,6 +27,9 @@ a name by its hash or by a count ("1 name, 76 hits").
   When: each push and pull request.
 - **`gitleaks` and `betterleaks` checks** (CI, required): the full git history.\
   When: each push and pull request.
+- **Drift report** (`drift-report.yml`): the report, the issue, and the comments that the job
+  writes. GitHub starts no issue scan for them.\
+  When: before the job prints or posts the text.
 - **Issue scan** (`secrets-scan-issues.yml`): issues, pull requests, and their comments.\
   When: each issue event, and on an hourly schedule. GitHub can delay or skip a scheduled run.
 
