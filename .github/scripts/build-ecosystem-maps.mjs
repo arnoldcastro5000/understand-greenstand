@@ -19,7 +19,7 @@ const SHAPES = { database: ['[("', '")]'], box: ['["', '"]'] };
 const DIRECTIONS = ["TB", "LR"];
 
 const check = process.argv.includes("--check");
-const { areas, errors } = loadEstate();
+const { repos, errors } = loadEstate();
 
 // Check ecosystem.json in both directions, and return it only if it is valid. Each edge names
 // a code repo or a system at each end, a known view and arrow, a label, and its evidence. Each
@@ -63,7 +63,7 @@ function validEcosystem(eco, codeRepos) {
   return errors.length > before ? null : eco;
 }
 
-const codeRepos = new Map(areas.flatMap((a) => a.repos).filter((r) => !r.docs).map((r) => [r.name, r]));
+const codeRepos = new Map(repos.filter((r) => !r.docs).map((r) => [r.name, r]));
 const ecosystem = validEcosystem(readDocsFile("ecosystem.json", errors, JSON.parse), codeRepos);
 
 // Mermaid ids: letters, digits, and "_" only. A store of data is a cylinder.

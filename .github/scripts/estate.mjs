@@ -1,11 +1,13 @@
 // Load the estate: estate.json (areas, descriptions, URLs) plus repos/*/meta.json (snapshots).
 // build-index.mjs (the README.md index), build-landing.mjs (the Pages landing page),
-// build-glossary.mjs, build-repo-readmes.mjs, build-ecosystem-maps.mjs, and drift-report.mjs
-// read it, so the outputs cannot drift apart.
-// Returns { estate, areas, count, errors }. Each repo in areas gets its snapshot and its
-// Source URL. errors lists every problem at once; the caller prints them and exits.
-// Also exports the helpers that the build scripts share: readDocsFile, markedBlock, and
-// replaceMarked.
+// build-moved.mjs (the moved pages of renamed repos), build-glossary.mjs,
+// build-repo-readmes.mjs, build-ecosystem-maps.mjs, and drift-report.mjs read it, so the
+// outputs cannot drift apart.
+// Returns { estate, areas, repos, count, errors }. Each repo in areas gets its snapshot, its
+// Source URL, and its valid former names (a list, often empty). repos lists the repos of all
+// areas, in order. errors lists every problem at once; the caller prints them and exits.
+// Also exports the helpers that the build scripts share: readDocsFile, markedBlock,
+// replaceMarked, and formerNamesText.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -26,7 +28,38 @@ export function loadEstate() {
     .filter((d) => d.isDirectory())
     .map((d) => d.name);
   const listed = estate.areas.flatMap((a) => a.repos.map((r) => r.name));
-  for (const name of dirs) if (!listed.includes(name)) errors.push(`repos/${name}/ has no entry in estate.json`);
+
+  // A renamed repo lists its former names in formerNames. The deploy writes a moved page at
+  // the subpath of each former name (build-moved.mjs). Thus a former name must be a repo name
+  // that no repo uses now, and that can be a subpath of the site: it does not start with "."
+  // (a hidden file) and does not end with ".html" (a page at the root of the site).
+  const formerNamesOf = new Map(); // the name of a repo -> its valid former names
+  const nameOf = new Map(); // a valid former name -> the name of its repo
+  for (const { name, formerNames } of estate.areas.flatMap((a) => a.repos)) {
+    if (formerNames === undefined) continue;
+    if (!Array.isArray(formerNames) || !formerNames.every((f) => typeof f === "string")) {
+      errors.push(`estate.json: formerNames of ${name} must be a list of repo names`);
+      continue;
+    }
+    for (const former of formerNames) {
+      if (!/^[A-Za-z0-9_-][A-Za-z0-9._-]*$/.test(former) || former.endsWith(".html")) {
+        errors.push(`estate.json: ${JSON.stringify(former)} (a former name of ${name}) is not a repo name that can be a subpath of the site`);
+      } else if (listed.includes(former)) {
+        errors.push(`estate.json: ${former} is the name of a repo, so it cannot be a former name of ${name}`);
+      } else if (nameOf.has(former)) {
+        errors.push(`estate.json lists ${former} as a former name twice`);
+      } else {
+        nameOf.set(former, name);
+        formerNamesOf.set(name, [...(formerNamesOf.get(name) ?? []), former]);
+      }
+    }
+  }
+
+  for (const dir of dirs) {
+    if (listed.includes(dir)) continue;
+    const name = nameOf.get(dir);
+    errors.push(name ? `repos/${dir}/ remains, but ${dir} is a former name of ${name}: move it to repos/${name}/` : `repos/${dir}/ has no entry in estate.json`);
+  }
   for (const name of listed) {
     if (listed.indexOf(name) !== listed.lastIndexOf(name)) errors.push(`estate.json lists ${name} twice`);
     if (!dirs.includes(name)) errors.push(`estate.json lists ${name}, but repos/${name}/ does not exist`);
@@ -50,12 +83,13 @@ export function loadEstate() {
           if (!existsSync(join(root, "repos", repo.name, f))) errors.push(`repos/${repo.name}/${f} is missing`);
         }
         const snap = snapshot(repo.name);
-        return snap && { ...repo, ...snap, source: `https://github.com/${estate.sourceOrg}/${repo.name}` };
+        const formerNames = formerNamesOf.get(repo.name) ?? [];
+        return snap && { ...repo, ...snap, formerNames, source: `https://github.com/${estate.sourceOrg}/${repo.name}` };
       })
       .filter(Boolean),
   }));
 
-  return { estate, areas, count: listed.length, errors };
+  return { estate, areas, repos: areas.flatMap((a) => a.repos), count: listed.length, errors };
 }
 
 // Read a file of the docs repo (at is its path from the root) and parse it, or record in errors
@@ -68,6 +102,13 @@ export function readDocsFile(at, errors, parse = (text) => text) {
   } catch (e) {
     return errors.push(`${at}: ${e.message}`), null;
   }
+}
+
+// The text after the description of a renamed repo in the README index and on the landing page:
+// " Former name: `old`." code formats one name (Markdown or HTML). Empty without former names.
+export function formerNamesText(formerNames, code) {
+  if (!formerNames.length) return "";
+  return ` Former name${formerNames.length > 1 ? "s" : ""}: ${formerNames.map(code).join(", ")}.`;
 }
 
 const occurrences = (text, marker) => text.split(marker).length - 1;

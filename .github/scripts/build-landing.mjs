@@ -6,7 +6,8 @@
 // Usage: node build-landing.mjs <site-dir>
 import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { loadEstate } from "./estate.mjs";
+import { formerNamesText, loadEstate } from "./estate.mjs";
+import { BASE_STYLE, esc } from "./site-html.mjs";
 
 const site = process.argv[2];
 if (!site) {
@@ -14,11 +15,11 @@ if (!site) {
   process.exit(2);
 }
 
-const { areas, count, errors } = loadEstate();
+const { areas, repos, count, errors } = loadEstate();
 
 // The deploy workflow assembles these files beside each viewer.
 const ASSEMBLED = ["index.html", "knowledge-graph.json", "onboarding.html", "readme.html", "glossary.html"];
-for (const { name } of areas.flatMap((a) => a.repos)) {
+for (const { name } of repos) {
   for (const f of ASSEMBLED) if (!existsSync(join(site, name, f))) errors.push(`${site}/${name}/${f} is missing`);
 }
 // The deploy workflow renders these pages at the site root: the estate glossary and the
@@ -26,11 +27,10 @@ for (const { name } of areas.flatMap((a) => a.repos)) {
 const ROOT_PAGES = ["glossary.html", "contribute.html"];
 for (const f of ROOT_PAGES) if (!existsSync(join(site, f))) errors.push(`${site}/${f} is missing`);
 
-const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const link = (href, text) => `<a href="${esc(href)}">${text}</a>`;
 const anchor = (title) => title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
-function item({ name, description, sha, date, source }) {
+function item({ name, description, formerNames, sha, date, source }) {
   const links = [
     link(`./${name}/`, "Viewer"),
     link(`./${name}/onboarding.html`, "Onboarding"),
@@ -42,7 +42,7 @@ function item({ name, description, sha, date, source }) {
   return [
     "<li>",
     `<a class="name" href="./${esc(name)}/">${esc(name)}</a>`,
-    `<p class="desc">${esc(description)}</p>`,
+    `<p class="desc">${esc(description)}${formerNamesText(formerNames, (n) => `<code>${esc(n)}</code>`)}</p>`,
     `<p class="links"><span>${links}</span><span class="snap">Snapshot ${esc(date)} at ${commit}</span></p>`,
     "</li>",
   ].join("\n");
@@ -76,15 +76,7 @@ const html = `<!doctype html>
 <title>understand-greenstand</title>
 <meta name="description" content="Interactive knowledge-graph viewers and onboarding guides for the Greenstand repositories, grouped by area.">
 <style>
-  :root { color-scheme: light dark; --fg: #1f2328; --bg: #fff; --muted: #656d76;
-    --line: #d0d7de; --link: #0969da; }
-  @media (prefers-color-scheme: dark) { :root { --fg: #e6edf3; --bg: #0d1117;
-    --muted: #8b949e; --line: #30363d; --link: #58a6ff; } }
-  body { font: 16px/1.6 -apple-system, system-ui, "Segoe UI", sans-serif;
-    max-width: 48rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem;
-    color: var(--fg); background: var(--bg); }
-  a { color: var(--link); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+${BASE_STYLE}
   h1 { font-size: 1.8rem; line-height: 1.25; margin: 0 0 .75rem; }
   h2 { font-size: 1.25rem; line-height: 1.25; margin: 0 0 .5rem; }
   p { margin: 0; }

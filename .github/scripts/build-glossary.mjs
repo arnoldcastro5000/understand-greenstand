@@ -11,8 +11,7 @@ import { slugger } from "./slug.mjs";
 
 const SCRIPT = ".github/scripts/build-glossary.mjs";
 const check = process.argv.includes("--check");
-const { areas, count, errors } = loadEstate();
-const repos = areas.flatMap((a) => a.repos);
+const { repos, count, errors } = loadEstate();
 
 const isText = (v) => typeof v === "string" && v.trim() !== "";
 // Text from the graph goes into Markdown: escape what would change its meaning.

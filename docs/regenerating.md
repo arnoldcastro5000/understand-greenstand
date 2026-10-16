@@ -137,6 +137,54 @@ Limits:
    checks must pass.
    The merge redeploys the viewers and the landing page.
 
+## When a source repo is renamed
+
+GitHub sends the former name of a renamed repo to the new name, until someone creates a repo
+with the former name. Thus the docs continue to work for some time. Follow the new name when
+you regenerate the repo, so that the new docs use the new name everywhere:
+
+1. Move the directory:
+
+   ```
+   git mv repos/<former-name> repos/<new-name>
+   ```
+
+2. In [`estate.json`](../estate.json), set the `name` of the entry to the new name. Add the
+   former name to the `formerNames` list of the entry:
+
+   ```json
+   { "name": "<new-name>", "formerNames": ["<former-name>"], "description": "..." }
+   ```
+
+3. Find the other lines that contain the former name. Run:
+
+   ```
+   node .github/scripts/check-former-names.mjs
+   ```
+
+   The script shows each line of a hand-written file that contains the former name. Examples
+   are the edges, their evidence, and `checkedAt` in [`ecosystem.json`](../ecosystem.json),
+   the text of [`ARCHITECTURE.md`](../ARCHITECTURE.md) and of the top `README.md`, and the
+   per-repo `README.md`. Replace the former name with the new name on each line. Then run
+   `node .github/scripts/build-ecosystem-maps.mjs`.
+
+4. Commit steps 1 to 3 before the regeneration. Then git can follow the history of each file
+   to its new path: a regeneration changes the files too much for git to find the move.
+
+5. Regenerate the repo with the [per-repo recipe](#per-repo-recipe). Clone the repo by its new
+   name, so that the graphs, the onboarding guide, and the glossaries use the new name.
+
+The `Estate index` check fails if `repos/<former-name>/` remains, if a former name is the name
+of a repo, or if a line of a hand-written file contains a former name. The README index and the
+landing page show the former name after the description.
+
+Pages has no redirects. Thus the deploy writes a moved page for each page of the repo on the
+site: `<former-name>/`, `<former-name>/onboarding.html`, and the other pages
+(`.github/scripts/build-moved.mjs`). A moved page sends the reader to the same page under the
+new name, with its `#anchor`. Links to other files of the site (the graphs, the raw Markdown)
+under the former name stop working. Links to `repos/<former-name>/` on GitHub also stop
+working.
+
 ## Notes
 
 - The exact command sequence and output layout are frozen by the pilot ticket

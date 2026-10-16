@@ -14,8 +14,10 @@ on:
       - "docs/contribute-to-greenstand.md"
       - "viewer/**"
       - ".github/scripts/build-landing.mjs"
+      - ".github/scripts/build-moved.mjs"
       - ".github/scripts/estate.mjs"
       - ".github/scripts/render-md.mjs"
+      - ".github/scripts/site-html.mjs"
       - ".github/scripts/slug.mjs"
       - ".github/workflows/deploy-viewers.yml"
   workflow_dispatch:
@@ -128,6 +130,8 @@ jobs:
           node .github/scripts/render-md.mjs GLOSSARY.md "$OUT/glossary.html" "Estate glossary" "./" "All viewers"
           # The volunteer guide, linked from the landing page and from README.md.
           node .github/scripts/render-md.mjs docs/contribute-to-greenstand.md "$OUT/contribute.html" "How to contribute to Greenstand" "./" "All viewers"
+          # Moved pages: the old subpath of a renamed repo sends readers to the new subpath.
+          node .github/scripts/build-moved.mjs "$OUT"
           # Landing index: the areas and links of estate.json, as in the README.md index.
           # It fails if a page that the landing page links to is missing.
           node .github/scripts/build-landing.mjs "$OUT"

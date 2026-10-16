@@ -12,6 +12,9 @@ name: Estate index
 # missing, stale, or not first, or when that README has an em dash or tells how to view the
 # graphs outside the section. Fix: run `node .github/scripts/build-repo-readmes.mjs`, or edit
 # the line that the error names.
+# Also fails when a hand-written file outside repos/ names a former name of a renamed repo
+# (formerNames in estate.json). Fix: run `node .github/scripts/check-former-names.mjs` and use
+# the new name on each line that it names.
 # No path filter: a path-filtered check stays pending forever if it is ever made required.
 
 on:
@@ -48,3 +51,6 @@ jobs:
 
       - name: Check the per-repo READMEs
         run: node .github/scripts/build-repo-readmes.mjs --check
+
+      - name: Check for former names
+        run: node .github/scripts/check-former-names.mjs

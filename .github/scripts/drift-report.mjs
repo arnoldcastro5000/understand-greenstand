@@ -31,7 +31,7 @@ const { GITHUB_TOKEN: token, GITHUB_REPOSITORY: docsRepo, GITHUB_STEP_SUMMARY: s
 // so its name is shown only outside Actions.
 const inActions = process.env.GITHUB_ACTIONS === "true";
 
-const { estate, areas, errors } = loadEstate();
+const { estate, repos, errors } = loadEstate();
 if (errors.length) fail(errors);
 // The issue belongs to github-actions: a local sync would open a second one under your name.
 if (syncIssue && !inActions) fail(["--sync-issue runs only in GitHub Actions"]);
@@ -118,7 +118,6 @@ function item(r) {
   return `- **${r.name}**: ${reasons(r).join("; ")}.\\\n  ${context}`;
 }
 
-const repos = areas.flatMap((a) => a.repos);
 let results;
 try {
   results = await Promise.all(repos.map(measure));
