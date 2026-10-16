@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 // Render a Markdown file to a styled, standalone HTML page.
 // Usage: node render-md.mjs <inFile> <outFile> <title> <backHref> <backLabel>
-// <inFile> is a path in the docs repo: repos/<name>/README.md, GLOSSARY.md at the root, or
-// docs/contribute-to-greenstand.md.
+// <inFile> is a path in the docs repo: repos/<name>/README.md, GLOSSARY.md or ARCHITECTURE.md
+// at the root, or docs/contribute-to-greenstand.md.
 // Headings get GitHub's anchors, so "#anchor" links work as they do on GitHub. Relative links
 // to a page that the site renders point to that page (ONBOARDING.md -> onboarding.html, and
 // the top README.md -> the landing page); other relative links point to the file on GitHub at
 // this commit.
-import { readFileSync, writeFileSync } from "node:fs";
-import { posix } from "node:path";
+// A Mermaid block becomes a diagram, as on GitHub. The page loads the copy of Mermaid that the
+// deploy workflow puts on the site. The script fails if that copy is missing.
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join, posix } from "node:path";
 import { marked } from "marked";
 import { slugger } from "./slug.mjs";
 
@@ -20,6 +22,7 @@ function sitePath(path) {
   if ((m = path.match(/^repos\/([^/]+)\/(README|ONBOARDING|GLOSSARY)\.md$/))) return `${m[1]}/${m[2].toLowerCase()}.html`;
   if ((m = path.match(/^repos\/([^/]+)\/((?:knowledge-graph|domain-graph|meta)\.json)$/))) return `${m[1]}/${m[2]}`;
   if (path === "GLOSSARY.md") return "glossary.html";
+  if (path === "ARCHITECTURE.md") return "architecture.html";
   if (path === "docs/contribute-to-greenstand.md") return "contribute.html";
   // The landing page shows the estate index of README.md.
   if (path === "README.md") return "index.html";
@@ -41,6 +44,10 @@ function rewrite(href) {
   return repo && sha ? `https://github.com/${repo}/blob/${sha}/${target}${hash}` : href;
 }
 
+// The path of the Mermaid ESM entry on the site. The deploy workflow copies it there.
+const MERMAID_ENTRY = "vendor/mermaid/mermaid.esm.min.mjs";
+let hasMermaid = false;
+
 const slug = slugger();
 const text = (html) =>
   html.replace(/<[^>]*>/g, "").replace(/&(amp|lt|gt|quot|#39);/g, (m, e) => ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" })[e]);
@@ -53,11 +60,71 @@ marked.use({
     link(href, title, html) {
       return marked.Renderer.prototype.link.call(this, rewrite(href), title, html);
     },
+    code(code, lang) {
+      if (lang?.trim().split(/\s/)[0] !== "mermaid") return false;
+      hasMermaid = true;
+      return `<pre class="mermaid">${esc(code)}\n</pre>\n`;
+    },
   },
 });
+const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const body = marked.parse(readFileSync(inFile, "utf8"));
 
-const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+// The page loads Mermaid only if it has a Mermaid block. Until Mermaid draws the diagrams, the
+// page hides their source text. A browser without modules does not hide the text.
+// A diagram fits the width of the page. But it keeps at least 70% of its size: thus its labels
+// stay readable on a phone. A wider diagram scrolls in its own box, and a shadow shows the side
+// with more of the diagram. The error image of a broken diagram keeps the size that Mermaid
+// gives it. When the color scheme changes, Mermaid draws the diagrams again.
+let mermaidHead = "";
+let mermaidScript = "";
+if (hasMermaid) {
+  const rel = posix.relative(posix.dirname(here ?? ""), MERMAID_ENTRY);
+  const entryFile = join(dirname(outFile), rel);
+  if (!existsSync(entryFile)) {
+    console.error(`error: ${inFile} has a Mermaid block, but ${entryFile} is missing`);
+    process.exit(1);
+  }
+  const shadows = (bg, shadow) => `linear-gradient(to right, ${bg} 30%, ${bg}00) left / 2rem 100% no-repeat local,
+      linear-gradient(to left, ${bg} 30%, ${bg}00) right / 2rem 100% no-repeat local,
+      radial-gradient(farthest-side at 0 50%, ${shadow}40, ${shadow}00) left / .75rem 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, ${shadow}40, ${shadow}00) right / .75rem 100% no-repeat scroll`;
+  mermaidHead = `
+<style>
+  pre.mermaid { padding: 0; text-align: center;
+    background: ${shadows("#ffffff", "#1f2328")}; }
+  @media (prefers-color-scheme: dark) { pre.mermaid {
+    background: ${shadows("#0d1117", "#e6edf3")}; } }
+  .mermaid-loading pre.mermaid { visibility: hidden; }
+</style>
+<script>if ("noModule" in HTMLScriptElement.prototype) document.documentElement.classList.add("mermaid-loading");</script>`;
+  mermaidScript = `
+<script type="module">
+const root = document.documentElement;
+const dark = matchMedia("(prefers-color-scheme: dark)");
+const blocks = [...document.querySelectorAll("pre.mermaid")].map((pre) => [pre, pre.textContent]);
+import(${JSON.stringify(rel.startsWith("../") ? rel : `./${rel}`)})
+  .then(({ default: mermaid }) => {
+    const draw = () => {
+      root.classList.add("mermaid-loading");
+      for (const [pre, source] of blocks) {
+        pre.removeAttribute("data-processed");
+        pre.textContent = source;
+      }
+      mermaid.initialize({ startOnLoad: false, theme: dark.matches ? "dark" : "default" });
+      return mermaid.run().finally(() => {
+        for (const svg of root.querySelectorAll('pre.mermaid svg:not([aria-roledescription="error"])')) {
+          svg.style.minWidth = Math.round(svg.viewBox.baseVal.width * 0.7) + "px";
+        }
+        root.classList.remove("mermaid-loading");
+      });
+    };
+    dark.addEventListener("change", draw);
+    return draw();
+  })
+  .finally(() => root.classList.remove("mermaid-loading"));
+</script>`;
+}
 
 const html = `<!doctype html>
 <html lang="en">
@@ -92,11 +159,11 @@ const html = `<!doctype html>
   th { background: rgba(175,184,193,.15); }
   blockquote { margin: 1rem 0; padding: 0 1rem; color: #656d76; border-left: .25rem solid #d0d7de; }
   @media (prefers-color-scheme: dark) { blockquote { color: #8b949e; border-color: #30363d; } }
-</style>
+</style>${mermaidHead}
 </head>
 <body>
 <nav><a href="${esc(backHref)}">&larr; ${esc(backLabel)}</a>${atRoot ? "" : '<a href="../">All viewers</a>'}</nav>
-${body}
+${body}${mermaidScript}
 </body>
 </html>
 `;
