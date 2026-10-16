@@ -1,4 +1,4 @@
-# Onboarding Guide — images-api (Greenstand Images API)
+# Onboarding Guide: images-api (Greenstand Images API)
 
 _Generated from the Understand-Anything knowledge graph. Source commit `9d761d1`._
 
@@ -19,16 +19,30 @@ shared utility layer for async wrapping and centralized error handling.
 
 ## Architecture Layers
 
-| Layer | Files | What it holds |
-|---|---|---|
-| **API Layer** | 9 | Express app factory, server bootstrap, the image-resize route/handler chain, and the OpenAPI contract for the `GET /img` endpoints. |
-| **Service Layer** | 1 | `ResizeImageService`: fetches the remote image, validates resize params with Joi, applies Sharp transforms. |
-| **Data Layer** | 7 | Knex/Postgres persistence scaffold: `BaseRepository`, `Session`, connection modules, `knexfile.js`, migration/seed assets. |
-| **Utility Layer** | 3 | Shared cross-cutting helpers: async handler wrapper, centralized error handler, `HttpError` type, pagination/query helpers. |
-| **Test Layer** | 5 | Mocha/Chai unit and Supertest integration specs plus the shared HTTP test client. |
-| **Infrastructure & CI/CD** | 18 | Dockerfile, Kustomize base/overlay Kubernetes manifests, GitHub Actions pipelines, Husky git hooks, database setup scripts. |
-| **Configuration Layer** | 9 | Project manifest, environment templates, and tooling config (npm, ESLint, Prettier, commitlint, semantic-release, CODEOWNERS). |
-| **Documentation Layer** | 3 | Project README, changelog, and contributing guide. |
+- **API Layer**\
+  Files: 9\
+  What it holds: Express app factory, server bootstrap, the image-resize route/handler chain, and the OpenAPI contract for the `GET /img` endpoints.
+- **Service Layer**\
+  Files: 1\
+  What it holds: `ResizeImageService`: fetches the remote image, validates resize params with Joi, applies Sharp transforms.
+- **Data Layer**\
+  Files: 7\
+  What it holds: Knex/Postgres persistence scaffold: `BaseRepository`, `Session`, connection modules, `knexfile.js`, migration/seed assets.
+- **Utility Layer**\
+  Files: 3\
+  What it holds: Shared cross-cutting helpers: async handler wrapper, centralized error handler, `HttpError` type, pagination/query helpers.
+- **Test Layer**\
+  Files: 5\
+  What it holds: Mocha/Chai unit and Supertest integration specs plus the shared HTTP test client.
+- **Infrastructure & CI/CD**\
+  Files: 18\
+  What it holds: Dockerfile, Kustomize base/overlay Kubernetes manifests, GitHub Actions pipelines, Husky git hooks, database setup scripts.
+- **Configuration Layer**\
+  Files: 9\
+  What it holds: Project manifest, environment templates, and tooling config (npm, ESLint, Prettier, commitlint, semantic-release, CODEOWNERS).
+- **Documentation Layer**\
+  Files: 3\
+  What it holds: Project README, changelog, and contributing guide.
 
 ## Key Concepts
 
@@ -56,19 +70,19 @@ shared utility layer for async wrapping and centralized error handling.
 
 Follow these steps in order to learn the codebase end to end:
 
-1. **Application Bootstrap** — `server/server.js` loads environment config, sets the log level via `server/setup.js`, imports the Express app, and listens on the configured port.
-2. **The Express App Factory** — `server/app.js` wires CORS, JSON body parsing, a content-type guard, the image-resize router, and a single global error handler. Highest fan-out file.
-3. **Routing and Request Dispatch** — `server/routes.js` maps the image-resize GET routes to their handlers, each wrapped in the async error handler.
-4. **Image-Resize Handlers** — `server/handlers/resizeImageHandler.js` reads and validates request parameters, then streams the resized image back through the service.
-5. **The Service Layer: Sharp and Joi** — `server/services/ResizeImageService.js` fetches the remote image, validates params with Joi, and applies Sharp transforms.
-6. **Cross-Cutting Utilities and Error Handling** — `server/utils/utils.js` (async wrapper + global error middleware), `server/utils/HttpError.js` (shared error type), `server/utils/helper.js` (pagination/query parsing).
-7. **The Data Layer: Knex and Postgres** — `server/repositories/BaseRepository.js`, `server/database/Session.js`, `server/database/knex.js`, and `knexfile.js` provide the persistence scaffold.
-8. **The API Contract** — `docs/api/spec/images-api.yaml` defines the two public GET endpoints; read it alongside the handlers from Step 4.
-9. **Testing Strategy** — `server/app.spec.js` (unit: 415 on non-JSON POST, 200 on GET /), `api-tests/image-resize-api.spec.js` (integration, mocking Axios), `api-tests/lib/supertest.js` (shared HTTP client).
-10. **Project Manifest and Environment** — `package.json` (entry point, scripts, dependencies), `.env.development.example` (Postgres URLs + upstream API), `README.md` (architecture overview).
-11. **Containerization** — `Dockerfile` (single-stage `node:16-alpine`, `npm ci`, `node .`) and `.dockerignore`.
-12. **Kubernetes Deployment** — `deployment/base/*` Kustomize manifests: namespace, Deployment (one replica), Service, and an Ambassador Mapping that routes external `/images/` traffic in.
-13. **CI/CD Pipelines** — `treetracker-api-pull-request-ci.yml` (lint + integration tests on PR) and `treetracker-api-build-deploy-dev.yml` (semantic-release, build/push image, update dev overlay on push to main).
+1. **Application Bootstrap**: `server/server.js` loads environment config, sets the log level via `server/setup.js`, imports the Express app, and listens on the configured port.
+2. **The Express App Factory**: `server/app.js` wires CORS, JSON body parsing, a content-type guard, the image-resize router, and a single global error handler. Highest fan-out file.
+3. **Routing and Request Dispatch**: `server/routes.js` maps the image-resize GET routes to their handlers, each wrapped in the async error handler.
+4. **Image-Resize Handlers**: `server/handlers/resizeImageHandler.js` reads and validates request parameters, then streams the resized image back through the service.
+5. **The Service Layer: Sharp and Joi**: `server/services/ResizeImageService.js` fetches the remote image, validates params with Joi, and applies Sharp transforms.
+6. **Cross-Cutting Utilities and Error Handling**: `server/utils/utils.js` (async wrapper + global error middleware), `server/utils/HttpError.js` (shared error type), `server/utils/helper.js` (pagination/query parsing).
+7. **The Data Layer: Knex and Postgres**: `server/repositories/BaseRepository.js`, `server/database/Session.js`, `server/database/knex.js`, and `knexfile.js` provide the persistence scaffold.
+8. **The API Contract**: `docs/api/spec/images-api.yaml` defines the two public GET endpoints; read it alongside the handlers from Step 4.
+9. **Testing Strategy**: `server/app.spec.js` (unit: 415 on non-JSON POST, 200 on GET /), `api-tests/image-resize-api.spec.js` (integration, mocking Axios), `api-tests/lib/supertest.js` (shared HTTP client).
+10. **Project Manifest and Environment**: `package.json` (entry point, scripts, dependencies), `.env.development.example` (Postgres URLs + upstream API), `README.md` (architecture overview).
+11. **Containerization**: `Dockerfile` (single-stage `node:16-alpine`, `npm ci`, `node .`) and `.dockerignore`.
+12. **Kubernetes Deployment**: `deployment/base/*` Kustomize manifests: namespace, Deployment (one replica), Service, and an Ambassador Mapping that routes external `/images/` traffic in.
+13. **CI/CD Pipelines**: `treetracker-api-pull-request-ci.yml` (lint + integration tests on PR) and `treetracker-api-build-deploy-dev.yml` (semantic-release, build/push image, update dev overlay on push to main).
 
 ## File Map (by layer)
 
@@ -83,16 +97,16 @@ Follow these steps in order to learn the codebase end to end:
 
 ## Complexity Hotspots
 
-Approach these areas carefully — they carry the most logic or the largest surface (all rated moderate):
+Approach these areas carefully: they carry the most logic or the largest surface (all rated moderate):
 
-- **`server/services/ResizeImageService.js`** (moderate) — the core: remote fetch + Joi validation + Sharp transforms.
-- **`server/handlers/resizeImageHandler.js`** (moderate) — where HTTP meets the domain; parameter validation and streaming.
-- **`server/utils/utils.js`** (moderate) — async handler wrapper + global error middleware.
-- **`server/repositories/BaseRepository.js`** (moderate) — generic Knex CRUD + filtered-query base class. Note `BaseRepository.spec.js` currently mirrors the implementation rather than testing it.
-- **`server/database/Session.js`** (moderate) — Knex session + transaction lifecycle.
-- **`api-tests/image-resize-api.spec.js`** (moderate) — end-to-end integration suite; read it to see real request behavior.
-- **`docs/api/spec/images-api.yaml`** and **`example.yaml`** (moderate) — the OpenAPI contract; authoritative for the public shape.
-- **`.github/workflows/treetracker-api-build-deploy-dev.yml`** (moderate) — the full commit-to-deploy pipeline.
+- **`server/services/ResizeImageService.js`** (moderate): the core: remote fetch + Joi validation + Sharp transforms.
+- **`server/handlers/resizeImageHandler.js`** (moderate): where HTTP meets the domain; parameter validation and streaming.
+- **`server/utils/utils.js`** (moderate): async handler wrapper + global error middleware.
+- **`server/repositories/BaseRepository.js`** (moderate): generic Knex CRUD + filtered-query base class. Note `BaseRepository.spec.js` currently mirrors the implementation rather than testing it.
+- **`server/database/Session.js`** (moderate): Knex session + transaction lifecycle.
+- **`api-tests/image-resize-api.spec.js`** (moderate): end-to-end integration suite; read it to see real request behavior.
+- **`docs/api/spec/images-api.yaml`** and **`example.yaml`** (moderate): the OpenAPI contract; authoritative for the public shape.
+- **`.github/workflows/treetracker-api-build-deploy-dev.yml`** (moderate): the full commit-to-deploy pipeline.
 
 ---
 

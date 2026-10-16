@@ -1,4 +1,4 @@
-# Onboarding Guide — treetracker-wallet-admin-client (Wallet Admin Client)
+# Onboarding Guide: treetracker-wallet-admin-client (Wallet Admin Client)
 
 _Generated from the Understand-Anything knowledge graph. Source commit `62a60f3`._
 
@@ -19,16 +19,30 @@ feature.
 
 ## Architecture Layers
 
-| Layer | Files | What it holds |
-|---|---|---|
-| **API Client Layer** | 3 | Axios modules that call the Greenstand wallet backend for wallets, transfers, and trust relationships. |
-| **State Management Layer** | 5 | React context providers plus auth context holding wallet, transfer, trust-relationship, and authentication state. |
-| **Shared Models & Utilities** | 4 | Filter/query models and shared helpers (the axios instance factory, formatting). |
-| **Feature Pages** | 62 | Route-level page views (login, wallets, transfers, trust relationships, send tokens, customize) with their forms, tables, side panels, styles, and tests. |
-| **Shared UI Components & Layout** | 30 | Reusable presentational components, the app shell layout, sidebar menu, MUI theme, and the react-router route table. |
-| **Application Entry & Bootstrap** | 7 | Root App wiring, DOM bootstrap, global styles, HTML mount document, web-vitals, and Jest test setup. |
-| **Build, CI/CD & Configuration** | 23 | GitHub Actions release/deploy pipelines, semantic-release, env files, npm/lint/format tooling config, and the PWA manifest. |
-| **Documentation** | 5 | README, changelog, contributing and code-of-conduct guides, plus the crawler robots file. |
+- **API Client Layer**\
+  Files: 3\
+  What it holds: Axios modules that call the Greenstand wallet backend for wallets, transfers, and trust relationships.
+- **State Management Layer**\
+  Files: 5\
+  What it holds: React context providers plus auth context holding wallet, transfer, trust-relationship, and authentication state.
+- **Shared Models & Utilities**\
+  Files: 4\
+  What it holds: Filter/query models and shared helpers (the axios instance factory, formatting).
+- **Feature Pages**\
+  Files: 62\
+  What it holds: Route-level page views (login, wallets, transfers, trust relationships, send tokens, customize) with their forms, tables, side panels, styles, and tests.
+- **Shared UI Components & Layout**\
+  Files: 30\
+  What it holds: Reusable presentational components, the app shell layout, sidebar menu, MUI theme, and the react-router route table.
+- **Application Entry & Bootstrap**\
+  Files: 7\
+  What it holds: Root App wiring, DOM bootstrap, global styles, HTML mount document, web-vitals, and Jest test setup.
+- **Build, CI/CD & Configuration**\
+  Files: 23\
+  What it holds: GitHub Actions release/deploy pipelines, semantic-release, env files, npm/lint/format tooling config, and the PWA manifest.
+- **Documentation**\
+  Files: 5\
+  What it holds: README, changelog, contributing and code-of-conduct guides, plus the crawler robots file.
 
 ## Key Concepts
 
@@ -54,18 +68,18 @@ feature.
 
 Follow these steps in order to learn the codebase end to end:
 
-1. **Project Overview** — Read the `README.md` for purpose, use cases, and local development setup.
-2. **Application Entry & Bootstrap** — `src/index.js` mounts the root `App`; `src/App.js` wires the MUI theme provider, auth provider, layout shell, and route table.
-3. **Routing & App Shell** — `ClientRoutes.js` maps URLs to pages and enforces auth; `Layout.js` provides the sidebar `Menu` shell and mounts the Transfers/TrustRelationships providers.
-4. **Authentication** — `auth-context.js` declares the shared context; `AuthProvider.js` manages login/logout, token storage, and JWT decode; `Login.js` collects wallet/password/API key.
-5. **The API Client Layer** — `apiClient.js` (axios instance + 401 interceptor) underpins `wallets.js`, `transfers.js`, and `trust_relationships.js`.
-6. **State Management Contexts** — `WalletsContext`, `TransfersContext`, and `TrustRelationshipsContext` own feature state, filters, and pagination.
-7. **Wallets Feature** — `MyWallets.js` lists wallets with a create action; `Wallet.js` is the detail view; `CreateManagedWallet.js` creates sub-wallets.
-8. **Transfers & Sending Tokens** — `MyTransfers.js` renders the transfers table; `SendTokens.js` orchestrates wallet selection and trusted/untrusted transfer tabs; `TransferFilter.js` shapes queries.
-9. **Trust Relationships Feature** — `TrustRelationship.js` + `TrustRelationshipTable.js` show and act on relationships; `CreateTrustRelationship.js` requests new ones; `TrustRelationShipFilter.js` backs the queries.
-10. **Shared UI Components & Theme** — `theme.js` (MUI palette/typography), `Table.js` (reusable grid), `Message.js`, and `Loader.js` provide consistent presentation and feedback.
-11. **Project Manifest & Environment Config** — `package.json` declares the stack and CRA scripts; the `.env.*` files supply per-environment settings such as the wallet API base URL.
-12. **Build, Release & Deployment** — `build-release.yaml` builds, semantic-releases, and deploys on push; `deploy.yaml` is the manual per-environment deploy.
+1. **Project Overview**: Read the `README.md` for purpose, use cases, and local development setup.
+2. **Application Entry & Bootstrap**: `src/index.js` mounts the root `App`; `src/App.js` wires the MUI theme provider, auth provider, layout shell, and route table.
+3. **Routing & App Shell**: `ClientRoutes.js` maps URLs to pages and enforces auth; `Layout.js` provides the sidebar `Menu` shell and mounts the Transfers/TrustRelationships providers.
+4. **Authentication**: `auth-context.js` declares the shared context; `AuthProvider.js` manages login/logout, token storage, and JWT decode; `Login.js` collects wallet/password/API key.
+5. **The API Client Layer**: `apiClient.js` (axios instance + 401 interceptor) underpins `wallets.js`, `transfers.js`, and `trust_relationships.js`.
+6. **State Management Contexts**: `WalletsContext`, `TransfersContext`, and `TrustRelationshipsContext` own feature state, filters, and pagination.
+7. **Wallets Feature**: `MyWallets.js` lists wallets with a create action; `Wallet.js` is the detail view; `CreateManagedWallet.js` creates sub-wallets.
+8. **Transfers & Sending Tokens**: `MyTransfers.js` renders the transfers table; `SendTokens.js` orchestrates wallet selection and trusted/untrusted transfer tabs; `TransferFilter.js` shapes queries.
+9. **Trust Relationships Feature**: `TrustRelationship.js` + `TrustRelationshipTable.js` show and act on relationships; `CreateTrustRelationship.js` requests new ones; `TrustRelationShipFilter.js` backs the queries.
+10. **Shared UI Components & Theme**: `theme.js` (MUI palette/typography), `Table.js` (reusable grid), `Message.js`, and `Loader.js` provide consistent presentation and feedback.
+11. **Project Manifest & Environment Config**: `package.json` declares the stack and CRA scripts; the `.env.*` files supply per-environment settings such as the wallet API base URL.
+12. **Build, Release & Deployment**: `build-release.yaml` builds, semantic-releases, and deploys on push; `deploy.yaml` is the manual per-environment deploy.
 
 ## File Map (by layer)
 
@@ -80,16 +94,16 @@ Follow these steps in order to learn the codebase end to end:
 
 ## Complexity Hotspots
 
-Approach these areas carefully — they carry the most logic or the largest surface:
+Approach these areas carefully: they carry the most logic or the largest surface:
 
-- **`src/pages/SendTokens/SendTokens.js`** and its forms (`SendTokensForm.js`, `SendToUntrustedWallets.js`, `SelectWallet.js`) (complex) — the richest feature: wallet selection, trusted/untrusted tabs, token-amount validation, and inline wallet creation.
-- **`src/store/TransfersContext.js`** and **`src/store/TrustRelationshipsContext.js`** (complex) — central state, filters, pagination, and API orchestration.
-- **`src/pages/MyTransfers/TransfersTable.js`**, **`TableFilters.js`** (complex) — sortable/paginated table with a side panel and popover date-range filters.
-- **`src/pages/TrustRelationship/TrustRelationshipTable.js`**, **`TrustRelationshipsFilters.js`**, **`CreateTrustRelationship.js`** (complex) — the trust-relationship grid, filters, and create dialog.
-- **`src/components/UI/components/Table/Table.js`** (complex) — the reusable data grid behind every feature table.
-- **`src/components/UI/theme.js`** (complex) — the central MUI theme; wide surface of palette/typography/component overrides.
-- **`src/pages/CustomizeWallet/CustomizeWallet.js`** (complex) — wallet profile editing with rich-text (`react-quill`) and image uploads.
-- **`src/pages/Login/Login.js`** (complex) — wallet/password/API-key input with client-side validation and sign-in.
+- **`src/pages/SendTokens/SendTokens.js`** and its forms (`SendTokensForm.js`, `SendToUntrustedWallets.js`, `SelectWallet.js`) (complex): the richest feature: wallet selection, trusted/untrusted tabs, token-amount validation, and inline wallet creation.
+- **`src/store/TransfersContext.js`** and **`src/store/TrustRelationshipsContext.js`** (complex): central state, filters, pagination, and API orchestration.
+- **`src/pages/MyTransfers/TransfersTable.js`**, **`TableFilters.js`** (complex): sortable/paginated table with a side panel and popover date-range filters.
+- **`src/pages/TrustRelationship/TrustRelationshipTable.js`**, **`TrustRelationshipsFilters.js`**, **`CreateTrustRelationship.js`** (complex): the trust-relationship grid, filters, and create dialog.
+- **`src/components/UI/components/Table/Table.js`** (complex): the reusable data grid behind every feature table.
+- **`src/components/UI/theme.js`** (complex): the central MUI theme; wide surface of palette/typography/component overrides.
+- **`src/pages/CustomizeWallet/CustomizeWallet.js`** (complex): wallet profile editing with rich-text (`react-quill`) and image uploads.
+- **`src/pages/Login/Login.js`** (complex): wallet/password/API-key input with client-side validation and sign-in.
 
 ---
 

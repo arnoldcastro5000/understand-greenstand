@@ -1,4 +1,4 @@
-# Onboarding Guide — treetracker-android
+# Onboarding Guide: treetracker-android
 
 _Generated from the Understand-Anything knowledge graph. Source commit `949d962`._
 
@@ -19,16 +19,30 @@ Room / API / S3**, with WorkManager driving background sync and Koin wiring ever
 
 ## Architecture Layers
 
-| Layer | Files | What it holds |
-|---|---|---|
-| **Presentation & UI** | 153 | Jetpack Compose feature screens, ViewModels, the navigation host, theming, camera/map UI, and Android resources for capture, signup, dashboard, and messaging flows. |
-| **Domain (Use Cases)** | 9 | Business-logic use cases that orchestrate capture upload, sync, and account workflows between the presentation and data layers. |
-| **Data & Persistence** | 101 | Room database, Retrofit API clients, repositories and data models, preferences, background sync workers, analytics, and Room schema snapshots. |
-| **Core, DI & Utilities** | 16 | Koin dependency-injection modules, the `Application` entry point, and shared utility/helper code used across all layers. |
-| **Testing** | 77 | Unit, Robolectric, screenshot, and instrumented Espresso tests plus test fakes under `src/test` and `src/androidTest`. |
-| **Build & Tooling** | 24 | Gradle build scripts, the version catalog, manifest, ProGuard, Fastlane, Spotless, and shell/config tooling for building and releasing. |
-| **CI/CD** | 21 | GitHub Actions workflows and composite actions for build, test, versioning, and Play Store / Firebase deployment, plus issue/PR templates. |
-| **Documentation** | 44 | Engineering, product, getting-started, and task documentation in Markdown. |
+- **Presentation & UI**\
+  Files: 153\
+  What it holds: Jetpack Compose feature screens, ViewModels, the navigation host, theming, camera/map UI, and Android resources for capture, signup, dashboard, and messaging flows.
+- **Domain (Use Cases)**\
+  Files: 9\
+  What it holds: Business-logic use cases that orchestrate capture upload, sync, and account workflows between the presentation and data layers.
+- **Data & Persistence**\
+  Files: 101\
+  What it holds: Room database, Retrofit API clients, repositories and data models, preferences, background sync workers, analytics, and Room schema snapshots.
+- **Core, DI & Utilities**\
+  Files: 16\
+  What it holds: Koin dependency-injection modules, the `Application` entry point, and shared utility/helper code used across all layers.
+- **Testing**\
+  Files: 77\
+  What it holds: Unit, Robolectric, screenshot, and instrumented Espresso tests plus test fakes under `src/test` and `src/androidTest`.
+- **Build & Tooling**\
+  Files: 24\
+  What it holds: Gradle build scripts, the version catalog, manifest, ProGuard, Fastlane, Spotless, and shell/config tooling for building and releasing.
+- **CI/CD**\
+  Files: 21\
+  What it holds: GitHub Actions workflows and composite actions for build, test, versioning, and Play Store / Firebase deployment, plus issue/PR templates.
+- **Documentation**\
+  Files: 44\
+  What it holds: Engineering, product, getting-started, and task documentation in Markdown.
 
 ## Key Concepts
 
@@ -59,18 +73,18 @@ Room / API / S3**, with WorkManager driving background sync and Koin wiring ever
 
 Follow these steps in order to learn the codebase end to end:
 
-1. **Project Overview** — Read the `README` and `docs/engineering/architecture.md` for what the app does and how it is structured.
-2. **Application Entry Point** — `TreeTrackerApplication.kt` boots the process: Firebase, Koin DI, and Timber logging.
-3. **Dependency Injection Graph** — `di/AppModule.kt` wires every repository, use case, manager, and ViewModel (highest fan-out file).
-4. **Navigation Host** — `Host.kt` wires every screen destination into the Compose `NavDisplay`, where ViewModels meet screens.
-5. **MVVM Foundation** — `BaseViewModel.kt`, `Action.kt`, and `CustomTheme.kt` define the presentation contract every screen follows.
-6. **Feature Screens and ViewModels** — `DashboardScreen`/`DashboardViewModel`, `TreeCaptureScreen`/`TreeCaptureViewModel`, and `SignupViewModel` apply the MVVM foundation to real features (camera, GPS gating, feature flags).
-7. **Domain Use Cases** — `SyncDataUseCase` orchestrates upload; `CreateTreeRequestUseCase`, `UploadImageUseCase`, `UploadLocationDataUseCase` are single-purpose steps.
-8. **Data and Persistence** — `AppDatabase`, `TreeTrackerDAO`, `TreeEntity`, `User`, and `Preferences` hold captures on the device.
-9. **API and Object Storage** — `ObjectStorageClient` (AWS S3 → DigitalOcean Spaces), `UploadBundle`, and `NewTreeRequest` move data off the device.
-10. **Background Sync** — `TreeSyncWorker` (WorkManager) invokes `SyncDataUseCase`; `SyncNotificationManager` and `TreeUploader` support it.
-11. **Testing Infrastructure** — `MainCoroutineRule`, `FakeFileGenerator`, and `SessionUploaderTest` show the coroutine-driven test approach.
-12. **Build and CI/CD** — `app/build.gradle`, `gradle/libs.versions.toml`, and the `build.yml` / `test.yml` / `deploy-play-store.yml` workflows build and ship the app.
+1. **Project Overview**: Read the `README` and `docs/engineering/architecture.md` for what the app does and how it is structured.
+2. **Application Entry Point**: `TreeTrackerApplication.kt` boots the process: Firebase, Koin DI, and Timber logging.
+3. **Dependency Injection Graph**: `di/AppModule.kt` wires every repository, use case, manager, and ViewModel (highest fan-out file).
+4. **Navigation Host**: `Host.kt` wires every screen destination into the Compose `NavDisplay`, where ViewModels meet screens.
+5. **MVVM Foundation**: `BaseViewModel.kt`, `Action.kt`, and `CustomTheme.kt` define the presentation contract every screen follows.
+6. **Feature Screens and ViewModels**: `DashboardScreen`/`DashboardViewModel`, `TreeCaptureScreen`/`TreeCaptureViewModel`, and `SignupViewModel` apply the MVVM foundation to real features (camera, GPS gating, feature flags).
+7. **Domain Use Cases**: `SyncDataUseCase` orchestrates upload; `CreateTreeRequestUseCase`, `UploadImageUseCase`, `UploadLocationDataUseCase` are single-purpose steps.
+8. **Data and Persistence**: `AppDatabase`, `TreeTrackerDAO`, `TreeEntity`, `User`, and `Preferences` hold captures on the device.
+9. **API and Object Storage**: `ObjectStorageClient` (AWS S3 → DigitalOcean Spaces), `UploadBundle`, and `NewTreeRequest` move data off the device.
+10. **Background Sync**: `TreeSyncWorker` (WorkManager) invokes `SyncDataUseCase`; `SyncNotificationManager` and `TreeUploader` support it.
+11. **Testing Infrastructure**: `MainCoroutineRule`, `FakeFileGenerator`, and `SessionUploaderTest` show the coroutine-driven test approach.
+12. **Build and CI/CD**: `app/build.gradle`, `gradle/libs.versions.toml`, and the `build.yml` / `test.yml` / `deploy-play-store.yml` workflows build and ship the app.
 
 ## File Map (by layer)
 
@@ -85,19 +99,19 @@ Follow these steps in order to learn the codebase end to end:
 
 ## Complexity Hotspots
 
-Approach these areas carefully — they carry the most logic or the largest surface (53 files rated
+Approach these areas carefully: they carry the most logic or the largest surface (53 files rated
 complex, 180 moderate):
 
-- **`usecases/SyncDataUseCase.kt`** (complex) — the top sync orchestrator; uploads planters, sessions, trees, config, and messages with per-step progress.
-- **`models/TreeUploader.kt`** and **`models/PlanterUploader.kt`** (complex) — batch upload, bundle windowing, and local-file cleanup.
-- **`database/TreeTrackerDAO.kt`** (complex) — the central query surface; the highest production fan-in.
-- **`database/Migrations.kt`** (complex) — raw-SQL schema upgrades across versions; easy to break on a bad migration.
-- **`di/AppModule.kt`** (complex) — the whole DI graph; a change here ripples everywhere.
-- **`preferences/Preferences.kt`** (complex) — typed prefs, reactive flows, and session clearing used app-wide.
-- **`capture/TreeCaptureScreen.kt`**, **`dashboard/DashboardScreen.kt`**, **`map/MapScreen.kt`** (complex) — the largest Compose screens (camera, GPS gating, feature flags, MapLibre).
-- **`signup/SignupViewModel.kt`** and **`dashboard/DashboardViewModel.kt`** (complex) — the most stateful ViewModels.
-- **`utilities/ImageUtils.kt`**, **`models/location/LocationDataCapturer.kt`** (complex) — image processing and GPS sampling logic.
-- **Test suites:** `SyncDataUseCaseTest.kt`, `TreeUploaderTest.kt`, `SessionTrackerTest.kt`, `TreeTrackerDaoTest.kt` (complex) — read these to see real end-to-end capture and sync behavior.
+- **`usecases/SyncDataUseCase.kt`** (complex): the top sync orchestrator; uploads planters, sessions, trees, config, and messages with per-step progress.
+- **`models/TreeUploader.kt`** and **`models/PlanterUploader.kt`** (complex): batch upload, bundle windowing, and local-file cleanup.
+- **`database/TreeTrackerDAO.kt`** (complex): the central query surface; the highest production fan-in.
+- **`database/Migrations.kt`** (complex): raw-SQL schema upgrades across versions; easy to break on a bad migration.
+- **`di/AppModule.kt`** (complex): the whole DI graph; a change here ripples everywhere.
+- **`preferences/Preferences.kt`** (complex): typed prefs, reactive flows, and session clearing used app-wide.
+- **`capture/TreeCaptureScreen.kt`**, **`dashboard/DashboardScreen.kt`**, **`map/MapScreen.kt`** (complex): the largest Compose screens (camera, GPS gating, feature flags, MapLibre).
+- **`signup/SignupViewModel.kt`** and **`dashboard/DashboardViewModel.kt`** (complex): the most stateful ViewModels.
+- **`utilities/ImageUtils.kt`**, **`models/location/LocationDataCapturer.kt`** (complex): image processing and GPS sampling logic.
+- **Test suites:** `SyncDataUseCaseTest.kt`, `TreeUploaderTest.kt`, `SessionTrackerTest.kt`, `TreeTrackerDaoTest.kt` (complex): read these to see real end-to-end capture and sync behavior.
 
 ---
 
