@@ -6,9 +6,9 @@
 // END markers; the rest of ARCHITECTURE.md is hand-written.
 // Usage: node build-ecosystem-maps.mjs           rewrite the maps
 //        node build-ecosystem-maps.mjs --check   exit 1 if a map is stale (CI)
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { loadEstate, root } from "./estate.mjs";
+import { loadEstate, readDocsFile, replaceMarked, root } from "./estate.mjs";
 
 const SCRIPT = ".github/scripts/build-ecosystem-maps.mjs";
 const DOC = "ARCHITECTURE.md";
@@ -20,17 +20,6 @@ const DIRECTIONS = ["TB", "LR"];
 
 const check = process.argv.includes("--check");
 const { areas, errors } = loadEstate();
-
-// Read a file of the docs repo, or record why it cannot be read.
-function read(at, parse = (s) => s) {
-  const file = join(root, at);
-  if (!existsSync(file)) return errors.push(`${at} is missing`), null;
-  try {
-    return parse(readFileSync(file, "utf8"));
-  } catch (e) {
-    return errors.push(`${at}: ${e.message}`), null;
-  }
-}
 
 // Check ecosystem.json in both directions, and return it only if it is valid. Each edge names
 // a code repo or a system at each end, a known view and arrow, a label, and its evidence. Each
@@ -75,7 +64,7 @@ function validEcosystem(eco, codeRepos) {
 }
 
 const codeRepos = new Map(areas.flatMap((a) => a.repos).filter((r) => !r.docs).map((r) => [r.name, r]));
-const ecosystem = validEcosystem(read("ecosystem.json", JSON.parse), codeRepos);
+const ecosystem = validEcosystem(readDocsFile("ecosystem.json", errors, JSON.parse), codeRepos);
 
 // Mermaid ids: letters, digits, and "_" only. A store of data is a cylinder.
 const mermaidId = (name) => `n_${name.replace(/[^A-Za-z0-9]/g, "_")}`;
@@ -97,8 +86,7 @@ function diagram(view) {
   ].join("\n");
 }
 
-const occurrences = (text, marker) => text.split(marker).length - 1;
-const doc = read(DOC);
+const doc = readDocsFile(DOC, errors);
 let next = doc;
 if (doc !== null && ecosystem) {
   const viewIds = new Set(ecosystem.views.map((v) => v.id));
@@ -106,19 +94,8 @@ if (doc !== null && ecosystem) {
     if (!viewIds.has(view)) errors.push(`${DOC} has a map block for "${view}", which is not a view in ecosystem.json`);
   }
   for (const view of ecosystem.views) {
-    const begins = occurrences(next, begin(view.id));
-    const ends = occurrences(next, end(view.id));
-    if (begins !== 1 || ends !== 1) {
-      errors.push(`${DOC}: ${begins} BEGIN and ${ends} END markers for the ${view.id} map; expected one of each`);
-      continue;
-    }
-    const start = next.indexOf(begin(view.id));
-    const stop = next.indexOf(end(view.id));
-    if (stop < start) {
-      errors.push(`${DOC}: the END marker of the ${view.id} map comes before its BEGIN marker`);
-      continue;
-    }
-    next = `${next.slice(0, start)}${begin(view.id)}\n\n${diagram(view)}\n\n${next.slice(stop)}`;
+    const markers = { begin: begin(view.id), end: end(view.id), what: `${view.id} map` };
+    next = replaceMarked(DOC, next, markers, diagram(view), errors);
   }
 }
 
