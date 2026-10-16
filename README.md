@@ -2,6 +2,9 @@
 
 Machine-generated documentation for the core-active Greenstand repository estate.
 
+**New volunteer?** Read [How to contribute to Greenstand](./docs/contribute-to-greenstand.md):
+how to join the community, pick a first task, and get help.
+
 ## Explore the viewers
 
 **[Open the live site → https://arnoldcastro5000.github.io/understand-greenstand/](https://arnoldcastro5000.github.io/understand-greenstand/)**
@@ -44,7 +47,7 @@ The repos are grouped by area. For each repo:
 
 ### Start here
 
-New to Greenstand? Read the overview first: the mission, the platform big picture, and how to make a first contribution.
+Learn the mission and the big picture of the platform before you read the code.
 
 - **[Greenstand-Overview](repos/Greenstand-Overview/)**: The org overview and onboarding repo: contributor guide, roadmap, and team directory. Docs, not code.\
   [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/Greenstand-Overview/) · [Onboarding](repos/Greenstand-Overview/ONBOARDING.md) · [Glossary](repos/Greenstand-Overview/GLOSSARY.md) · [README](repos/Greenstand-Overview/README.md) · [Source](https://github.com/Greenstand/Greenstand-Overview) · Snapshot 2026-09-03 at [`6861717`](https://github.com/Greenstand/Greenstand-Overview/commit/68617178870590e198bd045e835e718562235e55)
