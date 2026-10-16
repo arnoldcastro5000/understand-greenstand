@@ -1,6 +1,7 @@
 // Load the estate: estate.json (areas, descriptions, URLs) plus repos/*/meta.json (snapshots).
-// build-index.mjs (the README.md index) and build-landing.mjs (the Pages landing page) both
-// read it, so the two indexes cannot drift apart.
+// build-index.mjs (the README.md index), build-landing.mjs (the Pages landing page),
+// build-glossary.mjs, build-repo-readmes.mjs, and drift-report.mjs read it, so the outputs
+// cannot drift apart.
 // Returns { estate, areas, count, errors }. Each repo in areas gets its snapshot and its
 // Source URL. errors lists every problem at once; the caller prints them and exits.
 import { existsSync, readdirSync, readFileSync } from "node:fs";

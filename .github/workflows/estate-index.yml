@@ -5,6 +5,10 @@ name: Estate index
 # index links to. Fix: run `node .github/scripts/build-index.mjs` and commit README.md.
 # Also fails when a glossary (repos/<name>/GLOSSARY.md, or the estate GLOSSARY.md) does not
 # match the domain graphs. Fix: run `node .github/scripts/build-glossary.mjs`.
+# Also fails when the Start here section of a per-repo README (repos/<name>/README.md) is
+# missing, stale, or not first, or when that README has an em dash or tells how to view the
+# graphs outside the section. Fix: run `node .github/scripts/build-repo-readmes.mjs`, or edit
+# the line that the error names.
 # No path filter: a path-filtered check stays pending forever if it is ever made required.
 
 on:
@@ -35,3 +39,6 @@ jobs:
 
       - name: Check the glossaries
         run: node .github/scripts/build-glossary.mjs --check
+
+      - name: Check the per-repo READMEs
+        run: node .github/scripts/build-repo-readmes.mjs --check

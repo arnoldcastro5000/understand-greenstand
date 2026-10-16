@@ -88,7 +88,10 @@ Limits:
    - `knowledge-graph.json`
    - the domain markdown and domain graph
    - the onboarding guide
-   - a short per-repo `README.md`
+   - a short per-repo `README.md`: a one-paragraph description of the source repo, then the
+     sections `## Snapshot`, `## Contents`, `## Business domains`, and `## Regenerating`. Use
+     no em dash. Do not write how to view the graphs: step 7 adds a "Start here" section with
+     the viewer link.
    - `meta.json` (`gitCommitHash`, `lastAnalyzedAt`): the viewer loads source at that
      commit, and the top `README.md` index shows both values
 
@@ -116,7 +119,20 @@ Limits:
    or `ONBOARDING.md`. The deploy builds the landing page of the live site from the same
    `estate.json` (`.github/scripts/build-landing.mjs`), so the landing page needs no edit.
 
-7. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
+7. Refresh the "Start here" section of each per-repo `README.md`. Run:
+
+   ```
+   node .github/scripts/build-repo-readmes.mjs
+   ```
+
+   The script puts the section before the first `##` heading of the README. The section links
+   the viewer, the onboarding guide, the glossary, and the source repo. It also links the
+   `CONTRIBUTING.md` of the source repo (if it is a described file), the good first issues, and
+   the volunteer guide. The `Estate index` check fails a pull request if a section is missing,
+   stale, or not first. It also fails if a per-repo README has an em dash, or tells how to view
+   the graphs outside the section.
+
+8. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
    a pull request, and the `gitleaks`, `betterleaks`, `private-names`, and `estate-index`
    checks must pass.
    The merge redeploys the viewers and the landing page.
