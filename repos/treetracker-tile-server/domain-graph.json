@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "project": {
-    "name": "node-mapnik-1",
+    "name": "treetracker-tile-server",
     "languages": [
       "javascript",
       "cpp",

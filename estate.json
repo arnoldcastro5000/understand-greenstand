@@ -73,7 +73,8 @@
           "description": "The public web map of trees, planters, organizations, and tokens. Next.js, React, Leaflet."
         },
         {
-          "name": "node-mapnik-1",
+          "name": "treetracker-tile-server",
+          "formerNames": ["node-mapnik-1"],
           "description": "A fork of node-mapnik. The Greenstand part is the tile server that renders the web map tiles from PostGIS."
         }
       ]

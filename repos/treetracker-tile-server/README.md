@@ -1,8 +1,8 @@
-# node-mapnik-1
+# treetracker-tile-server
 
-Machine-generated documentation for [`Greenstand/node-mapnik-1`](https://github.com/Greenstand/node-mapnik-1).
+Machine-generated documentation for [`Greenstand/treetracker-tile-server`](https://github.com/Greenstand/treetracker-tile-server).
 
-> **This repo is a fork.** `node-mapnik-1` is Greenstand's fork of upstream
+> **This repo is a fork.** `treetracker-tile-server` is Greenstand's fork of upstream
 > [node-mapnik](https://github.com/mapnik/node-mapnik). The Greenstand-authored value is the
 > PostGIS-backed Express **tile server** under `greenstand/` that renders Tree Tracker web-map
 > tiles; the `src/` C++ layer is upstream Mapnik binding code, documented only as the rendering
@@ -13,16 +13,16 @@ Machine-generated documentation for [`Greenstand/node-mapnik-1`](https://github.
 
 ## Start here
 
-- **Explore:** open the [interactive viewer](https://arnoldcastro5000.github.io/understand-greenstand/node-mapnik-1/). It has a guided tour of the repo. Then read the [onboarding guide](./ONBOARDING.md) and the [glossary](./GLOSSARY.md).
-- **Source repo:** [Greenstand/node-mapnik-1](https://github.com/Greenstand/node-mapnik-1). Read the [README](https://github.com/Greenstand/node-mapnik-1#readme) and the [CONTRIBUTING.md](https://github.com/Greenstand/node-mapnik-1/blob/HEAD/CONTRIBUTING.md) of the source repo before you make a change.
-- **First tasks:** pick one from the [open good first issues](https://github.com/Greenstand/node-mapnik-1/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) of node-mapnik-1, or from the [good first issues of all Greenstand repos](https://github.com/search?q=org%3AGreenstand+label%3A%22good+first+issue%22+is%3Aissue+is%3Aopen+archived%3Afalse&type=issues&s=updated&o=desc).
+- **Explore:** open the [interactive viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-tile-server/). It has a guided tour of the repo. Then read the [onboarding guide](./ONBOARDING.md) and the [glossary](./GLOSSARY.md).
+- **Source repo:** [Greenstand/treetracker-tile-server](https://github.com/Greenstand/treetracker-tile-server). Read the [README](https://github.com/Greenstand/treetracker-tile-server#readme) and the [CONTRIBUTING.md](https://github.com/Greenstand/treetracker-tile-server/blob/HEAD/CONTRIBUTING.md) of the source repo before you make a change.
+- **First tasks:** pick one from the [open good first issues](https://github.com/Greenstand/treetracker-tile-server/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) of treetracker-tile-server, or from the [good first issues of all Greenstand repos](https://github.com/search?q=org%3AGreenstand+label%3A%22good+first+issue%22+is%3Aissue+is%3Aopen+archived%3Afalse&type=issues&s=updated&o=desc).
 - **New to Greenstand?** Read [How to contribute to Greenstand](../../docs/contribute-to-greenstand.md). It tells you how to join the community and where to get help. Everyone follows Greenstand's [Code of Conduct](https://github.com/Greenstand/Greenstand-Overview/blob/master/License%2C%20Code%20of%20Conduct%20etc/CODE_OF_CONDUCT.md).
 
 <!-- END start here -->
 
 ## Snapshot
 
-- **Source commit:** [`35fff37`](https://github.com/Greenstand/node-mapnik-1/commit/35fff37f7f10af483a128b199520b2264164d1fb)
+- **Source commit:** [`35fff37`](https://github.com/Greenstand/treetracker-tile-server/commit/35fff37f7f10af483a128b199520b2264164d1fb)
 - **Snapshot date:** 2026-09-02
 - **Files analyzed:** 206 (303 upstream test/asset files excluded)
 - **Graph:** 464 nodes, 617 edges, 7 architecture layers, 12-step guided tour

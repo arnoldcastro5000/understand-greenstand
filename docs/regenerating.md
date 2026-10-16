@@ -87,8 +87,8 @@ Limits:
      the gitignore syntax. Start a directory pattern with `/` to match it only at the root:
      `test/` matches each directory with the name `test`, at any depth.
 
-     - `node-mapnik-1` (a fork): the value keeps the upstream test fixtures, benchmarks, docs,
-       dependencies, examples, and shapefiles out of the graph.
+     - `treetracker-tile-server` (a fork): the value keeps the upstream test fixtures,
+       benchmarks, docs, dependencies, examples, and shapefiles out of the graph.
 
        ```
        --exclude ".ua/,/test/,/bench/,/docs/,/deps/,**/examples/**,*.shp,*.shx,*.dbf"
