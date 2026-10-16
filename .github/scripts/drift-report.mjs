@@ -139,8 +139,6 @@ const notDue = measured.filter((r) => !isDue(r) && r.commits > 0).sort(bySeverit
 const doc = (path) => (docsRepo ? `https://github.com/${docsRepo}/blob/HEAD/${path}` : path);
 const now = new Date().toISOString().replace("T", " ").slice(0, 16);
 const lines = [
-  `## ${TITLE}`,
-  "",
   `Report of ${now} UTC, for ${plural(results.length, "source repo")}. Drift is the change in a ` +
     "source repo since the snapshot that its docs describe. A described file is a file with a " +
     "node in the repo's graph. A repo is **due** when any described file was removed or renamed, " +
@@ -184,8 +182,10 @@ function check(text, label) {
 
 check(body, "the drift report");
 
-process.stdout.write(report);
-if (summaryFile) appendFileSync(summaryFile, report);
+// The issue has the title already; the job summary and a local run get it as a heading.
+const page = `## ${TITLE}\n\n${report}`;
+process.stdout.write(page);
+if (summaryFile) appendFileSync(summaryFile, page);
 
 if (syncIssue) await sync();
 if (missing.length) fail([`${plural(missing.length, "source repo")} not found`]);
