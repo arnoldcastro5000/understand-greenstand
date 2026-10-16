@@ -11484,7 +11484,6 @@
         "config:.eslintignore",
         "config:.huskyrc",
         "config:.releaserc",
-        "config:.ua/.understandignore",
         "config:CODEOWNERS",
         "config:commitlint.config.js",
         "config:config/.gitkeep"

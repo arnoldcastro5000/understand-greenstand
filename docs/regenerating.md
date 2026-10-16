@@ -77,21 +77,57 @@ Limits:
    git clone https://github.com/Greenstand/<repo-name> /tmp/<repo-name>
    ```
 
-2. Run the understand suite against the clone, in order:
+2. Run the Understand-Anything skills on the clone, in this order:
 
-   - `/understand-anything:understand`: builds the `knowledge-graph.json`.
-   - `/understand-anything:understand-domain`: extracts the business domain flow.
-   - `/understand-anything:understand-onboard`: renders the onboarding guide.
+   - `/understand-anything:understand /tmp/<repo-name> --full --exclude ".ua/"`: builds the
+     `knowledge-graph.json`. `--full` ignores an earlier graph in the clone. `--exclude ".ua/"`
+     keeps the files of `.ua/` out of the graph. Understand-Anything writes
+     `.ua/.understandignore` into the clone before its scan. The scan reads untracked files.
+     Some repos need a longer `--exclude` value. Use it in place of `".ua/"`. The patterns use
+     the gitignore syntax. Start a directory pattern with `/` to match it only at the root:
+     `test/` matches each directory with the name `test`, at any depth.
+
+     - `node-mapnik-1` (a fork): the value keeps the upstream test fixtures, benchmarks, docs,
+       dependencies, examples, and shapefiles out of the graph.
+
+       ```
+       --exclude ".ua/,/test/,/bench/,/docs/,/deps/,**/examples/**,*.shp,*.shx,*.dbf"
+       ```
+
+     - `Greenstand-Overview` (a docs repo): the `!` patterns keep the images and the license in
+       the graph. Understand-Anything excludes such files by default.
+
+       ```
+       --exclude ".ua/,!*.png,!*.jpg,!LICENSE"
+       ```
+
+     Then correct the project block of `/tmp/<repo-name>/.ua/knowledge-graph.json`. Do it
+     before the next two skills copy the block. The viewer shows `project.name` as its title.
+     It shows `project.description` in its info panel. `project.name` must be the repo name.
+     The project scanner of Understand-Anything takes the name from the manifest, for example
+     `client` from `package.json`. `project.description` must be one or two sentences about
+     the repo, without the note of the project scanner. The scanner adds that note ("Note: this
+     project has over 100 source files; ...") to the description of a repo with more than 100
+     files.
+   - `/understand-anything:understand-domain`: extracts the business domain flow. Run it with
+     the clone as the working directory.
+   - `/understand-anything:understand-onboard`: renders the onboarding guide. Run it with the
+     clone as the working directory.
+
+   The `Estate index` check fails a pull request if a graph has a node for a file of `.ua/`, a
+   reference to a node that the graph does not have, or a wrong project block.
 
 3. Land the outputs under `repos/<repo-name>/`:
 
    - `knowledge-graph.json`
-   - the domain markdown and domain graph
-   - the onboarding guide
+   - `domain-graph.json`
+   - `ONBOARDING.md`: the onboarding guide. The onboard skill offers to save it as
+     `docs/UA_ONBOARDING.md` in the clone. Land it as `ONBOARDING.md`.
    - a short per-repo `README.md`: a one-paragraph description of the source repo, then the
      sections `## Snapshot`, `## Contents`, `## Business domains`, and `## Regenerating`. Use
      no em dash. Do not write how to view the graphs: step 7 adds a "Start here" section with
-     the viewer link.
+     the viewer link. The `## Regenerating` section links to this recipe. If the repo needs a
+     longer `--exclude` value, add the value and the reason to the list in step 2.
    - `meta.json` (`gitCommitHash`, `lastAnalyzedAt`): the viewer loads source at that
      commit, and the top `README.md` index shows both values
 
@@ -149,9 +185,10 @@ Limits:
    Code stays as it is. The `Estate index` check fails a pull request if an onboarding guide has
    a table or an em dash outside code.
 
-9. Commit on a branch, push it, and open a pull request. `main` accepts changes only through
-   a pull request, and the `gitleaks`, `betterleaks`, `private-names`, and `estate-index`
-   checks must pass.
+9. Run the checks of step 5 in [`CONTRIBUTING.md`](../CONTRIBUTING.md#change-the-docs).
+   Then commit on a branch, push it, and open a pull request. `main` accepts changes only
+   through a pull request, and the `gitleaks`, `betterleaks`, `private-names`, and
+   `estate-index` checks must pass.
    The merge redeploys the viewers and the landing page.
 
 ## When a source repo is renamed
@@ -204,8 +241,8 @@ working.
 
 ## Notes
 
-- The exact command sequence and output layout are frozen by the pilot ticket
-  (`treetracker-api`). Follow that layout for every repo so the estate stays uniform.
+- The output layout comes from the pilot run on `treetracker-api`. Follow that layout for every
+  repo, so that the estate stays uniform.
 - `treetracker-android` is Kotlin and `treetracker-infrastructure` is HCL. Confirm the
   suite handles both, or record any gap in that repo's `README.md`.
 - The `pre-push` hook and the CI checks block secrets and names of private Greenstand repos.

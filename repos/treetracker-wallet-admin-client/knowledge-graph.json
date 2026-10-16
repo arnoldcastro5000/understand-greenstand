@@ -6879,7 +6879,6 @@
         "file:.npmrc",
         "file:.nvmrc",
         "file:.prettierignore",
-        "file:.ua/.understandignore",
         "step:.github/workflows/build-release.yaml:prepare",
         "step:.github/workflows/build-release.yaml:client",
         "step:.github/workflows/build-release.yaml:release",

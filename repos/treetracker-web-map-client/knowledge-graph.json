@@ -15887,7 +15887,6 @@
         "file:.lintstagedrc.js",
         "file:.npmrc",
         "file:.prettierignore",
-        "config:.ua/.understandignore",
         "config:.vs/VSWorkspaceState.json",
         "config:.vs/slnx.sqlite",
         "config:.vs/treetracker-web-map-client/v15/.suo",

@@ -17,6 +17,10 @@ name: Estate index
 # Also fails when a hand-written file outside repos/ names a former name of a renamed repo
 # (formerNames in estate.json). Fix: run `node .github/scripts/check-former-names.mjs` and use
 # the new name on each line that it names.
+# Also fails when a graph (repos/<name>/knowledge-graph.json) has a node for a file of .ua/,
+# a reference to a node that the graph does not have, or a wrong project block (also in
+# domain-graph.json). Fix: regenerate the repo with --exclude ".ua/" (docs/regenerating.md,
+# step 2), remove the reference, or correct the project block (step 2).
 # No path filter: a path-filtered check stays pending forever if it is ever made required.
 
 on:
@@ -59,3 +63,6 @@ jobs:
 
       - name: Check for former names
         run: node .github/scripts/check-former-names.mjs
+
+      - name: Check the graphs
+        run: node .github/scripts/check-graphs.mjs

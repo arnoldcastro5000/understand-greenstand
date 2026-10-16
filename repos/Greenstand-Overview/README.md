@@ -41,5 +41,4 @@ docs. This is the org's overview / onboarding repo, not a code service: it has n
 
 ## Regenerating
 
-See [`../../docs/regenerating.md`](../../docs/regenerating.md). In short: clone the source repo,
-run `/understand` then `/understand-domain` then `/understand-onboard`, and replace this directory.
+See [`../../docs/regenerating.md`](../../docs/regenerating.md).

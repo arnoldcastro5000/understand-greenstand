@@ -9117,7 +9117,6 @@
         "config:.huskyrc",
         "config:.npmrc",
         "config:.releaserc",
-        "config:.ua/.understandignore",
         "config:CODEOWNERS",
         "file:assets/greenstand.webp",
         "config:commitlint.config.js",

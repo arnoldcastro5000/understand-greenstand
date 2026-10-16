@@ -47,5 +47,4 @@ is Terraform/HCL.
 
 ## Regenerating
 
-See [`../../docs/regenerating.md`](../../docs/regenerating.md). In short: clone the source repo,
-run `/understand` then `/understand-domain` then `/understand-onboard`, and replace this directory.
+See [`../../docs/regenerating.md`](../../docs/regenerating.md).

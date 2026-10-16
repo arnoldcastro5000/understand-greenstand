@@ -1,13 +1,13 @@
 // Load the estate: estate.json (areas, descriptions, URLs) plus repos/*/meta.json (snapshots).
 // build-index.mjs (the README.md index), build-landing.mjs (the Pages landing page),
 // build-moved.mjs (the moved pages of renamed repos), build-glossary.mjs,
-// build-repo-readmes.mjs, build-onboarding.mjs, build-ecosystem-maps.mjs, and drift-report.mjs
-// read it, so the outputs cannot drift apart.
+// build-repo-readmes.mjs, build-onboarding.mjs, build-ecosystem-maps.mjs, check-former-names.mjs,
+// check-graphs.mjs, and drift-report.mjs read it, so the outputs cannot drift apart.
 // Returns { estate, areas, repos, count, errors }. Each repo in areas gets its snapshot, its
 // Source URL, and its valid former names (a list, often empty). repos lists the repos of all
 // areas, in order. errors lists every problem at once; the caller prints them and exits.
 // Also exports the helpers that the build scripts share: readDocsFile, markedBlock,
-// replaceMarked, formerNamesText, EM_DASH, and fencedLines.
+// replaceMarked, formerNamesText, EM_DASH, fencedLines, and readGraph.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -126,6 +126,37 @@ export function readDocsFile(at, errors, parse = (text) => text) {
   } catch (e) {
     return errors.push(`${at}: ${e.message}`), null;
   }
+}
+
+// Read the graph of a repo (repos/<name>/knowledge-graph.json) and check the shape of the parts
+// that the scripts read: a list of nodes, and the lists of edges, layers, and tour steps (each
+// optional). Return the graph, or record in errors what is wrong and return null. A missing graph
+// returns null with no error: loadEstate records it.
+export function readGraph(name, errors) {
+  const at = `repos/${name}/knowledge-graph.json`;
+  if (!existsSync(join(root, at))) return null;
+  // Wrap the value: readDocsFile returns null for an error, and the JSON text "null" is null too.
+  const read = readDocsFile(at, errors, (text) => ({ graph: JSON.parse(text) }));
+  if (read === null) return null;
+  const { graph } = read;
+  const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+  if (!isObject(graph)) return errors.push(`${at}: the graph must be a JSON object`), null;
+  const problems = [];
+  const parts = [["nodes", "node"], ["edges", "edge"], ["layers", "layer"], ["tour", "tour step"]];
+  for (const [key, item] of parts) {
+    const list = graph[key];
+    if (list === undefined && key !== "nodes") continue;
+    if (!Array.isArray(list)) {
+      problems.push(`${key} must be a list`);
+      continue;
+    }
+    list.forEach((v, i) => {
+      if (!isObject(v)) problems.push(`${item} ${i} must be a JSON object`);
+      else if ((key === "layers" || key === "tour") && !Array.isArray(v.nodeIds)) problems.push(`${item} ${i}: nodeIds must be a list`);
+    });
+  }
+  for (const problem of problems) errors.push(`${at}: ${problem}`);
+  return problems.length ? null : graph;
 }
 
 // The text after the description of a renamed repo in the README index and on the landing page:

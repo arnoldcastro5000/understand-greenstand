@@ -6895,7 +6895,6 @@
         "config:.huskyrc",
         "config:.npmrc",
         "config:.releaserc",
-        "config:.ua/.understandignore",
         "config:commitlint.config.js",
         "file:scripts/setup-dev-database-passwords.sh",
         "file:scripts/vars.sh"
