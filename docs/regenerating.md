@@ -130,3 +130,7 @@ Limits:
 - The `pre-push` hook and the CI checks block secrets and names of private Greenstand repos.
   A new graph can mirror such a name from its source. Set up the hook before you push, and
   read [`private-names.md`](./private-names.md) for what to do when a check stops you.
+- After you regenerate a repo, the `Estate index` check fails until you check the edges of that
+  repo in [`ecosystem.json`](../ecosystem.json) again. Each edge records its evidence at the old
+  snapshot. Fix the edges, set the `checkedAt` entry of the repo to the new snapshot commit, and
+  run `node .github/scripts/build-ecosystem-maps.mjs`. See [`ARCHITECTURE.md`](../ARCHITECTURE.md).
