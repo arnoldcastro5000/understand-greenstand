@@ -23,7 +23,7 @@ const CODE_OF_CONDUCT =
   "https://github.com/Greenstand/Greenstand-Overview/blob/master/License%2C%20Code%20of%20Conduct%20etc/CODE_OF_CONDUCT.md";
 
 const check = process.argv.includes("--check");
-const { estate, areas, count, errors } = loadEstate();
+const { estate, repos, count, errors } = loadEstate();
 
 // The path of the source repo's CONTRIBUTING.md, if it is a described file (a node in the
 // graph), in the order of places that GitHub uses. The link points to the default branch
@@ -95,7 +95,7 @@ function checkText(readme, at) {
 }
 
 const updates = [];
-for (const repo of areas.flatMap((a) => a.repos)) {
+for (const repo of repos) {
   const at = `repos/${repo.name}/README.md`;
   const readme = readDocsFile(at, errors);
   if (readme === null) continue;
