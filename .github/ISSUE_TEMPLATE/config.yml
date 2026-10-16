@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Contribute to Greenstand
+    url: https://github.com/arnoldcastro5000/understand-greenstand/blob/main/docs/contribute-to-greenstand.md
+    about: Join the community, pick a first task, and get help.
+  - name: Report a bug in Greenstand's code
+    url: https://github.com/Greenstand
+    about: Open the issue in the source repo of the code, not here.

@@ -72,7 +72,8 @@ The full steps are in [Join the team](https://github.com/Greenstand/Greenstand-O
 - **Triage.** Greenstand needs help to clean up and organize its issues. Choose an old issue,
   try the problem again, and add a comment that tells if the problem still occurs.
 - **Documentation.** Improve the docs of a source repo with a pull request. If a page in these
-  generated docs is wrong, [open an issue in the docs repo](https://github.com/arnoldcastro5000/understand-greenstand/issues).
+  generated docs is wrong, open a [Wrong docs](https://github.com/arnoldcastro5000/understand-greenstand/issues/new?template=wrong-docs.yml)
+  issue in the docs repo.
 - **Operations.** Greenstand also needs help with communications, marketing, fundraising,
   graphic design, and nonprofit management. Use the Operations form on the
   [volunteer page](https://greenstand.org/contribute/volunteer).
