@@ -87,8 +87,8 @@ Go deeper: [Documentation](https://github.com/Greenstand/greenstand-documentatio
 
 - **[treetracker-web-map-client](repos/treetracker-web-map-client/)**: The public web map of trees, planters, organizations, and tokens. Next.js, React, Leaflet.\
   [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-web-map-client/) · [Onboarding](repos/treetracker-web-map-client/ONBOARDING.md) · [Glossary](repos/treetracker-web-map-client/GLOSSARY.md) · [README](repos/treetracker-web-map-client/README.md) · [Source](https://github.com/Greenstand/treetracker-web-map-client) · Snapshot 2026-10-16 at [`42b3a9a`](https://github.com/Greenstand/treetracker-web-map-client/commit/42b3a9a6a10ffb30b8a1e25d66f6ebb8850640ec)
-- **[node-mapnik-1](repos/node-mapnik-1/)**: A fork of node-mapnik. The Greenstand part is the tile server that renders the web map tiles from PostGIS.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/node-mapnik-1/) · [Onboarding](repos/node-mapnik-1/ONBOARDING.md) · [Glossary](repos/node-mapnik-1/GLOSSARY.md) · [README](repos/node-mapnik-1/README.md) · [Source](https://github.com/Greenstand/node-mapnik-1) · Snapshot 2026-09-02 at [`35fff37`](https://github.com/Greenstand/node-mapnik-1/commit/35fff37f7f10af483a128b199520b2264164d1fb)
+- **[treetracker-tile-server](repos/treetracker-tile-server/)**: A fork of node-mapnik. The Greenstand part is the tile server that renders the web map tiles from PostGIS. Former name: `node-mapnik-1`.\
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-tile-server/) · [Onboarding](repos/treetracker-tile-server/ONBOARDING.md) · [Glossary](repos/treetracker-tile-server/GLOSSARY.md) · [README](repos/treetracker-tile-server/README.md) · [Source](https://github.com/Greenstand/treetracker-tile-server) · Snapshot 2026-09-02 at [`35fff37`](https://github.com/Greenstand/treetracker-tile-server/commit/35fff37f7f10af483a128b199520b2264164d1fb)
 
 ### Mobile
 
@@ -113,6 +113,6 @@ Go deeper: [Documentation](https://github.com/Greenstand/greenstand-documentatio
 
 The estate covers 14 documented code repositories: the core Tree Tracker services, the wallet
 stack, the admin tools, the web map, the mobile app, the data-ingest services, and the
-infrastructure repo, plus the `node-mapnik-1` fork (included by request). It also covers one
-docs repo, `Greenstand-Overview`, as the place to start. Other fork repos, private repos,
-other docs repos, and dormant repos are out of scope.
+infrastructure repo, plus the `treetracker-tile-server` fork (included by request). It also
+covers one docs repo, `Greenstand-Overview`, as the place to start. Other fork repos, private
+repos, other docs repos, and dormant repos are out of scope.

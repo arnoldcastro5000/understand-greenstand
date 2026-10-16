@@ -16,7 +16,7 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 - **AGPL-3.0 License**: Greenstand-Overview: [Governance & Legal](repos/Greenstand-Overview/GLOSSARY.md#governance--legal)
 - **Airflow DAG**: treetracker-infrastructure: [Application & Data Platform](repos/treetracker-infrastructure/GLOSSARY.md#application--data-platform)
 - **Airflow Variable**: treetracker-airflow-dags: [Platform & Orchestration](repos/treetracker-airflow-dags/GLOSSARY.md#platform--orchestration)
-- **Ambassador Mapping**: node-mapnik-1: [Deployment & Delivery](repos/node-mapnik-1/GLOSSARY.md#deployment--delivery) · treetracker-infrastructure: [Ingress & Identity](repos/treetracker-infrastructure/GLOSSARY.md#ingress--identity)
+- **Ambassador Mapping**: treetracker-infrastructure: [Ingress & Identity](repos/treetracker-infrastructure/GLOSSARY.md#ingress--identity) · treetracker-tile-server: [Deployment & Delivery](repos/treetracker-tile-server/GLOSSARY.md#deployment--delivery)
 - **Announcement**: treetracker-admin-client: [Messaging & Surveys](repos/treetracker-admin-client/GLOSSARY.md#messaging--surveys)
 - **API key**: treetracker-wallet-admin-client: [Authentication & Access](repos/treetracker-wallet-admin-client/GLOSSARY.md#authentication--access) · treetracker-wallet-api: [Authentication](repos/treetracker-wallet-api/GLOSSARY.md#authentication)
 - **AuditRecord**: treetracker-admin-api: [Identity & Access Control](repos/treetracker-admin-api/GLOSSARY.md#identity--access-control)
@@ -28,7 +28,7 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 - **BaseRepository**: images-api: [Data Persistence](repos/images-api/GLOSSARY.md#data-persistence)
 - **bastion**: treetracker-infrastructure: [Cloud & Cluster Provisioning](repos/treetracker-infrastructure/GLOSSARY.md#cloud--cluster-provisioning)
 - **Board of Directors**: Greenstand-Overview: [Governance & Legal](repos/Greenstand-Overview/GLOSSARY.md#governance--legal)
-- **Bounding-box envelope**: node-mapnik-1: [Tile Rendering](repos/node-mapnik-1/GLOSSARY.md#tile-rendering)
+- **Bounding-box envelope**: treetracker-tile-server: [Tile Rendering](repos/treetracker-tile-server/GLOSSARY.md#tile-rendering)
 - **Bounds**: treetracker-query-api: [Geospatial & Mapping](repos/treetracker-query-api/GLOSSARY.md#geospatial--mapping)
 - **bundle**: treetracker-wallet-api: [Token Transfer](repos/treetracker-wallet-api/GLOSSARY.md#token-transfer)
 
@@ -44,7 +44,7 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 - **client**: treetracker-infrastructure: [Ingress & Identity](repos/treetracker-infrastructure/GLOSSARY.md#ingress--identity)
 - **Code of Conduct**: Greenstand-Overview: [Governance & Legal](repos/Greenstand-Overview/GLOSSARY.md#governance--legal)
 - **Community role**: Greenstand-Overview: [Governance & Legal](repos/Greenstand-Overview/GLOSSARY.md#governance--legal)
-- **Connection pool**: node-mapnik-1: [Database Access](repos/node-mapnik-1/GLOSSARY.md#database-access)
+- **Connection pool**: treetracker-tile-server: [Database Access](repos/treetracker-tile-server/GLOSSARY.md#database-access)
 - **Continent**: treetracker-web-map-client: [Search and Discovery](repos/treetracker-web-map-client/GLOSSARY.md#search-and-discovery)
 - **Contract**: treetracker-query-api: [Token & Transaction Ledger](repos/treetracker-query-api/GLOSSARY.md#token--transaction-ledger)
 - **Contributor**: Greenstand-Overview: [Contributor Onboarding & Development Workflow](repos/Greenstand-Overview/GLOSSARY.md#contributor-onboarding--development-workflow)
@@ -60,14 +60,14 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 - **DAG**: treetracker-airflow-dags: [Platform & Orchestration](repos/treetracker-airflow-dags/GLOSSARY.md#platform--orchestration)
 - **Dashboard config (navbar items, logo URL, map initial location)**: treetracker-web-map-client: [Authentication and Admin](repos/treetracker-web-map-client/GLOSSARY.md#authentication-and-admin)
 - **Dashboard Stat**: treetracker-admin-client: [Reporting & Analytics Dashboard](repos/treetracker-admin-client/GLOSSARY.md#reporting--analytics-dashboard)
-- **Datasource**: node-mapnik-1: [Native Rendering Engine](repos/node-mapnik-1/GLOSSARY.md#native-rendering-engine)
+- **Datasource**: treetracker-tile-server: [Native Rendering Engine](repos/treetracker-tile-server/GLOSSARY.md#native-rendering-engine)
 - **Date Range Filter**: treetracker-admin-client: [Reporting & Analytics Dashboard](repos/treetracker-admin-client/GLOSSARY.md#reporting--analytics-dashboard)
 - **default privilege**: treetracker-infrastructure: [Database Platform](repos/treetracker-infrastructure/GLOSSARY.md#database-platform)
 - **Deliverable**: Greenstand-Overview: [Product Strategy & Planning](repos/Greenstand-Overview/GLOSSARY.md#product-strategy--planning)
 - **DeviceConfigRequest**: treetracker-android: [Data Sync & Upload](repos/treetracker-android/GLOSSARY.md#data-sync--upload)
 - **DeviceConfiguration**: treetracker-field-data: [Device Configuration](repos/treetracker-field-data/GLOSSARY.md#device-configuration)
 - **Display name**: treetracker-wallet-admin-client: [Wallet Customization](repos/treetracker-wallet-admin-client/GLOSSARY.md#wallet-customization)
-- **Docker image**: images-api: [Build & Deployment](repos/images-api/GLOSSARY.md#build--deployment) · node-mapnik-1: [Deployment & Delivery](repos/node-mapnik-1/GLOSSARY.md#deployment--delivery)
+- **Docker image**: images-api: [Build & Deployment](repos/images-api/GLOSSARY.md#build--deployment) · treetracker-tile-server: [Deployment & Delivery](repos/treetracker-tile-server/GLOSSARY.md#deployment--delivery)
 - **doctl kubeconfig**: treetracker-infrastructure: [Platform Operations & CI](repos/treetracker-infrastructure/GLOSSARY.md#platform-operations--ci)
 - **DOKS cluster**: treetracker-infrastructure: [Cloud & Cluster Provisioning](repos/treetracker-infrastructure/GLOSSARY.md#cloud--cluster-provisioning)
 - **Domain**: images-api: [Image Processing & Delivery](repos/images-api/GLOSSARY.md#image-processing--delivery)
@@ -116,8 +116,8 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 ## I
 
 - **IAM user**: treetracker-infrastructure: [Cloud & Cluster Provisioning](repos/treetracker-infrastructure/GLOSSARY.md#cloud--cluster-provisioning)
-- **Image**: images-api: [Image Processing & Delivery](repos/images-api/GLOSSARY.md#image-processing--delivery) · node-mapnik-1: [Native Rendering Engine](repos/node-mapnik-1/GLOSSARY.md#native-rendering-engine)
-- **In-flight query queue**: node-mapnik-1: [Database Access](repos/node-mapnik-1/GLOSSARY.md#database-access)
+- **Image**: images-api: [Image Processing & Delivery](repos/images-api/GLOSSARY.md#image-processing--delivery) · treetracker-tile-server: [Native Rendering Engine](repos/treetracker-tile-server/GLOSSARY.md#native-rendering-engine)
+- **In-flight query queue**: treetracker-tile-server: [Database Access](repos/treetracker-tile-server/GLOSSARY.md#database-access)
 - **Inbox Thread**: treetracker-admin-client: [Messaging & Surveys](repos/treetracker-admin-client/GLOSSARY.md#messaging--surveys)
 - **ingress host**: treetracker-infrastructure: [Ingress & Identity](repos/treetracker-infrastructure/GLOSSARY.md#ingress--identity)
 
@@ -133,8 +133,8 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 - **Keyword (tree id)**: treetracker-web-map-client: [Search and Discovery](repos/treetracker-web-map-client/GLOSSARY.md#search-and-discovery)
 - **Knex Connection**: images-api: [Data Persistence](repos/images-api/GLOSSARY.md#data-persistence)
 - **Kubernetes Deployment**: images-api: [Build & Deployment](repos/images-api/GLOSSARY.md#build--deployment)
-- **Kubernetes Service/Deployment**: node-mapnik-1: [Deployment & Delivery](repos/node-mapnik-1/GLOSSARY.md#deployment--delivery)
-- **Kustomize overlay**: images-api: [Build & Deployment](repos/images-api/GLOSSARY.md#build--deployment) · node-mapnik-1: [Deployment & Delivery](repos/node-mapnik-1/GLOSSARY.md#deployment--delivery)
+- **Kubernetes Service/Deployment**: treetracker-tile-server: [Deployment & Delivery](repos/treetracker-tile-server/GLOSSARY.md#deployment--delivery)
+- **Kustomize overlay**: images-api: [Build & Deployment](repos/images-api/GLOSSARY.md#build--deployment) · treetracker-tile-server: [Deployment & Delivery](repos/treetracker-tile-server/GLOSSARY.md#deployment--delivery)
 
 ## L
 
@@ -147,7 +147,7 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 - **Location**: treetracker-android: [Tree Capture](repos/treetracker-android/GLOSSARY.md#tree-capture)
 - **Logo image**: treetracker-wallet-admin-client: [Wallet Customization](repos/treetracker-wallet-admin-client/GLOSSARY.md#wallet-customization)
 - **Loki**: treetracker-infrastructure: [Observability & Alerting](repos/treetracker-infrastructure/GLOSSARY.md#observability--alerting)
-- **LRU cache**: node-mapnik-1: [Database Access](repos/node-mapnik-1/GLOSSARY.md#database-access)
+- **LRU cache**: treetracker-tile-server: [Database Access](repos/treetracker-tile-server/GLOSSARY.md#database-access)
 
 ## M
 
@@ -156,10 +156,10 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 - **Map (treetracker-web-map-core)**: treetracker-web-map-client: [Map Exploration](repos/treetracker-web-map-client/GLOSSARY.md#map-exploration)
 - **Map bounds**: treetracker-web-map-client: [Map Exploration](repos/treetracker-web-map-client/GLOSSARY.md#map-exploration)
 - **Map filters (userid, map_name, wallet, timeline)**: treetracker-web-map-client: [Map Exploration](repos/treetracker-web-map-client/GLOSSARY.md#map-exploration)
-- **Map instance**: node-mapnik-1: [Tile Rendering](repos/node-mapnik-1/GLOSSARY.md#tile-rendering)
+- **Map instance**: treetracker-tile-server: [Tile Rendering](repos/treetracker-tile-server/GLOSSARY.md#tile-rendering)
 - **map tile**: treetracker-airflow-dags: [Web-Map Precompute](repos/treetracker-airflow-dags/GLOSSARY.md#web-map-precompute)
-- **Mapnik Map**: node-mapnik-1: [Native Rendering Engine](repos/node-mapnik-1/GLOSSARY.md#native-rendering-engine)
-- **Mapnik XML template**: node-mapnik-1: [Style & Projection Config](repos/node-mapnik-1/GLOSSARY.md#style--projection-config)
+- **Mapnik Map**: treetracker-tile-server: [Native Rendering Engine](repos/treetracker-tile-server/GLOSSARY.md#native-rendering-engine)
+- **Mapnik XML template**: treetracker-tile-server: [Style & Projection Config](repos/treetracker-tile-server/GLOSSARY.md#style--projection-config)
 - **Member Grower/User**: treetracker-admin-client: [Stakeholder & Organization Management](repos/treetracker-admin-client/GLOSSARY.md#stakeholder--organization-management)
 - **Message**: treetracker-admin-client: [Messaging & Surveys](repos/treetracker-admin-client/GLOSSARY.md#messaging--surveys) · treetracker-android: [Grower Messaging](repos/treetracker-android/GLOSSARY.md#grower-messaging)
 - **MessageEntity**: treetracker-android: [Grower Messaging](repos/treetracker-android/GLOSSARY.md#grower-messaging)
@@ -200,21 +200,21 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 - **PlanterCheckIn**: treetracker-android: [Grower Onboarding & Identity](repos/treetracker-android/GLOSSARY.md#grower-onboarding--identity)
 - **PlanterInfo**: treetracker-android: [Grower Onboarding & Identity](repos/treetracker-android/GLOSSARY.md#grower-onboarding--identity)
 - **PlanterRegistration**: treetracker-admin-api: [Grower Management](repos/treetracker-admin-api/GLOSSARY.md#grower-management)
-- **PNG image**: node-mapnik-1: [Tile Rendering](repos/node-mapnik-1/GLOSSARY.md#tile-rendering)
+- **PNG image**: treetracker-tile-server: [Tile Rendering](repos/treetracker-tile-server/GLOSSARY.md#tile-rendering)
 - **Policy**: treetracker-admin-api: [Identity & Access Control](repos/treetracker-admin-api/GLOSSARY.md#identity--access-control)
-- **PostGIS datasource**: node-mapnik-1: [Style & Projection Config](repos/node-mapnik-1/GLOSSARY.md#style--projection-config)
+- **PostGIS datasource**: treetracker-tile-server: [Style & Projection Config](repos/treetracker-tile-server/GLOSSARY.md#style--projection-config)
 - **Postgres Table**: images-api: [Data Persistence](repos/images-api/GLOSSARY.md#data-persistence)
 - **pre-commit hook**: treetracker-infrastructure: [Platform Operations & CI](repos/treetracker-infrastructure/GLOSSARY.md#platform-operations--ci)
 - **prediction**: treetracker-airflow-dags: [Species Identification](repos/treetracker-airflow-dags/GLOSSARY.md#species-identification)
-- **Projection**: node-mapnik-1: [Native Rendering Engine](repos/node-mapnik-1/GLOSSARY.md#native-rendering-engine)
-- **Projection constants**: node-mapnik-1: [Style & Projection Config](repos/node-mapnik-1/GLOSSARY.md#style--projection-config)
+- **Projection**: treetracker-tile-server: [Native Rendering Engine](repos/treetracker-tile-server/GLOSSARY.md#native-rendering-engine)
+- **Projection constants**: treetracker-tile-server: [Style & Projection Config](repos/treetracker-tile-server/GLOSSARY.md#style--projection-config)
 - **Prometheus Operator**: treetracker-infrastructure: [Observability & Alerting](repos/treetracker-infrastructure/GLOSSARY.md#observability--alerting)
 - **Promtail**: treetracker-infrastructure: [Observability & Alerting](repos/treetracker-infrastructure/GLOSSARY.md#observability--alerting)
 - **Pull request**: Greenstand-Overview: [Contributor Onboarding & Development Workflow](repos/Greenstand-Overview/GLOSSARY.md#contributor-onboarding--development-workflow)
 
 ## Q
 
-- **Query result**: node-mapnik-1: [Database Access](repos/node-mapnik-1/GLOSSARY.md#database-access)
+- **Query result**: treetracker-tile-server: [Database Access](repos/treetracker-tile-server/GLOSSARY.md#database-access)
 - **Question**: treetracker-android: [Grower Messaging](repos/treetracker-android/GLOSSARY.md#grower-messaging)
 
 ## R
@@ -232,7 +232,7 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 - **reporting schema**: treetracker-airflow-dags: [Reporting & Analytics](repos/treetracker-airflow-dags/GLOSSARY.md#reporting--analytics)
 - **Repository**: Greenstand-Overview: [Contributor Onboarding & Development Workflow](repos/Greenstand-Overview/GLOSSARY.md#contributor-onboarding--development-workflow), [Product Strategy & Planning](repos/Greenstand-Overview/GLOSSARY.md#product-strategy--planning)
 - **Request**: images-api: [API Request Lifecycle](repos/images-api/GLOSSARY.md#api-request-lifecycle)
-- **Request settings**: node-mapnik-1: [Map Query Building](repos/node-mapnik-1/GLOSSARY.md#map-query-building)
+- **Request settings**: treetracker-tile-server: [Map Query Building](repos/treetracker-tile-server/GLOSSARY.md#map-query-building)
 - **ResizeParams (height, width, rotation, quality)**: images-api: [Image Processing & Delivery](repos/images-api/GLOSSARY.md#image-processing--delivery)
 - **Response**: images-api: [API Request Lifecycle](repos/images-api/GLOSSARY.md#api-request-lifecycle)
 - **Roadmap tier**: Greenstand-Overview: [Product Strategy & Planning](repos/Greenstand-Overview/GLOSSARY.md#product-strategy--planning)
@@ -245,7 +245,7 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 
 - **S3 manifest**: treetracker-airflow-dags: [Species Identification](repos/treetracker-airflow-dags/GLOSSARY.md#species-identification)
 - **SageMaker batch transform job**: treetracker-airflow-dags: [Species Identification](repos/treetracker-airflow-dags/GLOSSARY.md#species-identification)
-- **Sealed secret**: node-mapnik-1: [Deployment & Delivery](repos/node-mapnik-1/GLOSSARY.md#deployment--delivery) · treetracker-infrastructure: [Cloud & Cluster Provisioning](repos/treetracker-infrastructure/GLOSSARY.md#cloud--cluster-provisioning), [Ingress & Identity](repos/treetracker-infrastructure/GLOSSARY.md#ingress--identity)
+- **Sealed secret**: treetracker-infrastructure: [Cloud & Cluster Provisioning](repos/treetracker-infrastructure/GLOSSARY.md#cloud--cluster-provisioning), [Ingress & Identity](repos/treetracker-infrastructure/GLOSSARY.md#ingress--identity) · treetracker-tile-server: [Deployment & Delivery](repos/treetracker-tile-server/GLOSSARY.md#deployment--delivery)
 - **Search Result**: treetracker-wallet-app: [Search & Discovery](repos/treetracker-wallet-app/GLOSSARY.md#search--discovery)
 - **semantic-release Version**: images-api: [Build & Deployment](repos/images-api/GLOSSARY.md#build--deployment)
 - **Sender wallet**: treetracker-wallet-admin-client: [Token Transfers](repos/treetracker-wallet-admin-client/GLOSSARY.md#token-transfers)
@@ -260,8 +260,8 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 - **Solr Helm release**: treetracker-infrastructure: [Application & Data Platform](repos/treetracker-infrastructure/GLOSSARY.md#application--data-platform)
 - **Species**: treetracker-admin-api: [Capture Verification](repos/treetracker-admin-api/GLOSSARY.md#capture-verification), [Species & Tag Catalog](repos/treetracker-admin-api/GLOSSARY.md#species--tag-catalog) · treetracker-admin-client: [Reference Data Management](repos/treetracker-admin-client/GLOSSARY.md#reference-data-management) · treetracker-query-api: [Species Catalog](repos/treetracker-query-api/GLOSSARY.md#species-catalog) · treetracker-web-map-client: [Entity Profiles](repos/treetracker-web-map-client/GLOSSARY.md#entity-profiles)
 - **species stat view**: treetracker-airflow-dags: [Web-Map Precompute](repos/treetracker-airflow-dags/GLOSSARY.md#web-map-precompute)
-- **SQL CDATA parameter**: node-mapnik-1: [Style & Projection Config](repos/node-mapnik-1/GLOSSARY.md#style--projection-config)
-- **SQL query builder (SQLCase/SQLZoomTarget/SQLTree)**: node-mapnik-1: [Map Query Building](repos/node-mapnik-1/GLOSSARY.md#map-query-building)
+- **SQL CDATA parameter**: treetracker-tile-server: [Style & Projection Config](repos/treetracker-tile-server/GLOSSARY.md#style--projection-config)
+- **SQL query builder (SQLCase/SQLZoomTarget/SQLTree)**: treetracker-tile-server: [Map Query Building](repos/treetracker-tile-server/GLOSSARY.md#map-query-building)
 - **Stakeholder**: treetracker-admin-client: [Stakeholder & Organization Management](repos/treetracker-admin-client/GLOSSARY.md#stakeholder--organization-management) · treetracker-airflow-dags: [Data Migration](repos/treetracker-airflow-dags/GLOSSARY.md#data-migration) · treetracker-query-api: [Stakeholder Directory](repos/treetracker-query-api/GLOSSARY.md#stakeholder-directory) · treetracker-web-map-client: [Entity Profiles](repos/treetracker-web-map-client/GLOSSARY.md#entity-profiles)
 - **Stakeholder Group**: treetracker-admin-client: [Stakeholder & Organization Management](repos/treetracker-admin-client/GLOSSARY.md#stakeholder--organization-management)
 - **static website**: treetracker-infrastructure: [Application & Data Platform](repos/treetracker-infrastructure/GLOSSARY.md#application--data-platform)
@@ -274,9 +274,9 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 
 - **Tag**: treetracker-admin-api: [Species & Tag Catalog](repos/treetracker-admin-api/GLOSSARY.md#species--tag-catalog) · treetracker-admin-client: [Capture Management](repos/treetracker-admin-client/GLOSSARY.md#capture-management) · treetracker-api: [Tagging](repos/treetracker-api/GLOSSARY.md#tagging)
 - **Theme object**: treetracker-web-map-client: [Authentication and Admin](repos/treetracker-web-map-client/GLOSSARY.md#authentication-and-admin)
-- **Tile (x/y/z)**: node-mapnik-1: [Tile Rendering](repos/node-mapnik-1/GLOSSARY.md#tile-rendering)
+- **Tile (x/y/z)**: treetracker-tile-server: [Tile Rendering](repos/treetracker-tile-server/GLOSSARY.md#tile-rendering)
 - **Timeline (start and end date)**: treetracker-web-map-client: [Search and Discovery](repos/treetracker-web-map-client/GLOSSARY.md#search-and-discovery)
-- **Timeline range**: node-mapnik-1: [Map Query Building](repos/node-mapnik-1/GLOSSARY.md#map-query-building)
+- **Timeline range**: treetracker-tile-server: [Map Query Building](repos/treetracker-tile-server/GLOSSARY.md#map-query-building)
 - **Token**: Greenstand-Overview: [Token Economy (Greenstand Token)](repos/Greenstand-Overview/GLOSSARY.md#token-economy-greenstand-token) · treetracker-query-api: [Token & Transaction Ledger](repos/treetracker-query-api/GLOSSARY.md#token--transaction-ledger) · treetracker-wallet-api: [Token Query](repos/treetracker-wallet-api/GLOSSARY.md#token-query), [Token Transfer](repos/treetracker-wallet-api/GLOSSARY.md#token-transfer) · treetracker-wallet-app: [Token Transfer](repos/treetracker-wallet-app/GLOSSARY.md#token-transfer) · treetracker-web-map-client: [Entity Profiles](repos/treetracker-web-map-client/GLOSSARY.md#entity-profiles)
 - **Token amount**: treetracker-wallet-admin-client: [Token Transfers](repos/treetracker-wallet-admin-client/GLOSSARY.md#token-transfers)
 - **Token state**: Greenstand-Overview: [Token Economy (Greenstand Token)](repos/Greenstand-Overview/GLOSSARY.md#token-economy-greenstand-token)
@@ -284,7 +284,7 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 - **TracksRequest**: treetracker-android: [Data Sync & Upload](repos/treetracker-android/GLOSSARY.md#data-sync--upload)
 - **Transaction**: treetracker-query-api: [Token & Transaction Ledger](repos/treetracker-query-api/GLOSSARY.md#token--transaction-ledger) · treetracker-wallet-api: [Token Query](repos/treetracker-wallet-api/GLOSSARY.md#token-query), [Token Transfer](repos/treetracker-wallet-api/GLOSSARY.md#token-transfer) · treetracker-web-map-client: [Entity Profiles](repos/treetracker-web-map-client/GLOSSARY.md#entity-profiles)
 - **Transfer**: treetracker-wallet-admin-client: [Token Transfers](repos/treetracker-wallet-admin-client/GLOSSARY.md#token-transfers) · treetracker-wallet-api: [Token Transfer](repos/treetracker-wallet-api/GLOSSARY.md#token-transfer) · treetracker-wallet-app: [Token Transfer](repos/treetracker-wallet-app/GLOSSARY.md#token-transfer)
-- **Tree**: node-mapnik-1: [Map Query Building](repos/node-mapnik-1/GLOSSARY.md#map-query-building) · treetracker-android: [Tree Capture](repos/treetracker-android/GLOSSARY.md#tree-capture) · treetracker-api: [Tree Management](repos/treetracker-api/GLOSSARY.md#tree-management) · treetracker-query-api: [Tree & Capture Data](repos/treetracker-query-api/GLOSSARY.md#tree--capture-data) · treetracker-web-map-client: [Entity Profiles](repos/treetracker-web-map-client/GLOSSARY.md#entity-profiles)
+- **Tree**: treetracker-android: [Tree Capture](repos/treetracker-android/GLOSSARY.md#tree-capture) · treetracker-api: [Tree Management](repos/treetracker-api/GLOSSARY.md#tree-management) · treetracker-query-api: [Tree & Capture Data](repos/treetracker-query-api/GLOSSARY.md#tree--capture-data) · treetracker-tile-server: [Map Query Building](repos/treetracker-tile-server/GLOSSARY.md#map-query-building) · treetracker-web-map-client: [Entity Profiles](repos/treetracker-web-map-client/GLOSSARY.md#entity-profiles)
 - **tree cluster**: treetracker-airflow-dags: [Web-Map Precompute](repos/treetracker-airflow-dags/GLOSSARY.md#web-map-precompute)
 - **Tree marker**: treetracker-web-map-client: [Map Exploration](repos/treetracker-web-map-client/GLOSSARY.md#map-exploration)
 - **tree_denormalized**: treetracker-airflow-dags: [Reporting & Analytics](repos/treetracker-airflow-dags/GLOSSARY.md#reporting--analytics)
@@ -312,7 +312,7 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 
 ## W
 
-- **Wallet**: node-mapnik-1: [Map Query Building](repos/node-mapnik-1/GLOSSARY.md#map-query-building) · treetracker-android: [Grower Messaging](repos/treetracker-android/GLOSSARY.md#grower-messaging), [Grower Onboarding & Identity](repos/treetracker-android/GLOSSARY.md#grower-onboarding--identity), [Organization & Wallet Selection](repos/treetracker-android/GLOSSARY.md#organization--wallet-selection) · treetracker-query-api: [Token & Transaction Ledger](repos/treetracker-query-api/GLOSSARY.md#token--transaction-ledger) · treetracker-wallet-admin-client: [Wallet Management](repos/treetracker-wallet-admin-client/GLOSSARY.md#wallet-management) · treetracker-wallet-api: [Wallet Management](repos/treetracker-wallet-api/GLOSSARY.md#wallet-management) · treetracker-wallet-app: [Search & Discovery](repos/treetracker-wallet-app/GLOSSARY.md#search--discovery), [Wallet Management](repos/treetracker-wallet-app/GLOSSARY.md#wallet-management) · treetracker-web-map-client: [Entity Profiles](repos/treetracker-web-map-client/GLOSSARY.md#entity-profiles)
+- **Wallet**: treetracker-android: [Grower Messaging](repos/treetracker-android/GLOSSARY.md#grower-messaging), [Grower Onboarding & Identity](repos/treetracker-android/GLOSSARY.md#grower-onboarding--identity), [Organization & Wallet Selection](repos/treetracker-android/GLOSSARY.md#organization--wallet-selection) · treetracker-query-api: [Token & Transaction Ledger](repos/treetracker-query-api/GLOSSARY.md#token--transaction-ledger) · treetracker-tile-server: [Map Query Building](repos/treetracker-tile-server/GLOSSARY.md#map-query-building) · treetracker-wallet-admin-client: [Wallet Management](repos/treetracker-wallet-admin-client/GLOSSARY.md#wallet-management) · treetracker-wallet-api: [Wallet Management](repos/treetracker-wallet-api/GLOSSARY.md#wallet-management) · treetracker-wallet-app: [Search & Discovery](repos/treetracker-wallet-app/GLOSSARY.md#search--discovery), [Wallet Management](repos/treetracker-wallet-app/GLOSSARY.md#wallet-management) · treetracker-web-map-client: [Entity Profiles](repos/treetracker-web-map-client/GLOSSARY.md#entity-profiles)
 - **Wallet balance**: treetracker-wallet-admin-client: [Wallet Management](repos/treetracker-wallet-admin-client/GLOSSARY.md#wallet-management)
 - **Wallet credentials**: treetracker-wallet-api: [Authentication](repos/treetracker-wallet-api/GLOSSARY.md#authentication)
 - **Wallet identity**: treetracker-wallet-admin-client: [Authentication & Access](repos/treetracker-wallet-admin-client/GLOSSARY.md#authentication--access)
@@ -322,4 +322,4 @@ Jump to: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#
 
 ## Z
 
-- **Zoom level**: node-mapnik-1: [Style & Projection Config](repos/node-mapnik-1/GLOSSARY.md#style--projection-config)
+- **Zoom level**: treetracker-tile-server: [Style & Projection Config](repos/treetracker-tile-server/GLOSSARY.md#style--projection-config)
