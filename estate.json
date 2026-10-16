@@ -9,7 +9,8 @@
       "repos": [
         {
           "name": "Greenstand-Overview",
-          "description": "The org overview and onboarding repo: contributor guide, roadmap, and team directory. Docs, not code."
+          "description": "The org overview and onboarding repo: contributor guide, roadmap, and team directory. Docs, not code.",
+          "docs": true
         }
       ],
       "seeAlso": [

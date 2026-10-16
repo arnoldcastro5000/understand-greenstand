@@ -3,6 +3,9 @@ name: Estate index
 # Fails when the README.md estate index does not match estate.json and repos/*/meta.json,
 # when a repos/<name>/ directory has no estate.json entry, or when it lacks a file that the
 # index links to. Fix: run `node .github/scripts/build-index.mjs` and commit README.md.
+# Also fails when an ecosystem map in ARCHITECTURE.md is stale, when ecosystem.json has an
+# error, or when a repo was regenerated after its edges were checked. Fix: run
+# `node .github/scripts/build-ecosystem-maps.mjs` and follow its errors.
 # Also fails when a glossary (repos/<name>/GLOSSARY.md, or the estate GLOSSARY.md) does not
 # match the domain graphs. Fix: run `node .github/scripts/build-glossary.mjs`.
 # No path filter: a path-filtered check stays pending forever if it is ever made required.
@@ -32,6 +35,9 @@ jobs:
 
       - name: Check the estate index
         run: node .github/scripts/build-index.mjs --check
+
+      - name: Check the ecosystem maps
+        run: node .github/scripts/build-ecosystem-maps.mjs --check
 
       - name: Check the glossaries
         run: node .github/scripts/build-glossary.mjs --check

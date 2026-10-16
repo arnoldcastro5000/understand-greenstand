@@ -32,6 +32,8 @@ The full steps are in [Join the team](https://github.com/Greenstand/Greenstand-O
 - Open the [repository index](../README.md). It groups the main source repos by area: core API,
   wallet, admin, web map, mobile, data ingest, and infrastructure. Each repo has an interactive
   viewer with a guided tour, an onboarding guide, and a glossary.
+- Look at the [ecosystem maps](../ARCHITECTURE.md). They show how the repos work together:
+  which app calls which API, and which data they share.
 - Use the [estate glossary](../GLOSSARY.md) when a business term is new to you, for example
   capture, token, or wallet.
 
