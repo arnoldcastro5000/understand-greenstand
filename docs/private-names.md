@@ -28,7 +28,7 @@ a name by its hash or by a count ("1 name, 76 hits").
 - **`gitleaks` and `betterleaks` checks** (CI, required): the full git history.\
   When: each push and pull request.
 - **Issue scan** (`secrets-scan-issues.yml`): issues, pull requests, and their comments.\
-  When: each issue event, and every hour.
+  When: each issue event, and on an hourly schedule. GitHub can delay or skip a scheduled run.
 
 All guards use one script, `.github/scripts/private-names.sh`. It runs gitleaks and
 betterleaks, so each run also checks for secrets. Output shows the rule, the location, and the
