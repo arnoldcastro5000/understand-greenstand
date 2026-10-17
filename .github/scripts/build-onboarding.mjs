@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 // Clean up the onboarding guide of each repo (repos/<name>/ONBOARDING.md) after a regeneration.
 // /understand-anything:understand-onboard writes the guides, and it picks their format again on
-// each run. Two parts of its output do not suit these docs:
+// each run. Three parts of its output do not suit these docs:
+// - The title: the skill can take a wrong name from the graph. The title becomes
+//   "# Onboarding Guide: <repo name>". The subtitle (the groups in parentheses at the end of the
+//   title) stays, unless it is empty or only names the repo.
 // - A table: on a phone (390 px), GitHub cuts it off, and the reader must scroll it sideways.
 //   Each table becomes a list with one item for each row.
 // - An em dash: this repo's text uses none. The first em dash of a list item or a heading becomes
@@ -9,8 +12,9 @@
 //   becomes a colon.
 // Code (inline or fenced) stays as it is.
 // Usage: node build-onboarding.mjs           rewrite the guides
-//        node build-onboarding.mjs --check   exit 1 if a guide has a table or an em dash outside
-//                                            code (CI)
+//        node build-onboarding.mjs --check   exit 1 if a guide has a wrong title, a table, or an
+//                                            em dash outside code (CI)
+// Both modes exit 1 if the first line of a guide is not a title.
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { EM_DASH, fencedLines, loadEstate, readDocsFile, root } from "./estate.mjs";
@@ -137,10 +141,47 @@ function cleanUp(lines) {
     .join("\n");
 }
 
-// What the clean-up changes, by line number: the first row of each table, and each line with an
-// em dash outside code. It reads the blocks as cleanUp does, so both agree on what is code.
-function findings(lines) {
+// A title is a level 1 heading on the first line of a guide.
+const isTitle = (line) => /^#[ \t]/.test(line);
+
+const TITLE = "# Onboarding Guide: ";
+
+// The index of the "(" of the group in parentheses at the end of text, after white space, or -1.
+// The group can hold more parentheses.
+function groupStart(text) {
+  let depth = 0;
+  for (let i = text.length - 1; i > 0; i--) {
+    if (text[i] === ")") depth++;
+    else if (text[i] === "(") depth--;
+    if (depth <= 0) return depth === 0 && text[i] === "(" && /\s/.test(text[i - 1]) ? i : -1;
+  }
+  return -1;
+}
+
+// The subtitle of a title: the groups in parentheses at its end, before a closing "#" sequence.
+function subtitleOf(title) {
+  const text = title.replace(/[ \t]+#+[ \t]*$/, "").trimEnd();
+  let start = text.length;
+  for (let i; (i = groupStart(text.slice(0, start).trimEnd())) !== -1; ) start = i;
+  return text.slice(start);
+}
+
+// The guide with a title that names its repo: "# Onboarding Guide: <name>". The subtitle of the
+// title that the skill wrote stays. An empty subtitle goes, and so does a subtitle that only names
+// the repo.
+function retitle(lines, name) {
+  const subtitle = subtitleOf(lines[0]);
+  const keep = /[^()\s]/.test(subtitle) && subtitle !== `(${name})`;
+  return [keep ? `${TITLE}${name} ${subtitle}` : `${TITLE}${name}`, ...lines.slice(1)];
+}
+
+// What the clean-up changes, by line number: a first line that is not a title, a wrong title, the
+// first row of each table, and each line with an em dash outside code. It reads the blocks as cleanUp does, so both agree on what is
+// code.
+function findings(lines, name) {
   const out = [];
+  if (!isTitle(lines[0])) out.push([1, UNTITLED]);
+  else if (retitle(lines, name)[0] !== lines[0]) out.push([1, "a wrong title"]);
   let start = 1; // the line number of the first line of a run
   for (const { code, lines: run } of splitAtFences(lines)) {
     if (!code) {
@@ -164,6 +205,10 @@ function firstChange(a, b) {
   return i + 1;
 }
 
+// The script cannot clean up a guide without a title. It writes no title before the first line:
+// that line can be a title in another form, and then the guide has two titles.
+const UNTITLED = 'the first line is not a title ("# ...")';
+
 const updates = [];
 for (const { name } of repos) {
   const at = `repos/${name}/ONBOARDING.md`;
@@ -172,7 +217,8 @@ for (const { name } of repos) {
   // Work on the lines, and write the guide back with its own line ending.
   const eol = guide.includes("\r\n") ? "\r\n" : "\n";
   const lines = guide.split(/\r?\n/);
-  updates.push({ at, guide, lines, next: cleanUp(lines).replaceAll("\n", eol) });
+  const next = isTitle(lines[0]) ? cleanUp(retitle(lines, name)).replaceAll("\n", eol) : null;
+  updates.push({ at, name, guide, lines, next });
 }
 
 if (errors.length) {
@@ -183,17 +229,22 @@ if (errors.length) {
 const changed = updates.filter(({ guide, next }) => next !== guide);
 if (check) {
   if (changed.length) {
-    for (const { at, lines, next } of changed) {
-      const found = findings(lines);
+    for (const { at, name, lines, next } of changed) {
+      const found = findings(lines, name);
       for (const f of found.length ? found : [`${firstChange(lines, next.split(/\r?\n/))}: needs a clean-up`]) {
         console.error(`error: ${at}:${f}`);
       }
     }
-    console.error(`Run: node ${SCRIPT}`);
+    if (changed.some(({ next }) => next !== null)) console.error(`Run: node ${SCRIPT}`);
     process.exit(1);
   }
-  console.log(`onboarding guides have no table and no em dash outside code (${count} repos)`);
+  console.log(`onboarding guides have a correct title, no table, and no em dash outside code (${count} repos)`);
 } else {
+  const untitled = updates.filter(({ next }) => next === null);
+  if (untitled.length) {
+    for (const { at } of untitled) console.error(`error: ${at}:1: ${UNTITLED}`);
+    process.exit(1);
+  }
   for (const { at, next } of changed) writeFileSync(join(root, at), next);
   console.log(`cleaned up the onboarding guides (${count} repos, ${changed.length} changed)`);
 }
