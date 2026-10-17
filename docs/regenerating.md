@@ -175,15 +175,20 @@ Limits:
    ```
 
    `/understand-anything:understand-onboard` picks the format of a guide again on each run. The
-   script changes two parts of its output:
+   script changes three parts of its output:
 
+   - The title becomes `# Onboarding Guide: <repo name>`, because the skill can take a wrong
+     name from the graph. The subtitle (the groups in parentheses at the end of the title)
+     stays, unless it is empty or only names the repo.
    - Each table becomes a list with one item for each row, because a table is too wide for a
      phone.
    - The first em dash of a list item or a heading becomes a colon. A pair of em dashes in one
      sentence becomes a pair of parentheses. Any other em dash becomes a colon.
 
    Code stays as it is. The `Estate index` check fails a pull request if an onboarding guide has
-   a table or an em dash outside code.
+   a wrong title, a table, or an em dash outside code. The script fails if the first line of a
+   guide is not a title. Then run `/understand-anything:understand-onboard` again (step 2), and
+   run this step again.
 
 9. Run the checks of step 5 in [`CONTRIBUTING.md`](../CONTRIBUTING.md#change-the-docs).
    Then commit on a branch, push it, and open a pull request. `main` accepts changes only

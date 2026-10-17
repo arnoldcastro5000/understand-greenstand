@@ -1,4 +1,4 @@
-# Onboarding Guide: treetracker (TreeTracker API)
+# Onboarding Guide: treetracker-api (TreeTracker API)
 
 _Generated from the Understand-Anything knowledge graph. Source commit `85258c8`._
 

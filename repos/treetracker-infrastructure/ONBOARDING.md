@@ -1,4 +1,4 @@
-# Onboarding: treetracker-infrastructure
+# Onboarding Guide: treetracker-infrastructure
 
 Machine-generated onboarding guide for [`Greenstand/treetracker-infrastructure`](https://github.com/Greenstand/treetracker-infrastructure),
 the infrastructure-as-code that provisions and operates the Greenstand treetracker platform across DigitalOcean and AWS.
