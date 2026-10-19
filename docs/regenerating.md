@@ -31,9 +31,11 @@ with the default branch of the source repo. It counts:
 - the described files that were removed or renamed.
 - the new files, all changed files, and the commits, as context.
 
-A repo is **due** when any described file was removed or renamed, or when at least 5% of its
-described files changed. New files do not count, because they are often tests. A repo is also
-due when its snapshot commit is gone or is not on the default branch.
+A repo is **due** when any described file was removed or renamed. It is also due when at least
+2 described files changed, and they are at least 5% of its described files. The minimum of 2
+is for small repos: 1 of 15 described files is more than 5%. New files do not count, because
+they are often tests. A repo is also due when its snapshot commit is gone or is not on the
+default branch.
 
 The report goes to the job summary and to one issue, "Docs drift report". The workflow opens
 the issue when a repo is due, edits it on each run, comments when the list of due repos

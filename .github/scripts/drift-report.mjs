@@ -15,9 +15,12 @@ import { appendFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadEstate, root } from "./estate.mjs";
 
-// A repo is due when any described file was removed or renamed, or when at least this share of
-// its described files changed. New files do not count: they are often tests.
+// A repo is due when any described file was removed or renamed. It is also due when at least
+// DUE_MIN_FILES described files changed, and they are at least DUE_PERCENT% of its described
+// files. New files do not count: they are often tests.
 const DUE_PERCENT = 5;
+// Without the minimum, 1 changed file can make a small repo due (1 of 15 is 6.7%).
+const DUE_MIN_FILES = 2;
 // The compare API lists at most 300 changed files.
 const MAX_FILES = 300;
 const TITLE = "Docs drift report";
@@ -105,7 +108,9 @@ function reasons(r) {
   if (r.broken) return [r.broken];
   const out = [];
   if (r.removed) out.push(`${plural(r.removed, "described file")} removed or renamed`);
-  out.push(`${r.changed} of ${r.described} described files changed (${r.percent.toFixed(1)}%)`);
+  // Round down, so that a repo below DUE_PERCENT never shows DUE_PERCENT or more: 22 of 444
+  // (4.955%) shows "4.9%", not "5.0%".
+  out.push(`${r.changed} of ${r.described} described files changed (${(Math.floor(r.percent * 10) / 10).toFixed(1)}%)`);
   if (r.truncated) out.push(`the compare API lists only ${MAX_FILES} changed files, so the counts are a minimum`);
   return out;
 }
@@ -127,7 +132,8 @@ try {
 
 const missing = results.filter((r) => r.missing);
 const measured = results.filter((r) => !r.missing);
-const isDue = (r) => r.broken || r.removed > 0 || r.percent >= DUE_PERCENT || r.truncated;
+const isDue = (r) =>
+  r.broken || r.removed > 0 || (r.percent >= DUE_PERCENT && r.changed >= DUE_MIN_FILES) || r.truncated;
 const severity = (r) => (r.broken ? Infinity : r.percent);
 const bySeverity = (a, b) => severity(b) - severity(a) || a.name.localeCompare(b.name);
 const due = measured.filter(isDue).sort(bySeverity);
@@ -140,8 +146,9 @@ const now = new Date().toISOString().replace("T", " ").slice(0, 16);
 const lines = [
   `Report of ${now} UTC, for ${plural(results.length, "source repo")}. Drift is the change in a ` +
     "source repo since the snapshot that its docs describe. A described file is a file with a " +
-    "node in the repo's graph. A repo is **due** when any described file was removed or renamed, " +
-    `or when at least ${DUE_PERCENT}% of its described files changed. New files do not count. ` +
+    "node in the repo's graph. A repo is **due** when any described file was removed or renamed. " +
+    `It is also due when at least ${DUE_MIN_FILES} described files changed, and they are at least ` +
+    `${DUE_PERCENT}% of its described files. New files do not count. ` +
     `See [When to regenerate](${doc("docs/regenerating.md#when-to-regenerate")}).`,
   "",
   `### Due (${due.length})`,
