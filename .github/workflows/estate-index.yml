@@ -8,10 +8,11 @@ name: Estate index
 # `node .github/scripts/build-ecosystem-maps.mjs` and follow its errors.
 # Also fails when a glossary (repos/<name>/GLOSSARY.md, or the estate GLOSSARY.md) does not
 # match the domain graphs. Fix: run `node .github/scripts/build-glossary.mjs`.
-# Also fails when the Start here section of a per-repo README (repos/<name>/README.md) is
-# missing, stale, or not first, or when that README has an em dash or tells how to view the
-# graphs outside the section. Fix: run `node .github/scripts/build-repo-readmes.mjs`, or edit
-# the line that the error names.
+# Also fails when the Start here or Regenerating section of a per-repo README
+# (repos/<name>/README.md) is missing or stale. Also fails when the Start here section is not
+# first. Also fails when that README has an em dash, tells how to view the graphs outside the
+# Start here section, or has a Regenerating heading that the script does not write. Fix: run
+# `node .github/scripts/build-repo-readmes.mjs`, or edit the line that the error names.
 # Also fails when an onboarding guide (repos/<name>/ONBOARDING.md) has a wrong title, a table, or
 # an em dash outside code. Fix: run `node .github/scripts/build-onboarding.mjs`. If the first line
 # of a guide is not a title, run /understand-anything:understand-onboard again.

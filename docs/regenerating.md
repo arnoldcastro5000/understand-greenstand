@@ -126,10 +126,10 @@ Limits:
    - `ONBOARDING.md`: the onboarding guide. The onboard skill offers to save it as
      `docs/UA_ONBOARDING.md` in the clone. Land it as `ONBOARDING.md`.
    - a short per-repo `README.md`: a one-paragraph description of the source repo, then the
-     sections `## Snapshot`, `## Contents`, `## Business domains`, and `## Regenerating`. Use
-     no em dash. Do not write how to view the graphs: step 7 adds a "Start here" section with
-     the viewer link. The `## Regenerating` section links to this recipe. If the repo needs a
-     longer `--exclude` value, add the value and the reason to the list in step 2.
+     sections `## Snapshot`, `## Contents`, and `## Business domains`. Use no em dash. Do not
+     write how to view the graphs: step 7 adds a "Start here" section with the viewer link.
+     Step 7 also adds the `## Regenerating` section, which links to this recipe. If the repo
+     needs a longer `--exclude` value, add the value and the reason to the list in step 2.
    - `meta.json` (`gitCommitHash`, `lastAnalyzedAt`): the viewer loads source at that
      commit, and the top `README.md` index shows both values
 
@@ -157,18 +157,22 @@ Limits:
    or `ONBOARDING.md`. The deploy builds the landing page of the live site from the same
    `estate.json` (`.github/scripts/build-landing.mjs`), so the landing page needs no edit.
 
-7. Refresh the "Start here" section of each per-repo `README.md`. Run:
+7. Refresh the "Start here" and "Regenerating" sections of each per-repo `README.md`. Run:
 
    ```
    node .github/scripts/build-repo-readmes.mjs
    ```
 
-   The script puts the section before the first `##` heading of the README. The section links
-   the viewer, the onboarding guide, the glossary, and the source repo. It also links the
-   `CONTRIBUTING.md` of the source repo (if it is a described file), the good first issues, and
-   the volunteer guide. The `Estate index` check fails a pull request if a section is missing,
-   stale, or not first. It also fails if a per-repo README has an em dash, or tells how to view
-   the graphs outside the section.
+   The script puts the "Start here" section before the first `##` heading of the README. The
+   section links the viewer, the onboarding guide, the glossary, and the source repo. It also
+   links the `CONTRIBUTING.md` of the source repo (if it is a described file), the good first
+   issues, and the volunteer guide. The script puts the "Regenerating" section at the end of the
+   README, or in place of a `## Regenerating` section that the README already has. That section
+   links to this recipe by its title. The `Estate index` check fails a pull request if a section
+   is missing or stale, or if the "Start here" section is not first. It also fails if a per-repo
+   README has an em dash, or tells how to view the graphs outside the "Start here" section. It
+   also fails on a Regenerating heading that the script does not write: delete that heading and
+   its text.
 
 8. Clean up the onboarding guides. Run:
 
