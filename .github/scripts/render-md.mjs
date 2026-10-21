@@ -7,11 +7,13 @@
 // to a page that the site renders point to that page (ONBOARDING.md -> onboarding.html, and
 // the top README.md -> the landing page); other relative links point to the file on GitHub at
 // this commit.
+// A repo name in a heading moves to the next line as one piece (see keepRepoNamesWhole).
 // A Mermaid block becomes a diagram, as on GitHub. The page loads the copy of Mermaid that the
 // deploy workflow puts on the site. The script fails if that copy is missing.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, posix } from "node:path";
 import { marked } from "marked";
+import { loadEstate } from "./estate.mjs";
 import { slugger } from "./slug.mjs";
 
 const [, , inFile, outFile, title, backHref = "./", backLabel = "Viewer"] = process.argv;
@@ -48,6 +50,41 @@ function rewrite(href) {
 const MERMAID_ENTRY = "vendor/mermaid/mermaid.esm.min.mjs";
 let hasMermaid = false;
 
+// A repo name in a heading goes into a span with the style "display: inline-block". Thus the
+// name moves to the next line as one piece. A name that is wider than the line still breaks, so
+// the page does not get wider than the screen. Only a page with such a span gets its style.
+// A repo name that is a part of a longer word (tiles-1-docs, my-tiles-1, tiles-1.md) does not
+// count. The longest name comes first, so that a name inside a longer name does not count.
+const { repos, errors } = loadEstate();
+if (errors.length) {
+  for (const e of errors) console.error(`error: ${e}`);
+  process.exit(1);
+}
+const REPO_NAME = new RegExp(
+  `(?<![\\w-])(?:${repos
+    .map((r) => r.name)
+    .sort((a, b) => b.length - a.length)
+    .map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("|")})(?![\\w-]|\\.\\w)`,
+  "g",
+);
+// An HTML tag. A quoted attribute value can hold ">".
+const TAG = /(<(?:[^>"']|"[^"]*"|'[^']*')*>)/;
+let hasRepoName = false;
+// Changes only the text between the tags, not a tag or its attributes.
+const keepRepoNamesWhole = (html) =>
+  html
+    .split(TAG)
+    .map((part, i) =>
+      i % 2
+        ? part
+        : part.replace(REPO_NAME, (name) => {
+            hasRepoName = true;
+            return `<span class="repo-name">${name}</span>`;
+          }),
+    )
+    .join("");
+
 const slug = slugger();
 const text = (html) =>
   html.replace(/<[^>]*>/g, "").replace(/&(amp|lt|gt|quot|#39);/g, (m, e) => ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" })[e]);
@@ -55,7 +92,7 @@ marked.use({
   gfm: true,
   renderer: {
     heading(html, level) {
-      return `<h${level} id="${slug(text(html))}">${html}</h${level}>\n`;
+      return `<h${level} id="${slug(text(html))}">${keepRepoNamesWhole(html)}</h${level}>\n`;
     },
     link(href, title, html) {
       return marked.Renderer.prototype.link.call(this, rewrite(href), title, html);
@@ -69,6 +106,10 @@ marked.use({
 });
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const body = marked.parse(readFileSync(inFile, "utf8"));
+
+// The style of a repo name span. An inline-block does not get the underline of a link around
+// it, so the span takes the text decoration of its parent.
+const repoNameStyle = hasRepoName ? "\n  .repo-name { display: inline-block; text-decoration: inherit; }" : "";
 
 // The page loads Mermaid only if it has a Mermaid block. Until Mermaid draws the diagrams, the
 // page hides their source text. A browser without modules does not hide the text.
@@ -158,7 +199,7 @@ const html = `<!doctype html>
   @media (prefers-color-scheme: dark) { th, td { border-color: #30363d; } }
   th { background: rgba(175,184,193,.15); }
   blockquote { margin: 1rem 0; padding: 0 1rem; color: #656d76; border-left: .25rem solid #d0d7de; }
-  @media (prefers-color-scheme: dark) { blockquote { color: #8b949e; border-color: #30363d; } }
+  @media (prefers-color-scheme: dark) { blockquote { color: #8b949e; border-color: #30363d; } }${repoNameStyle}
 </style>${mermaidHead}
 </head>
 <body>

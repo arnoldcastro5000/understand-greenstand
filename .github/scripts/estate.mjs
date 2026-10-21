@@ -2,7 +2,8 @@
 // build-index.mjs (the README.md index), build-landing.mjs (the Pages landing page),
 // build-moved.mjs (the moved pages of renamed repos), build-glossary.mjs,
 // build-repo-readmes.mjs, build-onboarding.mjs, build-ecosystem-maps.mjs, check-former-names.mjs,
-// check-graphs.mjs, and drift-report.mjs read it, so the outputs cannot drift apart.
+// check-graphs.mjs, drift-report.mjs, and render-md.mjs read it, so the outputs cannot drift
+// apart.
 // Returns { estate, areas, repos, count, errors }. Each repo in areas gets its snapshot, its
 // Source URL, and its valid former names (a list, often empty). repos lists the repos of all
 // areas, in order. errors lists every problem at once; the caller prints them and exits.
