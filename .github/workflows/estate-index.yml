@@ -16,7 +16,7 @@ name: Estate index
 # Also fails when an onboarding guide (repos/<name>/ONBOARDING.md) has a wrong title, a table, or
 # an em dash outside code. Fix: run `node .github/scripts/build-onboarding.mjs`. If the first line
 # of a guide is not a title, run /understand-anything:understand-onboard again.
-# Also fails when a hand-written file outside repos/ names a former name of a renamed repo
+# Also fails when a line of edited text names a former name of a renamed repo
 # (formerNames in estate.json). Fix: run `node .github/scripts/check-former-names.mjs` and use
 # the new name on each line that it names.
 # Also fails when a graph (repos/<name>/knowledge-graph.json) has a node for a file of .ua/,

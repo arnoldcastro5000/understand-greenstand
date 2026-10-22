@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Build the estate index in README.md from estate.json and repos/*/meta.json.
-// The index sits between the BEGIN and END markers; the rest of README.md is hand-written.
+// The index sits between the BEGIN and END markers; the rest of README.md is edited text.
 // Usage: node build-index.mjs           rewrite the index in README.md
 //        node build-index.mjs --check   exit 1 if the index is stale (CI)
 import { writeFileSync } from "node:fs";

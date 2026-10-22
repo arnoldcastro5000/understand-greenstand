@@ -39,8 +39,8 @@ default branch.
 
 The report goes to the job summary and to one issue, "Docs drift report". The workflow opens
 the issue when a repo is due, edits it on each run, comments when the list of due repos
-changes, and closes it when no repo is due. Do not close the issue by hand: the next run opens
-it again while a repo is due. A repo stays due until you regenerate it.
+changes, and closes it when no repo is due. Do not close the issue yourself: the next run
+opens it again while a repo is due. A repo stays due until you regenerate it.
 
 The report shows only repo names, counts, and compare links. Before the job prints or posts any
 text, it runs the private-name check on it (see [`private-names.md`](./private-names.md)). The
@@ -227,8 +227,8 @@ you regenerate the repo, so that the new docs use the new name everywhere:
    node .github/scripts/check-former-names.mjs
    ```
 
-   The script shows each line of a hand-written file that contains the former name. Examples
-   are the edges, their evidence, and `checkedAt` in [`ecosystem.json`](../ecosystem.json),
+   The script shows each line of edited text that contains the former name. Examples are the
+   edges, their evidence, and `checkedAt` in [`ecosystem.json`](../ecosystem.json),
    the text of [`ARCHITECTURE.md`](../ARCHITECTURE.md) and of the top `README.md`, and the
    per-repo `README.md`. Replace the former name with the new name on each line. Then run
    `node .github/scripts/build-ecosystem-maps.mjs`.
@@ -240,7 +240,7 @@ you regenerate the repo, so that the new docs use the new name everywhere:
    name, so that the graphs, the onboarding guide, and the glossaries use the new name.
 
 The `Estate index` check fails if `repos/<former-name>/` remains, if a former name is the name
-of a repo, or if a line of a hand-written file contains a former name. The README index and the
+of a repo, or if a line of edited text contains a former name. The README index and the
 landing page show the former name after the description.
 
 Pages has no redirects. Thus the deploy writes a moved page for each page of the repo on the
