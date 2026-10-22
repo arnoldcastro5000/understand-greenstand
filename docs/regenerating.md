@@ -227,11 +227,11 @@ you regenerate the repo, so that the new docs use the new name everywhere:
    node .github/scripts/check-former-names.mjs
    ```
 
-   The script shows each line of edited text that contains the former name. Examples are the
-   edges, their evidence, and `checkedAt` in [`ecosystem.json`](../ecosystem.json),
-   the text of [`ARCHITECTURE.md`](../ARCHITECTURE.md) and of the top `README.md`, and the
-   per-repo `README.md`. Replace the former name with the new name on each line. Then run
-   `node .github/scripts/build-ecosystem-maps.mjs`.
+   The script shows each line of edited text or of a per-repo `README.md` that contains the
+   former name. Examples are the edges, their evidence, and `checkedAt` in
+   [`ecosystem.json`](../ecosystem.json), the text of [`ARCHITECTURE.md`](../ARCHITECTURE.md)
+   and of the top `README.md`, and the per-repo `README.md`. Replace the former name with the
+   new name on each line. Then run `node .github/scripts/build-ecosystem-maps.mjs`.
 
 4. Commit steps 1 to 3 before the regeneration. Then git can follow the history of each file
    to its new path: a regeneration changes the files too much for git to find the move.
@@ -240,8 +240,8 @@ you regenerate the repo, so that the new docs use the new name everywhere:
    name, so that the graphs, the onboarding guide, and the glossaries use the new name.
 
 The `Estate index` check fails if `repos/<former-name>/` remains, if a former name is the name
-of a repo, or if a line of edited text contains a former name. The README index and the
-landing page show the former name after the description.
+of a repo, or if a line of edited text or of a per-repo `README.md` contains a former name. The
+README index and the landing page show the former name after the description.
 
 Pages has no redirects. Thus the deploy writes a moved page for each page of the repo on the
 site: `<former-name>/`, `<former-name>/onboarding.html`, and the other pages
