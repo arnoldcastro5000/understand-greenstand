@@ -18,8 +18,9 @@ Everyone who takes part here follows the [Code of Conduct](./CODE_OF_CONDUCT.md)
 
 Most files here are generated. The recipe in
 [Regenerating a repo's documentation](./docs/regenerating.md#per-repo-recipe) tells which step
-writes which file. A regeneration replaces a hand edit of a generated file. To change a
-generated file, change its input or the recipe.
+writes which file. A regeneration replaces a direct edit of a generated file. To change a
+generated file, change its input or the recipe. Text that is not generated is edited text.
+Change it directly in its file.
 
 ## Change the docs
 

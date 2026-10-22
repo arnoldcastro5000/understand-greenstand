@@ -3,7 +3,7 @@
 // repos work together. Views, systems, edges, and the snapshot that each repo's edges were
 // checked at come from ecosystem.json; the repos come from estate.json (a repo with
 // "docs": true is docs, not code, and stays off the maps). Each map sits between its BEGIN and
-// END markers; the rest of ARCHITECTURE.md is hand-written.
+// END markers; the rest of ARCHITECTURE.md is edited text.
 // Usage: node build-ecosystem-maps.mjs           rewrite the maps
 //        node build-ecosystem-maps.mjs --check   exit 1 if a map is stale (CI)
 import { writeFileSync } from "node:fs";
