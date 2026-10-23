@@ -13,6 +13,7 @@ on:
       - "GLOSSARY.md"
       - "ARCHITECTURE.md"
       - "docs/contribute-to-greenstand.md"
+      - "docs/shared-resources.md"
       - "viewer/**"
       - ".github/scripts/build-landing.mjs"
       - ".github/scripts/build-moved.mjs"
@@ -152,6 +153,8 @@ jobs:
           node .github/scripts/render-md.mjs docs/contribute-to-greenstand.md "$OUT/contribute.html" "How to contribute to Greenstand" "./" "All viewers"
           # The ecosystem maps, linked from the landing page and from the volunteer guide.
           node .github/scripts/render-md.mjs ARCHITECTURE.md "$OUT/architecture.html" "How the Greenstand repos work together" "./" "All viewers"
+          # The shared-resource page: what the code repos share, and who looks after it.
+          node .github/scripts/render-md.mjs docs/shared-resources.md "$OUT/shared-resources.html" "The shared resources of the code repos" "./" "All viewers"
           # Moved pages: the old subpath of a renamed repo sends readers to the new subpath.
           node .github/scripts/build-moved.mjs "$OUT"
           # Landing index: the areas and links of estate.json, as in the README.md index.

@@ -35,12 +35,17 @@ Change it directly in its file.
    ```
    node .github/scripts/build-index.mjs --check
    node .github/scripts/build-ecosystem-maps.mjs --check
+   node .github/scripts/build-shared-resources.mjs --check
    node .github/scripts/build-glossary.mjs --check
    node .github/scripts/build-repo-readmes.mjs --check
    node .github/scripts/build-onboarding.mjs --check
    node .github/scripts/check-former-names.mjs
    node .github/scripts/check-graphs.mjs
    ```
+
+   If you change `shared-resources.json`, also run
+   `node .github/scripts/build-shared-resources.mjs --evidence`. It reads each cited file on
+   GitHub and checks that each name is in its cited lines. The pull request runs it too.
 
 6. Open a pull request. `main` accepts changes only through a pull request. The required checks
    must pass.

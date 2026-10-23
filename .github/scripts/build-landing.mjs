@@ -24,8 +24,8 @@ for (const { name } of repos) {
   for (const f of ASSEMBLED) if (!existsSync(join(site, name, f))) errors.push(`${site}/${name}/${f} is missing`);
 }
 // The deploy workflow renders these pages at the site root: the estate glossary, the volunteer
-// guide, and the ecosystem maps.
-const ROOT_PAGES = ["glossary.html", "contribute.html", "architecture.html"];
+// guide, the ecosystem maps, and the shared-resource page.
+const ROOT_PAGES = ["glossary.html", "contribute.html", "architecture.html", "shared-resources.html"];
 for (const f of ROOT_PAGES) if (!existsSync(join(site, f))) errors.push(`${site}/${f} is missing`);
 
 const link = (href, text) => `<a href="${esc(href)}">${text}</a>`;

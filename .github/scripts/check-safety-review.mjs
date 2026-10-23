@@ -18,13 +18,12 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { fencedLines, root } from "./estate.mjs";
+import { escapeRegExp, fencedLines, root } from "./estate.mjs";
 
 const PAGE_FILES = ["docs/shared-resources.md", "shared-resources.json"];
 const TEMPLATE = ".github/pull_request_template.md";
 const ITEM = "If this pull request changes `docs/shared-resources.md` or `shared-resources.json`: I confirm that the page has no security detail.";
 const LINE_FORM = "Safety review: the page text was checked against the local findings list on <YYYY-MM-DD>. It has no security detail.";
-const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const LINE = new RegExp(`^${escapeRegExp(LINE_FORM).replace("<YYYY-MM-DD>", "(\\d{4}-\\d{2}-\\d{2})")}$`);
 // A task list item as GitHub shows it: a list marker after at most 3 spaces, then the box.
 const TASK = /^ {0,3}[-*+] \[([ xX])\] (.*)$/;

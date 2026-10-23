@@ -10,7 +10,7 @@
 // Usage: node check-graphs.mjs   exit 1 and show each problem (CI)
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { loadEstate, readDocsFile, readGraph, root } from "./estate.mjs";
+import { isObject, loadEstate, readDocsFile, readGraph, root } from "./estate.mjs";
 
 const IS_DATA = `is a node for a file of .ua/, the data directory of Understand-Anything. Regenerate the repo with --exclude ".ua/" (docs/regenerating.md, step 2).`;
 // A path in .ua/ at the root of the source repo: the filePath of a node, or the path in its ID
@@ -22,7 +22,6 @@ const inData = ({ id, filePath }) =>
 // The note of the project scanner: "Note: this project has over 100 source files; consider
 // scoping analysis to a subdirectory for faster results." An LLM writes it, so the words can vary.
 const SCANNER_NOTE = /note:\s*this project has (over|more than) 100 (source )?files/i;
-const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 
 const { repos, errors } = loadEstate();
 

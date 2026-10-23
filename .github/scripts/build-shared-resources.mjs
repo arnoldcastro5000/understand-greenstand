@@ -1,0 +1,332 @@
+#!/usr/bin/env node
+// Build the built text of the shared-resource page (docs/shared-resources.md) from
+// shared-resources.json: the at-a-glance table at the top, and for each resource the uses table
+// ("Code repos that use it") and the names table with the snapshot line. Each part sits between
+// its BEGIN and END markers; the rest of the page is edited text.
+// Each evidence entry of the data file proves one use of a resource by a code repo: the cited
+// lines of a file in that repo, at the snapshot of the repo. The facts of each repo were checked
+// at its snapshot (checkedAt), so a regeneration fails the check until a person checks them
+// again. Only names of the known kinds go on the page, and no name with a dot (no host, no
+// bucket). The ## heading above the blocks of a resource is its name, and its GitHub anchor is
+// its id: the links from other pages use the id.
+// Usage: node build-shared-resources.mjs              rewrite the built text
+//        node build-shared-resources.mjs --check      exit 1 if the built text is stale (CI)
+//        node build-shared-resources.mjs --evidence   exit 1 if a name is not in its cited lines
+//          at the snapshot. It reads each cited file through the GitHub API (GITHUB_TOKEN, if
+//          set). CI runs it only when shared-resources.json changes.
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { EM_DASH, escapeRegExp, fencedLines, isObject, loadEstate, readDocsFile, replaceMarked, root } from "./estate.mjs";
+import { slugger } from "./slug.mjs";
+
+const SCRIPT = ".github/scripts/build-shared-resources.mjs";
+const DATA = "shared-resources.json";
+const PAGE = "docs/shared-resources.md";
+const BUILT = `built by ${SCRIPT} from ${DATA}. Do not edit.`;
+const GLANCE = {
+  begin: `<!-- BEGIN shared resources at a glance: ${BUILT} -->`,
+  end: "<!-- END shared resources at a glance -->",
+  what: "at-a-glance table",
+};
+const PARTS = ["uses", "names"];
+const markers = (id, part) => ({
+  begin: `<!-- BEGIN shared resource ${id} ${part}: ${BUILT} -->`,
+  end: `<!-- END shared resource ${id} ${part} -->`,
+  what: `${part} block of ${id}`,
+});
+
+// The uses of a resource, in the order of the uses tables. "sign in" is one use.
+const USES = ["push", "pull", "deploy", "read", "write", "publish", "consume", "sign in"];
+// The link text of an evidence link.
+const LABELS = ["build workflow", "deploy workflow", "test workflow", "manifest", "Dockerfile", "Terraform", "Airflow DAG"];
+// The kinds of names that a volunteer types, in the order of the names tables.
+const KINDS = ["secret", "image", "schema", "overlay", "queue", "realm"];
+// The one expression that the evidence check expands: a build workflow often gives the image
+// name as greenstand/${{ github.event.repository.name }}. GitHub expressions ignore case.
+const REPO_NAME_EXPRESSION = /\$\{\{\s*github\.event\.repository\.name\s*\}\}/gi;
+
+const mode = process.argv.includes("--evidence") ? "evidence" : process.argv.includes("--check") ? "check" : "write";
+const { estate, repos, errors } = loadEstate();
+const codeRepos = new Map(repos.filter((r) => !r.docs).map((r) => [r.name, r]));
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
+// The cited lines of each evidence entry, { first, last }, parsed once by validData.
+const rangeOf = new Map();
+// The line anchor of a GitHub file link: #L7 or #L3-L5.
+const lineAnchor = ({ first, last }) => (first === last ? `#L${first}` : `#L${first}-L${last}`);
+// A path in a repo as a URL path. "(" and ")" are encoded too, so a Markdown link stays whole.
+const urlPath = (path) =>
+  path
+    .split("/")
+    .map((segment) => encodeURIComponent(segment).replace(/[()]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`))
+    .join("/");
+
+// Check shared-resources.json in both directions, and return it only if it is valid: each
+// evidence entry names a code repo, a known use and label, a path in the repo, its lines, and at
+// least one name of a known kind; checkedAt lists each repo of the evidence, and only those, at
+// its current snapshot.
+function validData(data) {
+  if (data === null) return null; // readDocsFile recorded the error
+  const before = errors.length;
+  const fail = (message) => errors.push(`${DATA}: ${message}`);
+  if (!isObject(data) || !isObject(data.checkedAt) || !Array.isArray(data.resources) || !data.resources.length) {
+    fail("must be an object with checkedAt (an object) and resources (a list with at least one resource)");
+    return null;
+  }
+  const ids = new Set();
+  const evidenceRepos = new Set();
+  data.resources.forEach((resource, i) => {
+    const at = `resource ${i + 1}`;
+    if (!isObject(resource)) return fail(`${at} must be an object`);
+    const { id, evidence } = resource;
+    if (typeof id !== "string" || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(id)) fail(`${at}: the id ${JSON.stringify(id)} must be lowercase words joined by "-"`);
+    else if (ids.has(id)) fail(`${at}: the id ${id} is used twice`);
+    ids.add(id);
+    if (typeof resource.name !== "string" || !resource.name.trim() || resource.name.includes(EM_DASH)) fail(`${at}: the name must be set, with no em dash`);
+    if (!Array.isArray(evidence) || !evidence.length) return fail(`${at}: evidence must be a list with at least one entry`);
+    evidence.forEach((e, j) => {
+      const where = `${typeof id === "string" ? id : at}, evidence ${j + 1}`;
+      if (!isObject(e)) return fail(`${where} must be an object`);
+      if (!codeRepos.has(e.repo)) fail(`${where}: ${e.repo} is not a code repo of estate.json`);
+      else evidenceRepos.add(e.repo);
+      if (!USES.includes(e.use)) fail(`${where}: unknown use ${JSON.stringify(e.use)} (use one of: ${USES.join(", ")})`);
+      if (!LABELS.includes(e.label)) fail(`${where}: unknown label ${JSON.stringify(e.label)} (use one of: ${LABELS.join(", ")})`);
+      if (typeof e.path !== "string" || !e.path || e.path.startsWith("/") || e.path.split("/").some((s) => s === "" || s === "." || s === "..")) {
+        fail(`${where}: the path ${JSON.stringify(e.path)} must be a path in the repo`);
+      }
+      // One written form for each range: no leading zero, and the first line before the last.
+      const m = typeof e.lines === "string" ? e.lines.match(/^([1-9]\d*)(?:-([1-9]\d*))?$/) : null;
+      const range = m && { first: Number(m[1]), last: Number(m[2] ?? m[1]) };
+      if (!range || (m[2] !== undefined && range.first >= range.last)) {
+        fail(`${where}: lines must be "<n>" or "<first>-<last>", with 1 <= first < last; it is ${JSON.stringify(e.lines)}`);
+      } else rangeOf.set(e, range);
+      if (!Array.isArray(e.names) || !e.names.length) return fail(`${where}: names must be a list with at least one name`);
+      for (const typed of e.names) {
+        if (!KINDS.includes(typed?.kind)) fail(`${where}: unknown kind ${JSON.stringify(typed?.kind)} (use one of: ${KINDS.join(", ")})`);
+        if (typeof typed?.name !== "string") fail(`${where}: each name must be a text`);
+        else if (typed.name.includes(".")) fail(`${where}: the name ${JSON.stringify(typed.name)} has a dot: a host or a bucket name must not go on the page`);
+        else if (!/^[A-Za-z0-9_/-]+$/.test(typed.name)) fail(`${where}: the name ${JSON.stringify(typed.name)} may hold only letters, digits, "_", "-", and "/"`);
+      }
+    });
+  });
+  for (const [repo, checked] of Object.entries(data.checkedAt)) {
+    if (!evidenceRepos.has(repo)) fail(`checkedAt.${repo} is in no evidence entry: remove it`);
+    // A short commit, as in ecosystem.json: a full one looks like a key to the secret scanners.
+    else if (typeof checked !== "string" || !/^[0-9a-f]{7}$/.test(checked)) fail(`checkedAt.${repo} must be the first 7 characters of a commit`);
+    else if (!codeRepos.get(repo).sha.startsWith(checked)) {
+      const snapshot = codeRepos.get(repo).sha.slice(0, 7);
+      fail(`checkedAt.${repo} is ${checked}, but repos/${repo}/meta.json is ${snapshot}: check the facts of ${repo} again, then update checkedAt`);
+    }
+  }
+  for (const repo of evidenceRepos) if (!(repo in data.checkedAt)) fail(`checkedAt.${repo} is missing`);
+  return errors.length > before ? null : data;
+}
+
+const data = validData(readDocsFile(DATA, errors, JSON.parse));
+
+// Alphabetical order by code units (ticket 05, Answer 8), so the order does not depend on the
+// locale data of Node.
+const byCodeUnits = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+const reposOf = (resource) => [...new Set(resource.evidence.map((e) => e.repo))].sort(byCodeUnits);
+const usesOf = (resource, repo) => USES.filter((u) => resource.evidence.some((e) => e.repo === repo && e.use === u));
+
+// The uses table: one row per code repo, in the order of the alphabet. Each evidence link goes to
+// the file at the checked commit, with its lines. When a label shows more than once in a row, each
+// of its links gets a number ("Dockerfile 1", "Dockerfile 2"), so each link text in a row is unique.
+function usesTable(resource) {
+  const rows = reposOf(resource).map((repo) => {
+    const entries = resource.evidence.filter((e) => e.repo === repo);
+    const seen = new Map();
+    const links = entries.map((e) => {
+      const repeats = entries.filter((other) => other.label === e.label).length;
+      seen.set(e.label, (seen.get(e.label) ?? 0) + 1);
+      const text = repeats > 1 ? `${e.label} ${seen.get(e.label)}` : e.label;
+      return `[${text}](https://github.com/${estate.sourceOrg}/${repo}/blob/${data.checkedAt[repo]}/${urlPath(e.path)}${lineAnchor(rangeOf.get(e))})`;
+    });
+    return `| ${repo} | ${usesOf(resource, repo).join(", ")} | ${links.join(", ")} |`;
+  });
+  return ["| Code repo | Use | Evidence |", "|---|---|---|", ...rows].join("\n");
+}
+
+// The names table (each name once: the kinds in their order, the names of a kind in the order of
+// the alphabet), and the line with the first and last snapshot dates of the repos.
+function namesBlock(resource) {
+  const unique = new Map(resource.evidence.flatMap((e) => e.names).map((typed) => [`${typed.kind} ${typed.name}`, typed]));
+  const rows = [...unique.values()]
+    .sort((a, b) => KINDS.indexOf(a.kind) - KINDS.indexOf(b.kind) || byCodeUnits(a.name, b.name))
+    .map((typed) => `| ${typed.kind[0].toUpperCase()}${typed.kind.slice(1)} | \`${typed.name}\` |`);
+  const dates = reposOf(resource).map((repo) => codeRepos.get(repo).date).sort(byCodeUnits);
+  const when = dates[0] === dates.at(-1) ? dates[0] : `${dates[0]} to ${dates.at(-1)}`;
+  return ["| Kind | Name |", "|---|---|", ...rows, "", `Each fact was checked at the snapshot of its code repo (generated ${when}).`].join("\n");
+}
+
+// The at-a-glance table: each resource (a link to its section), the count of code repos that use
+// it, and the count of each use.
+function glanceTable() {
+  const rows = data.resources.map((resource) => {
+    const repoList = reposOf(resource);
+    const useCounts = USES.map((u) => [u, repoList.filter((repo) => usesOf(resource, repo).includes(u)).length])
+      .filter(([, n]) => n)
+      .map(([u, n]) => `${n} ${u}`);
+    return `| [${resource.name}](#${resource.id}) | ${repoList.length} (${useCounts.join(", ")}) |`;
+  });
+  return ["| Resource | Code repos that use it |", "|---|---|", ...rows].join("\n");
+}
+
+// The text of a heading as GitHub and render-md.mjs show it, for its anchor: a link shows its
+// text; code marks and emphasis marks do not show.
+const shownText = (markdown) =>
+  markdown
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/[`*]/g, "")
+    .replace(/(^|[^\p{L}\p{N}])_+|_+(?=[^\p{L}\p{N}]|$)/gu, "$1");
+
+// The headings of the page, in order, with their GitHub anchors, as a reader sees them: an ATX
+// heading ("## Text"), or a setext heading (a paragraph, then a line of "=" or "-"). Headings in
+// fenced code do not count. A list item, a quote, or an HTML block ends a paragraph, so a "---"
+// line after one of them (or after a blank line) is not an underline. Every heading gets its
+// anchor in order, so a repeat gets "-1".
+// Returns a function: the ## heading above a position of the page, or undefined.
+function headingsOf(page) {
+  const slug = slugger();
+  const pageLines = page.split("\n");
+  const fenced = fencedLines(pageLines);
+  const headings = [];
+  let paragraph = null; // { offset, text } of the paragraph that the next line can underline
+  let offset = 0;
+  pageLines.forEach((line, i) => {
+    const atx = line.match(/^ {0,3}(#{1,6})(?:[ \t]+(.*?))?(?:[ \t]+#+)?[ \t]*$/);
+    const underline = line.match(/^ {0,3}(=+|-+)[ \t]*$/);
+    if (fenced[i] || !line.trim()) paragraph = null;
+    else if (atx) {
+      headings.push({ offset, level: atx[1].length, text: atx[2] ?? "" });
+      paragraph = null;
+    } else if (underline && paragraph) {
+      headings.push({ offset: paragraph.offset, level: underline[1][0] === "=" ? 1 : 2, text: paragraph.text });
+      paragraph = null;
+    } else if (/^ {0,3}(?:[-*+](?:[ \t]|$)|\d+[.)](?:[ \t]|$)|>|<)/.test(line)) paragraph = null;
+    else if (paragraph) paragraph.text += ` ${line.trim()}`;
+    else if (/^ {4}/.test(line)) paragraph = null;
+    else paragraph = { offset, text: line.trim() };
+    offset += line.length + 1;
+  });
+  for (const h of headings) h.anchor = slug(shownText(h.text));
+  return (position) => headings.filter((h) => h.level === 2 && h.offset < position).at(-1);
+}
+
+// The page with its built text, or the page unchanged if a part fails.
+function buildPage(page) {
+  const fail = (message) => errors.push(`${PAGE}${message}`);
+  if (page.includes("\r")) {
+    fail(" has CRLF line ends; use LF (.gitattributes asks git for LF)");
+    return page;
+  }
+  const pageLines = page.split("\n");
+  const fenced = fencedLines(pageLines);
+  pageLines.forEach((line, i) => {
+    if (!fenced[i] && line.includes(EM_DASH)) fail(`:${i + 1}: an em dash; use a colon, a comma, or two sentences`);
+  });
+  if (!data) return page;
+  const ids = new Set(data.resources.map((r) => r.id));
+  for (const [, id, part] of page.matchAll(/<!-- BEGIN shared resource (\S+) (uses|names):/g)) {
+    if (!ids.has(id)) fail(` has a ${part} block for "${id}", which is not a resource in ${DATA}`);
+  }
+  const headingAbove = headingsOf(page);
+  let next = replaceMarked(PAGE, page, GLANCE, glanceTable(), errors);
+  for (const resource of data.resources) {
+    for (const part of PARTS) {
+      const m = markers(resource.id, part);
+      const before = errors.length;
+      next = replaceMarked(PAGE, next, m, part === "uses" ? usesTable(resource) : namesBlock(resource), errors);
+      if (errors.length > before) continue;
+      const heading = headingAbove(page.indexOf(m.begin));
+      if (!heading) {
+        fail(`: the ${m.what} has no ## heading above it`);
+        continue;
+      }
+      if (heading.text !== resource.name) {
+        fail(`: the ## heading above the ${m.what} is "${heading.text}", but its name in ${DATA} is "${resource.name}"`);
+      }
+      if (heading.anchor !== resource.id) {
+        fail(`: the ## heading above the ${m.what} has the anchor #${heading.anchor}, but the id is ${resource.id}: the links from other pages use the id`);
+      }
+    }
+  }
+  return next;
+}
+
+// Read each cited file at the snapshot of its repo, once, and check that each name of each
+// evidence entry is in the cited lines. A name counts only as a whole name: greenstand/a is not
+// in greenstand/a-dev or in greenstand/a.old.
+async function checkEvidence() {
+  const { GITHUB_TOKEN: token } = process.env;
+  const fetched = new Map(); // "<repo>@<sha>:<path>" -> a promise of { content } or { status }
+  const read = (repo, path) => {
+    const sha = codeRepos.get(repo).sha;
+    const key = `${repo}@${sha}:${path}`;
+    if (!fetched.has(key)) {
+      const headers = { Accept: "application/vnd.github.raw", ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+      fetched.set(
+        key,
+        fetch(`https://api.github.com/repos/${estate.sourceOrg}/${repo}/contents/${urlPath(path)}?ref=${sha}`, { headers }).then(async (res) =>
+          res.ok ? { content: await res.text() } : { status: res.status },
+        ),
+      );
+    }
+    return fetched.get(key);
+  };
+  let names = 0;
+  for (const resource of data.resources) {
+    for (const [j, e] of resource.evidence.entries()) {
+      const { first, last } = rangeOf.get(e);
+      const where = `${resource.id}, evidence ${j + 1} (${e.repo} ${e.path}${lineAnchor({ first, last })} at ${data.checkedAt[e.repo]})`;
+      const file = await read(e.repo, e.path);
+      if (file.content === undefined) {
+        errors.push(`${where}: the file is not in the repo at the snapshot (HTTP ${file.status})`);
+        continue;
+      }
+      const fileLines = file.content.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n");
+      if (last > fileLines.length) {
+        errors.push(`${where}: the file has ${fileLines.length} lines`);
+        continue;
+      }
+      const cited = fileLines.slice(first - 1, last).join("\n").replace(REPO_NAME_EXPRESSION, e.repo);
+      for (const typed of e.names) {
+        names++;
+        if (!new RegExp(`(?<![\\w/-])${escapeRegExp(typed.name)}(?![\\w/.-])`).test(cited)) errors.push(`${where}: ${typed.name} is not in the cited lines`);
+      }
+    }
+  }
+  return { entries: data.resources.flatMap((r) => r.evidence).length, names, files: fetched.size };
+}
+
+if (mode === "evidence") {
+  const checked = errors.length ? null : await checkEvidence();
+  if (errors.length) {
+    for (const e of errors) console.error(`error: ${e}`);
+    process.exit(1);
+  }
+  const files = checked.files === 1 ? "1 file at its snapshot" : `${checked.files} files at their snapshots`;
+  console.log(`each name is in its cited lines (${plural(checked.entries, "evidence entry", "evidence entries")}, ${plural(checked.names, "name", "names")}, ${files})`);
+  process.exit(0);
+}
+
+const page = readDocsFile(PAGE, errors);
+const next = page === null ? null : buildPage(page);
+
+if (errors.length) {
+  for (const e of errors) console.error(`error: ${e}`);
+  process.exit(1);
+}
+
+const summary = `${plural(data.resources.length, "resource", "resources")}, ${plural(data.resources.flatMap((r) => r.evidence).length, "evidence entry", "evidence entries")}`;
+if (mode === "check") {
+  if (next !== page) {
+    console.error(`error: the built text of ${PAGE} is stale. Run: node ${SCRIPT}`);
+    process.exit(1);
+  }
+  console.log(`the built text of ${PAGE} is current (${summary})`);
+} else {
+  writeFileSync(join(root, PAGE), next);
+  console.log(`wrote the built text of ${PAGE} (${summary})`);
+}

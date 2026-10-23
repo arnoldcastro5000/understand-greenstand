@@ -229,9 +229,12 @@ you regenerate the repo, so that the new docs use the new name everywhere:
 
    The script shows each line of edited text or of a per-repo `README.md` that contains the
    former name. Examples are the edges, their evidence, and `checkedAt` in
-   [`ecosystem.json`](../ecosystem.json), the text of [`ARCHITECTURE.md`](../ARCHITECTURE.md)
-   and of the top `README.md`, and the per-repo `README.md`. Replace the former name with the
-   new name on each line. Then run `node .github/scripts/build-ecosystem-maps.mjs`.
+   [`ecosystem.json`](../ecosystem.json), the evidence and `checkedAt` in
+   [`shared-resources.json`](../shared-resources.json), the text of
+   [`ARCHITECTURE.md`](../ARCHITECTURE.md) and of the top `README.md`, and the per-repo
+   `README.md`. Replace the former name with the new name on each line. Then run
+   `node .github/scripts/build-ecosystem-maps.mjs` and
+   `node .github/scripts/build-shared-resources.mjs`.
 
 4. Commit steps 1 to 3 before the regeneration. Then git can follow the history of each file
    to its new path: a regeneration changes the files too much for git to find the move.
@@ -263,3 +266,11 @@ working.
   repo in [`ecosystem.json`](../ecosystem.json) again. Each edge records its evidence at the old
   snapshot. Fix the edges, set the `checkedAt` entry of the repo to the new snapshot commit, and
   run `node .github/scripts/build-ecosystem-maps.mjs`. See [`ARCHITECTURE.md`](../ARCHITECTURE.md).
+- If the repo has evidence in [`shared-resources.json`](../shared-resources.json), the
+  `Estate index` check also fails until you check the shared-resource facts of that repo again.
+  Each evidence entry cites lines of a file at the old snapshot. Find each name at the new
+  snapshot, fix the path and the lines of the entry, set the `checkedAt` entry of the repo to the
+  new snapshot commit, and run `node .github/scripts/build-shared-resources.mjs`. Then check the
+  edited text of the page too: the notes and "Who looks after it". The pull request reads each
+  cited file and fails when a name is not in its lines. See
+  [The shared resources of the code repos](./shared-resources.md).
