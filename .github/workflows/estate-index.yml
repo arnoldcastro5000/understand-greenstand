@@ -23,6 +23,13 @@ name: Estate index
 # a reference to a node that the graph does not have, or a wrong project block (also in
 # domain-graph.json). Fix: regenerate the repo with --exclude ".ua/" (docs/regenerating.md,
 # step 2), remove the reference, or correct the project block (step 2).
+# Also fails when the built text of the shared-resource page (docs/shared-resources.md) is stale,
+# when shared-resources.json has an error, when a repo was regenerated after its facts were
+# checked, or when the ## heading above the blocks of a resource is not its name with its id as
+# the anchor. Fix: run `node .github/scripts/build-shared-resources.mjs` and follow its errors.
+# When a push or a pull request changes shared-resources.json, also fails when a name is not in
+# its cited lines at the snapshot (the script reads them through the GitHub API). Fix the
+# evidence entry that the error names.
 # No path filter: a path-filtered check stays pending forever if it is ever made required.
 
 on:
@@ -68,3 +75,23 @@ jobs:
 
       - name: Check the graphs
         run: node .github/scripts/check-graphs.mjs
+
+      - name: Check the shared-resource page
+        run: node .github/scripts/build-shared-resources.mjs --check
+
+      # Only when shared-resources.json changes: the step reads GitHub, and the other steps stay
+      # offline. BASE is the commit before the push, or the base of the pull request. When it is
+      # not known (a new branch), the step runs.
+      - name: Check the evidence of the shared-resource facts
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [[ "$BASE" =~ ^[0-9a-f]{40}$ && "$BASE" != 0000000000000000000000000000000000000000 ]] \
+            && git fetch --quiet --no-tags --depth=1 origin "$BASE" \
+            && git diff --quiet "$BASE" HEAD -- shared-resources.json; then
+            echo "shared-resources.json did not change since ${BASE:0:7}: no evidence check"
+          else
+            node .github/scripts/build-shared-resources.mjs --evidence
+          fi

@@ -1,14 +1,14 @@
 // Load the estate: estate.json (areas, descriptions, URLs) plus repos/*/meta.json (snapshots).
 // build-index.mjs (the README.md index), build-landing.mjs (the Pages landing page),
 // build-moved.mjs (the moved pages of renamed repos), build-glossary.mjs,
-// build-repo-readmes.mjs, build-onboarding.mjs, build-ecosystem-maps.mjs, check-former-names.mjs,
-// check-graphs.mjs, drift-report.mjs, and render-md.mjs read it, so the outputs cannot drift
-// apart.
+// build-repo-readmes.mjs, build-onboarding.mjs, build-ecosystem-maps.mjs,
+// build-shared-resources.mjs, check-former-names.mjs, check-graphs.mjs, drift-report.mjs, and
+// render-md.mjs read it, so the outputs cannot drift apart.
 // Returns { estate, areas, repos, count, errors }. Each repo in areas gets its snapshot, its
 // Source URL, and its valid former names (a list, often empty). repos lists the repos of all
 // areas, in order. errors lists every problem at once; the caller prints them and exits.
 // Also exports the helpers that the build scripts share: readDocsFile, markedBlock,
-// replaceMarked, formerNamesText, EM_DASH, fencedLines, and readGraph.
+// replaceMarked, formerNamesText, EM_DASH, fencedLines, readGraph, isObject, and escapeRegExp.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -17,6 +17,12 @@ export const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 // The em dash. This repo's text uses none, and the checks look for it.
 export const EM_DASH = String.fromCharCode(0x2014);
+
+// A JSON object: not null, and not a list.
+export const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+
+// A text as a regular expression that matches exactly that text.
+export const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 // Which lines of a Markdown text are fenced code: a fence line, or a line between an opening
 // fence and its closing fence. As in CommonMark, a closing fence uses the character of the
@@ -140,7 +146,6 @@ export function readGraph(name, errors) {
   const read = readDocsFile(at, errors, (text) => ({ graph: JSON.parse(text) }));
   if (read === null) return null;
   const { graph } = read;
-  const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
   if (!isObject(graph)) return errors.push(`${at}: the graph must be a JSON object`), null;
   const problems = [];
   const parts = [["nodes", "node"], ["edges", "edge"], ["layers", "layer"], ["tour", "tour step"]];
