@@ -36,11 +36,15 @@ const markers = (id, part) => ({
 });
 
 // The uses of a resource, in the order of the uses tables. "sign in" is one use.
-const USES = ["push", "pull", "deploy", "read", "write", "publish", "consume", "sign in"];
+const USES = ["push", "pull", "deploy", "route", "read", "write", "publish", "consume", "sign in"];
 // The link text of an evidence link.
 const LABELS = ["build workflow", "deploy workflow", "test workflow", "manifest", "Dockerfile", "Terraform", "Airflow DAG"];
 // The kinds of names that a volunteer types, in the order of the names tables.
-const KINDS = ["secret", "image", "schema", "overlay", "queue", "realm"];
+const KINDS = ["secret", "image", "schema", "overlay", "route", "queue", "realm"];
+// A route is a path prefix that a code repo adds to the API gateway: the use "route" and the kind
+// "route". It is "/" and one or more parts, each after a "/", with an optional "/" at the end.
+// "/" alone is no route: the evidence check would find it in "rewrite: /" too.
+const ROUTE = /^(\/[A-Za-z0-9_-]+)+\/?$/;
 // The one expression that the evidence check expands: a build workflow often gives the image
 // name as greenstand/${{ github.event.repository.name }}. GitHub expressions ignore case.
 const REPO_NAME_EXPRESSION = /\$\{\{\s*github\.event\.repository\.name\s*\}\}/gi;
@@ -106,7 +110,14 @@ function validData(data) {
         if (typeof typed?.name !== "string") fail(`${where}: each name must be a text`);
         else if (typed.name.includes(".")) fail(`${where}: the name ${JSON.stringify(typed.name)} has a dot: a host or a bucket name must not go on the page`);
         else if (!/^[A-Za-z0-9_/-]+$/.test(typed.name)) fail(`${where}: the name ${JSON.stringify(typed.name)} may hold only letters, digits, "_", "-", and "/"`);
+        else if (typed.kind === "route" && !ROUTE.test(typed.name)) {
+          fail(`${where}: the route ${JSON.stringify(typed.name)} must be "/" and one or more parts of letters, digits, "_", and "-", each after a "/" (for example /query/ or /wallet/v2/)`);
+        }
       }
+      // The use "route" and the kind "route" go together: the evidence of a route proves the route.
+      const routes = e.names.filter((typed) => typed?.kind === "route");
+      if (e.use === "route" && !routes.length) fail(`${where}: an entry with the use "route" must name a route`);
+      if (e.use !== "route") for (const typed of routes) fail(`${where}: the route ${JSON.stringify(typed.name)} may stand only on an entry with the use "route"`);
     });
   });
   for (const [repo, checked] of Object.entries(data.checkedAt)) {
@@ -133,6 +144,7 @@ const usesOf = (resource, repo) => USES.filter((u) => resource.evidence.some((e)
 // The uses table: one row per code repo, in the order of the alphabet. Each evidence link goes to
 // the file at the checked commit, with its lines. When a label shows more than once in a row, each
 // of its links gets a number ("Dockerfile 1", "Dockerfile 2"), so each link text in a row is unique.
+// A no-break space keeps the number on the line of its label in a narrow cell.
 function usesTable(resource) {
   const rows = reposOf(resource).map((repo) => {
     const entries = resource.evidence.filter((e) => e.repo === repo);
@@ -140,7 +152,7 @@ function usesTable(resource) {
     const links = entries.map((e) => {
       const repeats = entries.filter((other) => other.label === e.label).length;
       seen.set(e.label, (seen.get(e.label) ?? 0) + 1);
-      const text = repeats > 1 ? `${e.label} ${seen.get(e.label)}` : e.label;
+      const text = repeats > 1 ? `${e.label}&nbsp;${seen.get(e.label)}` : e.label;
       return `[${text}](https://github.com/${estate.sourceOrg}/${repo}/blob/${data.checkedAt[repo]}/${urlPath(e.path)}${lineAnchor(rangeOf.get(e))})`;
     });
     return `| ${repo} | ${usesOf(resource, repo).join(", ")} | ${links.join(", ")} |`;
