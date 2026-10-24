@@ -1,9 +1,10 @@
 name: Drift report
 
-# Reports the drift of each source repo since its snapshot, and which repos are due for
-# regeneration (.github/scripts/drift-report.mjs). The report goes to the job summary and to one
-# "Docs drift report" issue: the job opens or reopens it when a repo is due, edits it on each
-# run, comments when the due list changes, and closes it when no repo is due.
+# Reports the drift of each source repo since its snapshot, which repos are due for
+# regeneration, and which shared-resource facts are gone (.github/scripts/drift-report.mjs). The
+# report goes to the job summary and to one "Docs drift report" issue: the job opens or reopens
+# it when a repo is due or a fact is gone, edits it on each run, comments when the due list or
+# the list of gone facts changes, and closes it when no repo is due and no fact is gone.
 # It never regenerates: that needs Claude Code and a human (docs/regenerating.md).
 # The issue text is authored text on a public surface, and GitHub starts no workflow (so no issue
 # scan) for what GITHUB_TOKEN writes. So the script runs the shared private-name check on the

@@ -37,14 +37,24 @@ is for small repos: 1 of 15 described files is more than 5%. New files do not co
 they are often tests. A repo is also due when its snapshot commit is gone or is not on the
 default branch.
 
-The report goes to the job summary and to one issue, "Docs drift report". The workflow opens
-the issue when a repo is due, edits it on each run, comments when the list of due repos
-changes, and closes it when no repo is due. Do not close the issue yourself: the next run
-opens it again while a repo is due. A repo stays due until you regenerate it.
+The report also lists the shared-resource facts to check. A shared-resource fact is a name on
+[the shared-resource page](./shared-resources.md) and the file of a code repo that cites it (one
+name of an evidence entry of [`shared-resources.json`](../shared-resources.json)). The report
+reads each cited file on the default branch. A fact is gone when the file does not hold the
+name, or is not there. A gone fact does not make a repo due. It stays on the list until the name
+comes back, or until you regenerate the repo and check its facts again (see [Notes](#notes)).
 
-The report shows only repo names, counts, and compare links. Before the job prints or posts any
-text, it runs the private-name check on it (see [`private-names.md`](./private-names.md)). The
-job needs the `PRIVATE_REPO_NAMES` secret, and fails without it.
+The report goes to the job summary and to one issue, "Docs drift report". The workflow opens
+the issue when a repo is due or a shared-resource fact is gone. It edits the issue on each run.
+It comments when the list of due repos or the list of gone facts changes. It closes the issue
+when no repo is due and no fact is gone. Do not close the issue yourself: the next run opens it
+again while a repo is due or a fact is gone. A repo stays due until you regenerate it.
+
+The report shows only repo names, counts, and compare links, the names that the shared-resource
+page shows, and the files that the page links. Before the job prints or posts any text, it runs
+the private-name
+check on it (see [`private-names.md`](./private-names.md)). The job needs the
+`PRIVATE_REPO_NAMES` secret, and fails without it.
 
 To see the report now, run it locally. It prints the report and changes nothing:
 
@@ -52,8 +62,9 @@ To see the report now, run it locally. It prints the report and changes nothing:
 GITHUB_TOKEN="$(gh auth token)" node .github/scripts/drift-report.mjs
 ```
 
-A run makes about 2 GitHub API requests per repo. Without a token, the limit is 60 requests an
-hour.
+A run makes about 2 GitHub API requests for each repo and 1 for each file that
+`shared-resources.json` cites. Without a token, the limit is 60 requests an hour. That is not
+enough for one run.
 
 Limits:
 
@@ -61,6 +72,8 @@ Limits:
   60 days without activity. Turn it on again on the repo's Actions tab.
 - The compare API lists at most 300 changed files. A repo with 300 or more changed files is
   due.
+- An issue body holds at most 65,536 characters. When the list of gone facts is longer, the
+  issue shows the first facts and links the job summary of the run for the others.
 - A source repo that the report cannot find (deleted, or private now) fails the job. The
   public output does not show its name; a local run does. See
   [`private-names.md`](./private-names.md#a-repo-turns-private-after-we-wrote-its-name).
@@ -269,8 +282,10 @@ working.
 - If the repo has evidence in [`shared-resources.json`](../shared-resources.json), the
   `Estate index` check also fails until you check the shared-resource facts of that repo again.
   Each evidence entry cites lines of a file at the old snapshot. Find each name at the new
-  snapshot, fix the path and the lines of the entry, set the `checkedAt` entry of the repo to the
-  new snapshot commit, and run `node .github/scripts/build-shared-resources.mjs`. Then check the
+  snapshot, and fix the path and the lines of the entry. If a name is not in the repo any more,
+  remove it from the entry, and remove an entry that has no name left. Then set the `checkedAt`
+  entry of the repo to the new snapshot commit, and run
+  `node .github/scripts/build-shared-resources.mjs`. Then check the
   edited text of the page too: the notes and "Who looks after it". The pull request reads each
   cited file and fails when a name is not in its lines. See
   [The shared resources of the code repos](./shared-resources.md).

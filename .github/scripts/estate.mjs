@@ -8,7 +8,8 @@
 // Source URL, and its valid former names (a list, often empty). repos lists the repos of all
 // areas, in order. errors lists every problem at once; the caller prints them and exits.
 // Also exports the helpers that the build scripts share: readDocsFile, markedBlock,
-// replaceMarked, formerNamesText, EM_DASH, fencedLines, readGraph, isObject, and escapeRegExp.
+// replaceMarked, formerNamesText, EM_DASH, fencedLines, readGraph, isObject, escapeRegExp,
+// urlPath, and the name rule of the shared-resource facts (expandRepoName, hasWholeName).
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -23,6 +24,21 @@ export const isObject = (v) => v !== null && typeof v === "object" && !Array.isA
 
 // A text as a regular expression that matches exactly that text.
 export const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// A path in a repo as a URL path. "(" and ")" are encoded too, so a Markdown link stays whole.
+export const urlPath = (path) =>
+  path
+    .split("/")
+    .map((segment) => encodeURIComponent(segment).replace(/[()]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`))
+    .join("/");
+
+// The name rule of the shared-resource facts, for build-shared-resources.mjs (at the snapshot)
+// and drift-report.mjs (on the default branch). A build workflow often gives the image name as
+// greenstand/${{ github.event.repository.name }}: expandRepoName reads that one expression as the
+// repo name. GitHub expressions ignore case.
+export const expandRepoName = (text, repo) => text.replace(/\$\{\{\s*github\.event\.repository\.name\s*\}\}/gi, repo);
+// A name counts only as a whole name: greenstand/a is not in greenstand/a-dev or in greenstand/a.old.
+export const hasWholeName = (text, name) => new RegExp(`(?<![\\w/-])${escapeRegExp(name)}(?![\\w/.-])`).test(text);
 
 // Which lines of a Markdown text are fenced code: a fence line, or a line between an opening
 // fence and its closing fence. As in CommonMark, a closing fence uses the character of the

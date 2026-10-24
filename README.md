@@ -30,7 +30,7 @@ the domain graph.
 
 The layout is regenerate-ready. See [`docs/regenerating.md`](./docs/regenerating.md) for how to
 regenerate a repo's docs, and [when](./docs/regenerating.md#when-to-regenerate): a weekly drift
-report lists the repos that are due.
+report lists the repos that are due and the shared-resource facts to check.
 
 To report a problem in these docs or to change them, read [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 Before you push, read [`docs/private-names.md`](./docs/private-names.md): names of private
