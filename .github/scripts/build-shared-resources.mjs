@@ -8,7 +8,8 @@
 // at its snapshot (checkedAt), so a regeneration fails the check until a person checks them
 // again. Only names of the known kinds go on the page, and no name with a dot (no host, no
 // bucket). The ## heading above the blocks of a resource is its name, and its GitHub anchor is
-// its id: the links from other pages use the id. A resource with an empty evidence list (no
+// its id: the links from other pages use the id. The sections follow the order of the resources
+// in the data file, as the per-repo READMEs list them. A resource with an empty evidence list (no
 // evidence of a use by a code repo) has the count 0 in the at-a-glance table, no blocks, and one
 // ## heading, its name, with its id as the anchor.
 // Usage: node build-shared-resources.mjs              rewrite the built text
@@ -247,6 +248,7 @@ function buildPage(page) {
     if (heading.text !== resource.name) fail(`: ${what} is "${heading.text}", but its name in ${DATA} is "${resource.name}"`);
     if (heading.anchor !== resource.id) fail(`: ${what} has the anchor #${heading.anchor}, but the id is ${resource.id}: the links from other pages use the id`);
   };
+  const sectionAt = new Map(); // id -> the offset of the ## heading of its section
   let next = replaceMarked(PAGE, page, GLANCE, glanceTable(), errors);
   for (const resource of data.resources) {
     // A resource with no evidence has no built tables, and one ## heading with its name: the
@@ -262,7 +264,10 @@ function buildPage(page) {
         fail(` has no ## heading "${resource.name}" with the anchor #${resource.id}: the at-a-glance table and the links from other pages use the id`);
       } else if (named.length > 1) {
         fail(` has ${named.length} ## headings "${resource.name}": ${resource.id} has one section`);
-      } else checkHeading(named[0], resource, `the ## heading of ${resource.id}`);
+      } else {
+        checkHeading(named[0], resource, `the ## heading of ${resource.id}`);
+        sectionAt.set(resource.id, named[0].offset);
+      }
       continue;
     }
     for (const part of PARTS) {
@@ -272,9 +277,20 @@ function buildPage(page) {
       if (errors.length > before) continue;
       const heading = headingAbove(page.indexOf(m.begin));
       if (!heading) fail(`: the ${m.what} has no ## heading above it`);
-      else checkHeading(heading, resource, `the ## heading above the ${m.what}`);
+      else {
+        checkHeading(heading, resource, `the ## heading above the ${m.what}`);
+        if (!sectionAt.has(resource.id)) sectionAt.set(resource.id, heading.offset);
+      }
     }
   }
+  // The sections follow the order of the data file: the per-repo READMEs list them in that order.
+  const placed = data.resources.filter((r) => sectionAt.has(r.id));
+  placed.forEach((resource, i) => {
+    const previous = placed[i - 1];
+    if (previous && sectionAt.get(resource.id) < sectionAt.get(previous.id)) {
+      fail(`: the section of ${resource.id} comes before the section of ${previous.id}, but ${DATA} lists ${previous.id} first: put the sections in the order of the data file`);
+    }
+  });
   return next;
 }
 

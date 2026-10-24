@@ -154,7 +154,7 @@ jobs:
           # The ecosystem maps, linked from the landing page and from the volunteer guide.
           node .github/scripts/render-md.mjs ARCHITECTURE.md "$OUT/architecture.html" "How the Greenstand repos work together" "./" "All viewers"
           # The shared-resource page, linked from the landing page, the ecosystem maps, the volunteer
-          # guide, and README.md.
+          # guide, README.md, and each per-repo README.
           node .github/scripts/render-md.mjs docs/shared-resources.md "$OUT/shared-resources.html" "The shared resources of the code repos" "./" "All viewers"
           # Moved pages: the old subpath of a renamed repo sends readers to the new subpath.
           node .github/scripts/build-moved.mjs "$OUT"
