@@ -15,6 +15,11 @@ see the [ecosystem maps](../ARCHITECTURE.md).
 | [Secrets in the cluster](#secrets-in-the-cluster) | 6 (6 read) |
 | [API gateway and domains](#api-gateway-and-domains) | 7 (7 route) |
 | [Web hosting and CDN](#web-hosting-and-cdn) | 3 (3 deploy) |
+| [Photo and upload storage](#photo-and-upload-storage) | 2 (2 write) |
+| [Shared database](#shared-database) | 6 (2 read, 4 write) |
+| [Message broker](#message-broker) | 3 (3 publish, 2 consume) |
+| [Sign-in](#sign-in) | 1 (1 sign&nbsp;in) |
+| [Monitoring and logs](#monitoring-and-logs) | 0 |
 
 <!-- END shared resources at a glance -->
 
@@ -371,3 +376,238 @@ above.
 - Not known yet: what serves the tile hosts of the web map.
 
 For access to a bucket or for a new static site, ask in Greenstand's Slack ([Slack basics](https://github.com/Greenstand/Greenstand-Overview#slack-basics)).
+
+## Photo and upload storage
+
+The photo and upload storage keeps the photos of the captures, other images of the apps, and
+the batch uploads of the Android app. The files are in AWS S3 buckets.
+
+### How a code repo uses it
+
+A code repo that writes to the storage uploads each file with an AWS client library. Some other
+code repos keep or show the web address of a photo. These code repos do not write to the
+storage (checked 2026-10-24).
+
+<!-- BEGIN shared resource photo-and-upload-storage uses: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Code repo | Use | Evidence |
+|---|---|---|
+| treetracker-android | write | [build workflow](https://github.com/Greenstand/treetracker-android/blob/949d962/.github/workflows/build.yml#L48-L50) |
+| treetracker-wallet-api | write | [manifest](https://github.com/Greenstand/treetracker-wallet-api/blob/e95c15a/deployment/base/treetracker-wallet-api-deployment.yaml#L52-L70) |
+
+<!-- END shared resource photo-and-upload-storage uses -->
+
+The names that you see in the workflow and the manifest (each secret is a GitHub secret, except
+the Kubernetes Secret `aws-s3`):
+
+<!-- BEGIN shared resource photo-and-upload-storage names: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Kind | Name |
+|---|---|
+| Secret | `S3_DEV_IDENTITY_POOL_ID` |
+| Secret | `S3_PRODUCTION_IDENTITY_POOL_ID` |
+| Secret | `S3_TEST_IDENTITY_POOL_ID` |
+| Secret | `aws-s3` |
+
+Each fact was checked at the snapshot of its code repo (generated 2026-09-03).
+
+<!-- END shared resource photo-and-upload-storage names -->
+
+Notes:
+
+- The Android app uploads each photo and each batch upload from the phone. The build workflow
+  puts the storage settings from the GitHub secrets into the app.
+- treetracker-wallet-api uploads the logo and the cover image of a wallet.
+- treetracker-api also has code that uploads the image of a grower account. No manifest of
+  treetracker-api sets the storage settings for it (checked 2026-10-24).
+
+### Who looks after it
+
+treetracker-infrastructure gives AWS users access to the storage with Terraform. No Terraform
+file of the estate sets up the buckets (checked 2026-10-24).
+
+treetracker-infrastructure also gives one AWS user in each environment read access to the batch
+uploads.
+
+- Not known yet: what sets up the buckets and the identity pools of the Android app.
+- Not known yet: which system reads the batch uploads with these AWS users.
+
+For access to the storage, ask in Greenstand's Slack ([Slack basics](https://github.com/Greenstand/Greenstand-Overview#slack-basics)).
+
+## Shared database
+
+Several code repos share one PostgreSQL database. For the place of the database, see the
+[platform map](../ARCHITECTURE.md#platform). For which code repos read the
+data of other code repos, see the [shared database map](../ARCHITECTURE.md#shared-database).
+
+### How a code repo uses it
+
+A service reads the connection to the database from a Kubernetes Secret (see
+[Secrets in the cluster](#secrets-in-the-cluster)). treetracker-api, treetracker-field-data, and
+treetracker-wallet-api each write to a schema of their own. The migration job of each of the 3
+runs the migration tool db-migrate (see [Clusters and deploys](#clusters-and-deploys)).
+
+<!-- BEGIN shared resource shared-database uses: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Code repo | Use | Evidence |
+|---|---|---|
+| treetracker-admin-api | write | [manifest](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/deployment/base/treetracker-admin-api-deployment.yaml#L37-L41) |
+| treetracker-api | write | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/deployment.yaml#L32-L38), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/database-migration-job.yaml#L25-L29) |
+| treetracker-field-data | write | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/deployment.yaml#L32-L38), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/database-migration-job.yaml#L25-L29) |
+| treetracker-query-api | read | [manifest](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/deployment/base/deployment.yaml#L33-L37) |
+| treetracker-tile-server | read | [manifest](https://github.com/Greenstand/treetracker-tile-server/blob/b619c05/deployment/base/deployment.yaml#L57-L61) |
+| treetracker-wallet-api | write | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-wallet-api/blob/e95c15a/deployment/base/treetracker-wallet-api-deployment.yaml#L42-L51), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-wallet-api/blob/e95c15a/deployment/base/treetracker-wallet-api-db-migration-job.yaml#L25-L31) |
+
+<!-- END shared resource shared-database uses -->
+
+The names that you see in the manifests (each secret is a Kubernetes Secret):
+
+<!-- BEGIN shared resource shared-database names: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Kind | Name |
+|---|---|
+| Secret | `database-connection` |
+| Secret | `database-migration-connection` |
+| Secret | `query-api-database-connection` |
+| Secret | `treetracker-api-database-connection` |
+| Schema | `field_data` |
+| Schema | `treetracker` |
+| Schema | `wallet` |
+
+Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-10-17).
+
+<!-- END shared resource shared-database names -->
+
+Notes:
+
+- A code repo with the use "write" also reads the database.
+- treetracker-admin-api, treetracker-query-api, and treetracker-tile-server set no schema in
+  their manifests (checked 2026-10-24).
+- treetracker-wallet-api reads its schema from the Kubernetes Secret. Its migration job adds
+  the schema `wallet` to the connection.
+- The Airflow DAGs of treetracker-airflow-dags also read and write the database. They get the
+  connection from Airflow, not from a Kubernetes Secret.
+
+### Who looks after it
+
+treetracker-infrastructure sets up the database with Terraform. It also sets up the schemas
+and the database roles with Terraform. For a new schema or for access to the database, ask in
+Greenstand's Slack ([Slack basics](https://github.com/Greenstand/Greenstand-Overview#slack-basics)).
+
+## Message broker
+
+The message broker carries events from one code repo to another. The broker is RabbitMQ. For
+the place of the broker, see the [platform map](../ARCHITECTURE.md#platform).
+
+### How a code repo uses it
+
+A code repo names its queues and exchanges in a source file. A service publishes a message to
+a queue or an exchange, and another service consumes it. The service reads the connection to
+the broker from a Kubernetes Secret (see [Secrets in the cluster](#secrets-in-the-cluster)).
+
+<!-- BEGIN shared resource message-broker uses: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Code repo | Use | Evidence |
+|---|---|---|
+| treetracker-admin-api | publish | [source file](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/src/messaging/config.js#L11-L17) |
+| treetracker-api | publish, consume | [source file&nbsp;1](https://github.com/Greenstand/treetracker-api/blob/85258c8/server/infra/RabbitMQ/config/index.js#L2-L30), [source file&nbsp;2](https://github.com/Greenstand/treetracker-api/blob/85258c8/server/infra/RabbitMQ/config/index.js#L4-L36) |
+| treetracker-field-data | publish, consume | [source file&nbsp;1](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/server/infra/RabbitMQ/config/index.js#L2-L29), [source file&nbsp;2](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/server/infra/RabbitMQ/config/index.js#L4-L35) |
+
+<!-- END shared resource message-broker uses -->
+
+The names that you see in the source files:
+
+<!-- BEGIN shared resource message-broker names: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Kind | Name |
+|---|---|
+| Queue | `admin-verifications` |
+| Queue | `capture-created` |
+| Queue | `raw-capture-created` |
+| Queue | `raw-capture-rejected` |
+| Queue | `tree-created` |
+
+Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-09-03).
+
+<!-- END shared resource message-broker names -->
+
+Notes:
+
+- treetracker-api publishes `capture-created`, and treetracker-field-data consumes it.
+  treetracker-field-data publishes `raw-capture-rejected`, and treetracker-api consumes it.
+- `admin-verifications` is an exchange, not a queue. The names table shows an exchange with the
+  kind "Queue".
+- treetracker-admin-api publishes to `admin-verifications` only in the development environment.
+  Its base manifest turns the publishing off, and only its development overlay turns it on
+  (checked 2026-10-24).
+- No code repo of the estate consumes `raw-capture-created`, `tree-created`, or the messages of
+  `admin-verifications` (checked 2026-10-24).
+
+### Who looks after it
+
+treetracker-infrastructure runs RabbitMQ in each cluster, with the RabbitMQ cluster operator.
+The broker client of a code repo creates the queues and the exchanges of its source file when it
+connects.
+
+- Not known yet: whether a system outside the estate consumes these messages.
+
+For access to the broker, ask in Greenstand's Slack ([Slack basics](https://github.com/Greenstand/Greenstand-Overview#slack-basics)).
+
+## Sign-in
+
+The sign-in server holds user accounts and signs users in. The server is Keycloak. For the place
+of the server, see the [platform map](../ARCHITECTURE.md#platform).
+
+### How a code repo uses it
+
+A web app sends the user to the sign-in server and receives a token. The deploy workflow of the
+web app writes the address of the server, the realm, and the client into an `.env` file before
+the build.
+
+<!-- BEGIN shared resource sign-in uses: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Code repo | Use | Evidence |
+|---|---|---|
+| treetracker-wallet-app | sign&nbsp;in | [deploy workflow&nbsp;1](https://github.com/Greenstand/treetracker-wallet-app/blob/3c14113/.github/workflows/static-website-deploy-dev.yml#L48), [deploy workflow&nbsp;2](https://github.com/Greenstand/treetracker-wallet-app/blob/3c14113/.github/workflows/ci-cd-deploy-web-prod.yml#L43) |
+
+<!-- END shared resource sign-in uses -->
+
+The names that you see in the workflows:
+
+<!-- BEGIN shared resource sign-in names: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Kind | Name |
+|---|---|
+| Realm | `treetracker` |
+
+Each fact was checked at the snapshot of its code repo (generated 2026-10-17).
+
+<!-- END shared resource sign-in names -->
+
+Notes:
+
+- The workflow that deploys the test static site of treetracker-wallet-app writes no sign-in
+  settings (checked 2026-10-24).
+
+### Who looks after it
+
+treetracker-infrastructure runs Keycloak in each cluster. For a new client or a test account,
+ask in Greenstand's Slack ([Slack basics](https://github.com/Greenstand/Greenstand-Overview#slack-basics)).
+
+## Monitoring and logs
+
+The monitoring and the logs show the state of the services in the clusters. This section is for
+maintainers.
+
+### How a code repo uses it
+
+No code repo sets up metrics, traces, or logs of its own (checked 2026-10-24).
+
+### Who looks after it
+
+treetracker-infrastructure holds the Ansible playbooks that install the tools for metrics, logs,
+and traces in a cluster. It also sets up a monitoring server with Terraform.
+
+- Not known yet: which of these tools run in each cluster today.
+
+For access to the tools, ask in Greenstand's Slack ([Slack basics](https://github.com/Greenstand/Greenstand-Overview#slack-basics)).
