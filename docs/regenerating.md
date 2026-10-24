@@ -50,10 +50,9 @@ It comments when the list of due repos or the list of gone facts changes. It clo
 when no repo is due and no fact is gone. Do not close the issue yourself: the next run opens it
 again while a repo is due or a fact is gone. A repo stays due until you regenerate it.
 
-The report shows only repo names, counts, and compare links, the names that the shared-resource
-page shows, and the files that the page links. Before the job prints or posts any text, it runs
-the private-name
-check on it (see [`private-names.md`](./private-names.md)). The job needs the
+The report shows only repo names, counts, compare links, the names that the shared-resource page
+shows, and the files that the page links. Before the job prints or posts any text, it runs the
+private-name check on it (see [`private-names.md`](./private-names.md)). The job needs the
 `PRIVATE_REPO_NAMES` secret, and fails without it.
 
 To see the report now, run it locally. It prints the report and changes nothing:
@@ -285,7 +284,6 @@ working.
   snapshot, and fix the path and the lines of the entry. If a name is not in the repo any more,
   remove it from the entry, and remove an entry that has no name left. Then set the `checkedAt`
   entry of the repo to the new snapshot commit, and run
-  `node .github/scripts/build-shared-resources.mjs`. Then check the
-  edited text of the page too: the notes and "Who looks after it". The pull request reads each
-  cited file and fails when a name is not in its lines. See
-  [The shared resources of the code repos](./shared-resources.md).
+  `node .github/scripts/build-shared-resources.mjs`. Then check the edited text of the page too:
+  the notes and "Who looks after it". The pull request reads each cited file and fails when a
+  name is not in its lines. See [The shared resources of the code repos](./shared-resources.md).
