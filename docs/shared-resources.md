@@ -11,6 +11,10 @@ see the [ecosystem maps](../ARCHITECTURE.md).
 | Resource | Code repos that use it |
 |---|---|
 | [Container registry](#container-registry) | 9 (8 push, 9 pull) |
+| [Clusters and deploys](#clusters-and-deploys) | 8 (8 deploy) |
+| [Secrets in the cluster](#secrets-in-the-cluster) | 6 (6 read) |
+| [API gateway and domains](#api-gateway-and-domains) | 7 (7 route) |
+| [Web hosting and CDN](#web-hosting-and-cdn) | 3 (3 deploy) |
 
 <!-- END shared resources at a glance -->
 
@@ -32,7 +36,7 @@ need a Docker Hub login to work on a code repo.
 |---|---|---|
 | images-api | push, pull | [build workflow](https://github.com/Greenstand/images-api/blob/9d761d1/.github/workflows/treetracker-api-build-deploy-dev.yml#L74-L84), [manifest](https://github.com/Greenstand/images-api/blob/9d761d1/deployment/base/deployment.yaml#L28) |
 | treetracker-admin-api | push, pull | [build workflow](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/.github/workflows/treetracker-admin-api-build-deploy.yml#L75-L84), [manifest](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/deployment/base/treetracker-admin-api-deployment.yaml#L28) |
-| treetracker-airflow-dags | pull | [Airflow DAG 1](https://github.com/Greenstand/treetracker-airflow-dags/blob/a537231/migrate_captures_dag.py#L63), [Airflow DAG 2](https://github.com/Greenstand/treetracker-airflow-dags/blob/a537231/migrate_stakeholders_dag.py#L64) |
+| treetracker-airflow-dags | pull | [Airflow DAG&nbsp;1](https://github.com/Greenstand/treetracker-airflow-dags/blob/a537231/migrate_captures_dag.py#L63), [Airflow DAG&nbsp;2](https://github.com/Greenstand/treetracker-airflow-dags/blob/a537231/migrate_stakeholders_dag.py#L64) |
 | treetracker-api | push, pull | [build workflow](https://github.com/Greenstand/treetracker-api/blob/85258c8/.github/workflows/treetracker-api-build-deploy-dev.yml#L104-L114), [manifest](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/deployment.yaml#L28) |
 | treetracker-field-data | push, pull | [build workflow](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/.github/workflows/treetracker-api-build-deploy-dev.yml#L109-L119), [manifest](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/deployment.yaml#L28) |
 | treetracker-query-api | push, pull | [build workflow](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/.github/workflows/treetracker-query-api-build-deploy-dev.yml#L57-L67), [manifest](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/deployment/base/deployment.yaml#L29) |
@@ -83,3 +87,287 @@ Notes:
 No code repo and no Terraform file of the estate sets up the registry. The build workflows
 read their Docker Hub credentials from the secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`.
 For push access or a new image name, ask in Greenstand's Slack ([Slack basics](https://github.com/Greenstand/Greenstand-Overview#slack-basics)).
+
+## Clusters and deploys
+
+The code repos that run as services deploy into the Kubernetes clusters: one cluster for each
+environment (development, test, and production). For the 4 ways that a code repo starts a
+deploy, see the [platform map](../ARCHITECTURE.md#platform).
+
+### How a code repo uses it
+
+Each code repo keeps its Kubernetes manifests in `deployment/base`. It keeps one overlay for each
+environment in `deployment/overlays`. A deploy uses the overlay of its environment. The code
+repos use 2 of the 4 ways:
+
+- A workflow applies the manifests to the cluster. treetracker-query-api,
+  treetracker-tile-server, treetracker-wallet-api, and treetracker-web-map-client use this way.
+  The workflow reads the cluster name and an access token from GitHub secrets.
+- A workflow commits the new image tag to the overlay. Then a GitOps controller outside the
+  estate applies the change. images-api, treetracker-admin-api, treetracker-api, and
+  treetracker-field-data use this way.
+
+<!-- BEGIN shared resource clusters-and-deploys uses: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Code repo | Use | Evidence |
+|---|---|---|
+| images-api | deploy | [deploy workflow](https://github.com/Greenstand/images-api/blob/9d761d1/.github/workflows/treetracker-api-deploy-prod.yml#L23-L24) |
+| treetracker-admin-api | deploy | [deploy workflow](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/.github/workflows/treetracker-admin-api-deploy-prod.yml#L25-L26) |
+| treetracker-api | deploy | [deploy workflow](https://github.com/Greenstand/treetracker-api/blob/85258c8/.github/workflows/treetracker-api-deploy-prod.yml#L23-L24) |
+| treetracker-field-data | deploy | [deploy workflow](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/.github/workflows/treetracker-api-deploy-prod.yml#L23-L24) |
+| treetracker-query-api | deploy | [build workflow](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/.github/workflows/treetracker-query-api-build-deploy-dev.yml#L100-L106), [deploy workflow&nbsp;1](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/.github/workflows/deploy-test-env.yml#L35-L39), [deploy workflow&nbsp;2](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/.github/workflows/deploy-prod-env.yml#L35-L39) |
+| treetracker-tile-server | deploy | [build workflow](https://github.com/Greenstand/treetracker-tile-server/blob/b619c05/.github/workflows/build-deploy.yml#L102-L106), [deploy workflow](https://github.com/Greenstand/treetracker-tile-server/blob/b619c05/.github/workflows/deploy-prod.yml#L36-L40) |
+| treetracker-wallet-api | deploy | [deploy workflow](https://github.com/Greenstand/treetracker-wallet-api/blob/e95c15a/.github/workflows/treetracker-wallet-api-deploy-prod.yml#L36-L42) |
+| treetracker-web-map-client | deploy | [deploy workflow](https://github.com/Greenstand/treetracker-web-map-client/blob/42b3a9a/.github/workflows/deploy-main-channel-to-prod.yaml#L49-L55) |
+
+<!-- END shared resource clusters-and-deploys uses -->
+
+The names that you see in the workflows (each secret is a GitHub secret):
+
+<!-- BEGIN shared resource clusters-and-deploys names: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Kind | Name |
+|---|---|
+| Secret | `DEV_CLUSTER_NAME` |
+| Secret | `DEV_DIGITALOCEAN_TOKEN` |
+| Secret | `DIGITALOCEAN_PRODUCTION_TOKEN` |
+| Secret | `DIGITALOCEAN_TOKEN` |
+| Secret | `K8S_NAMESPACE` |
+| Secret | `PRODUCTION_CLUSTER_NAME` |
+| Secret | `TEST_CLUSTER_NAME` |
+| Secret | `TEST_DIGITALOCEAN_TOKEN` |
+| Overlay | `deployment/overlays/development` |
+| Overlay | `deployment/overlays/prod` |
+| Overlay | `deployment/overlays/production` |
+| Overlay | `deployment/overlays/test` |
+
+Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-10-17).
+
+<!-- END shared resource clusters-and-deploys names -->
+
+Notes:
+
+- treetracker-query-api and treetracker-web-map-client call their production overlay `prod`.
+  The other code repos call it `production`.
+- treetracker-web-map-client also has the folders `deployment-alpha`, `deployment-beta`,
+  `deployment-main`, and `deployment-next`. A manual workflow deploys a prerelease of the
+  channel alpha from `deployment-alpha`, and a prerelease of the channel next from
+  `deployment-next`. No workflow uses `deployment-beta` or `deployment-main` (checked
+  2026-10-24).
+- In treetracker-api, treetracker-field-data, and treetracker-wallet-api, the manifests also
+  hold a job that runs the database migrations after each deploy.
+
+### Who looks after it
+
+treetracker-infrastructure sets up the clusters with Terraform. The workflows that apply the
+manifests need the GitHub secrets in the table above.
+
+- Not known yet: which repo holds the setup of the GitOps controller, and which clusters it
+  watches.
+- Not known yet: which of these GitHub secrets belong to the whole Greenstand organization, and
+  which belong to one code repo.
+
+For access to a cluster, ask in Greenstand's Slack ([Slack basics](https://github.com/Greenstand/Greenstand-Overview#slack-basics)).
+
+## Secrets in the cluster
+
+A Kubernetes Secret holds a value that a service reads at run time, for example the connection to
+the shared database. The code repos keep these values in git only in a sealed (encrypted) form.
+
+### How a code repo uses it
+
+A writer encrypts the value with the public certificate of the SealedSecret controller of a
+cluster. The code repo keeps the result as a `SealedSecret` manifest. In the cluster, the
+SealedSecret controller makes a Kubernetes Secret from it. The service reads the Kubernetes
+Secret. An overlay can replace the `SealedSecret` of the base with its own.
+
+<!-- BEGIN shared resource secrets-in-the-cluster uses: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Code repo | Use | Evidence |
+|---|---|---|
+| treetracker-admin-api | read | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/deployment/base/database-connection-sealed-secret.yaml#L4), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/deployment/base/rabbitmq-sealedsecret.yaml#L4), [manifest&nbsp;3](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/deployment/base/treetracker-admin-api-jwt-sealed-secret.yaml#L4) |
+| treetracker-api | read | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/database-connection-sealed-secret.yaml#L5), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/database-migration-connection-sealed-secret.yaml#L5), [manifest&nbsp;3](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/rabbitmq-connection-sealed-secret.yaml#L5) |
+| treetracker-field-data | read | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/database-connection-sealed-secret.yaml#L4), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/database-migration-connection-sealed-secret.yaml#L5), [manifest&nbsp;3](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/rabbitmq-connection-sealed-secret.yaml#L5) |
+| treetracker-query-api | read | [manifest](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/deployment/base/database-connection-sealed-secret.yaml#L5) |
+| treetracker-tile-server | read | [manifest](https://github.com/Greenstand/treetracker-tile-server/blob/b619c05/deployment/base/database-connection-sealed-secret.yaml#L5) |
+| treetracker-wallet-api | read | [manifest](https://github.com/Greenstand/treetracker-wallet-api/blob/e95c15a/deployment/base/treetracker-wallet-api-deployment.yaml#L35-L55) |
+
+<!-- END shared resource secrets-in-the-cluster uses -->
+
+The names that you see in the manifests (each secret is a Kubernetes Secret):
+
+<!-- BEGIN shared resource secrets-in-the-cluster names: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Kind | Name |
+|---|---|
+| Secret | `aws-s3` |
+| Secret | `database-connection` |
+| Secret | `database-migration-connection` |
+| Secret | `query-api-database-connection` |
+| Secret | `rabbitmq-connection` |
+| Secret | `treetracker-api-database-connection` |
+| Secret | `treetracker-api-jwt` |
+| Secret | `treetracker-rabbitmq-connection` |
+| Secret | `treetracker-wallet-jwt-keys` |
+
+Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-10-17).
+
+<!-- END shared resource secrets-in-the-cluster names -->
+
+Notes:
+
+- A Kubernetes Secret belongs to the namespace of its service. Thus the Kubernetes Secret
+  `database-connection` of one code repo is not the Kubernetes Secret `database-connection` of
+  another code repo.
+- treetracker-api and treetracker-field-data have a second Kubernetes Secret for the database,
+  `database-migration-connection`. Their migration job reads it.
+
+### Who looks after it
+
+treetracker-infrastructure installs the SealedSecret controller in each cluster. To seal a new
+value, you need the public certificate of the SealedSecret controller of that cluster.
+treetracker-wallet-api holds no `SealedSecret` for its 3 Kubernetes Secrets (checked
+2026-10-24).
+
+- Not known yet: how these Kubernetes Secrets get into the cluster.
+
+For the certificate, ask in Greenstand's Slack ([Slack basics](https://github.com/Greenstand/Greenstand-Overview#slack-basics)).
+
+## API gateway and domains
+
+The API gateway takes each request for an API and sends it to the service in the cluster. Each
+environment has its own host name for the gateway. For the place of the gateway, see the
+[platform map](../ARCHITECTURE.md#platform).
+
+### How a code repo uses it
+
+A code repo that serves an API adds a route to the gateway: a `Mapping` manifest with a path
+prefix. The gateway sends each request whose path starts with the prefix to the service of the
+code repo. It removes the prefix first. The web apps, the Android app, and the Airflow DAGs call
+the APIs through the gateway.
+
+<!-- BEGIN shared resource api-gateway-and-domains uses: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Code repo | Use | Evidence |
+|---|---|---|
+| images-api | route | [manifest](https://github.com/Greenstand/images-api/blob/9d761d1/deployment/base/mapping.yaml#L6) |
+| treetracker-admin-api | route | [manifest](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/deployment/base/treetracker-admin-api-mapping.yaml#L6) |
+| treetracker-api | route | [manifest](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/mapping.yaml#L6) |
+| treetracker-field-data | route | [manifest](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/mapping.yaml#L6) |
+| treetracker-query-api | route | [manifest](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/deployment/base/mapping.yaml#L7) |
+| treetracker-tile-server | route | [manifest](https://github.com/Greenstand/treetracker-tile-server/blob/b619c05/deployment/base/mapping.yaml#L6) |
+| treetracker-wallet-api | route | [manifest](https://github.com/Greenstand/treetracker-wallet-api/blob/e95c15a/deployment/base/treetracker-wallet-api-mapping.yaml#L6) |
+
+<!-- END shared resource api-gateway-and-domains uses -->
+
+The names that you see in the manifests:
+
+<!-- BEGIN shared resource api-gateway-and-domains names: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Kind | Name |
+|---|---|
+| Route | `/api/admin/` |
+| Route | `/field-data/` |
+| Route | `/images/` |
+| Route | `/query/` |
+| Route | `/tiles/` |
+| Route | `/treetracker/` |
+| Route | `/wallet/v2/` |
+
+Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-10-17).
+
+<!-- END shared resource api-gateway-and-domains names -->
+
+Notes:
+
+- treetracker-web-map-client has the route `/` on a host name of its own.
+
+### Who looks after it
+
+treetracker-infrastructure runs the gateway. It sets up the DNS records of the host names of the
+gateway with Terraform. For a new host name or a change to the gateway, ask in Greenstand's Slack
+([Slack basics](https://github.com/Greenstand/Greenstand-Overview#slack-basics)).
+
+## Web hosting and CDN
+
+Static hosting serves the web apps of treetracker-admin-client, treetracker-wallet-admin-client,
+and treetracker-wallet-app: the browser gets the files of the app from a CDN. The files are in
+AWS S3 buckets, and AWS CloudFront is the CDN.
+
+### How a code repo uses it
+
+The workflow that deploys a web app builds the app. Then it copies the files to the bucket of
+the environment (`aws s3 sync`). Then it clears the cache of the CDN
+(`aws cloudfront create-invalidation`). The workflow reads the bucket, the CDN distribution, and
+the AWS key from GitHub secrets. Each environment and each channel has its own GitHub secrets.
+
+<!-- BEGIN shared resource web-hosting-and-cdn uses: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Code repo | Use | Evidence |
+|---|---|---|
+| treetracker-admin-client | deploy | [deploy workflow](https://github.com/Greenstand/treetracker-admin-client/blob/ecbfe05/.github/workflows/deploy.yaml#L46-L63) |
+| treetracker-wallet-admin-client | deploy | [build workflow](https://github.com/Greenstand/treetracker-wallet-admin-client/blob/62a60f3/.github/workflows/build-release.yaml#L148-L149), [deploy workflow&nbsp;1](https://github.com/Greenstand/treetracker-wallet-admin-client/blob/62a60f3/.github/workflows/deploy.yaml#L46-L59), [deploy workflow&nbsp;2](https://github.com/Greenstand/treetracker-wallet-admin-client/blob/62a60f3/.github/workflows/deploy.yaml#L152-L153) |
+| treetracker-wallet-app | deploy | [deploy workflow&nbsp;1](https://github.com/Greenstand/treetracker-wallet-app/blob/3c14113/.github/workflows/static-website-deploy-dev.yml#L86-L96), [deploy workflow&nbsp;2](https://github.com/Greenstand/treetracker-wallet-app/blob/3c14113/.github/workflows/ci-cd-deploy-web-test.yml#L12-L13), [deploy workflow&nbsp;3](https://github.com/Greenstand/treetracker-wallet-app/blob/3c14113/.github/workflows/ci-cd-deploy-web-prod.yml#L12-L13) |
+
+<!-- END shared resource web-hosting-and-cdn uses -->
+
+The names that you see in the workflows (each secret is a GitHub secret):
+
+<!-- BEGIN shared resource web-hosting-and-cdn names: built by .github/scripts/build-shared-resources.mjs from shared-resources.json. Do not edit. -->
+
+| Kind | Name |
+|---|---|
+| Secret | `AWS_ACCESS_KEY_ID` |
+| Secret | `AWS_KEY_ID_DEV` |
+| Secret | `AWS_KEY_ID_PROD` |
+| Secret | `AWS_SECRET_ACCESS_KEY` |
+| Secret | `AWS_SECRET_DEV` |
+| Secret | `AWS_SECRET_PROD` |
+| Secret | `DEV_ALPHA_CDN_DISTRIBUTION_ID` |
+| Secret | `DEV_ALPHA_CDN_S3_BUCKET` |
+| Secret | `DEV_CDN_DISTRIBUTION_ID` |
+| Secret | `DEV_CDN_DISTRIBUTION_ID_FREETOWN` |
+| Secret | `DEV_CDN_S3_BUCKET` |
+| Secret | `DEV_CDN_S3_BUCKET_FREETOWN` |
+| Secret | `DEV_STAGING_CDN_DISTRIBUTION_ID` |
+| Secret | `DEV_STAGING_CDN_S3_BUCKET` |
+| Secret | `PROD_ALPHA_CDN_DISTRIBUTION_ID` |
+| Secret | `PROD_ALPHA_CDN_S3_BUCKET` |
+| Secret | `PROD_CDN_DISTRIBUTION_ID` |
+| Secret | `PROD_CDN_DISTRIBUTION_ID_FREETOWN` |
+| Secret | `PROD_CDN_S3_BUCKET` |
+| Secret | `PROD_CDN_S3_BUCKET_FREETOWN` |
+| Secret | `STAGING_CDN_DISTRIBUTION_ID` |
+| Secret | `STAGING_CDN_S3_BUCKET` |
+| Secret | `TEST_CDN_DISTRIBUTION_ID` |
+| Secret | `TEST_CDN_S3_BUCKET` |
+| Secret | `TEST_STAGING_CDN_DISTRIBUTION_ID` |
+| Secret | `TEST_STAGING_CDN_S3_BUCKET` |
+
+Each fact was checked at the snapshot of its code repo (generated 2026-09-03 to 2026-10-17).
+
+<!-- END shared resource web-hosting-and-cdn names -->
+
+Notes:
+
+- treetracker-admin-client and treetracker-wallet-admin-client choose the GitHub secrets by
+  channel and environment, in a table in the workflow.
+- treetracker-infrastructure also runs a CDN in front of images-api.
+- In production, the web map loads its map tiles from tile hosts.
+
+### Who looks after it
+
+treetracker-infrastructure sets up 4 static sites of treetracker-admin-client with Terraform:
+development, test, staging, and production. It sets up the development static site of
+treetracker-wallet-app with Terraform, and the test and production static sites with
+CloudFormation. The workflows that deploy the web apps need the GitHub secrets in the table
+above.
+
+- Not known yet: what sets up the static sites of the channels alpha, beta, and freetown of
+  treetracker-admin-client.
+- Not known yet: what sets up the static sites of treetracker-wallet-admin-client.
+- Not known yet: which of these GitHub secrets belong to the whole Greenstand organization, and
+  which belong to one code repo.
+- Not known yet: what serves the tile hosts of the web map.
+
+For access to a bucket or for a new static site, ask in Greenstand's Slack ([Slack basics](https://github.com/Greenstand/Greenstand-Overview#slack-basics)).
