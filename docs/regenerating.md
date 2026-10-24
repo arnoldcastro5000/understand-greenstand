@@ -178,13 +178,15 @@ Limits:
    The script puts the "Start here" section before the first `##` heading of the README. The
    section links the viewer, the onboarding guide, the glossary, and the source repo. It also
    links the `CONTRIBUTING.md` of the source repo (if it is a described file), the good first
-   issues, and the volunteer guide. The script puts the "Regenerating" section at the end of the
-   README, or in place of a `## Regenerating` section that the README already has. That section
-   links to this recipe by its title. The `Estate index` check fails a pull request if a section
-   is missing or stale, or if the "Start here" section is not first. It also fails if a per-repo
-   README has an em dash, or tells how to view the graphs outside the "Start here" section. It
-   also fails on a Regenerating heading that the script does not write: delete that heading and
-   its text.
+   issues, and the volunteer guide. For a code repo, it links each section of
+   [the shared-resource page](./shared-resources.md) where the repo appears in
+   [`shared-resources.json`](../shared-resources.json), or the page if the repo is in no
+   section. The script puts the "Regenerating" section at the end of the README, or in place of
+   a `## Regenerating` section that the README already has. That section links to this recipe by
+   its title. The `Estate index` check fails a pull request if a section is missing or stale, or
+   if the "Start here" section is not first. It also fails if a per-repo README has an em dash,
+   or tells how to view the graphs outside the "Start here" section. It also fails on a
+   Regenerating heading that the script does not write: delete that heading and its text.
 
 8. Clean up the onboarding guides. Run:
 
@@ -283,7 +285,10 @@ working.
   Each evidence entry cites lines of a file at the old snapshot. Find each name at the new
   snapshot, and fix the path and the lines of the entry. If a name is not in the repo any more,
   remove it from the entry, and remove an entry that has no name left. Then set the `checkedAt`
-  entry of the repo to the new snapshot commit, and run
-  `node .github/scripts/build-shared-resources.mjs`. Then check the edited text of the page too:
-  the notes and "Who looks after it". The pull request reads each cited file and fails when a
-  name is not in its lines. See [The shared resources of the code repos](./shared-resources.md).
+  entry of the repo to the new snapshot commit. If the repo has no evidence entry left, remove
+  its `checkedAt` entry. Then run
+  `node .github/scripts/build-shared-resources.mjs` and
+  `node .github/scripts/build-repo-readmes.mjs` (the "Start here" section lists the sections
+  where the repo appears). Then check the edited text of the page too: the notes and "Who looks
+  after it". The pull request reads each cited file and fails when a name is not in its lines.
+  See [The shared resources of the code repos](./shared-resources.md).
