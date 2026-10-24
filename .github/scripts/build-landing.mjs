@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Build the landing page of the Pages site (<site-dir>/index.html) from the estate
 // (estate.mjs), so it shows the same areas, repos, and links as the README.md index. Like the top
-// of README.md, it also links the estate glossary, the volunteer guide, and the ecosystem maps.
+// of README.md, it also links the estate glossary, the volunteer guide, the ecosystem maps, and the
+// shared-resource page.
 // The deploy workflow runs it after it assembles <site-dir>/<repo>/. It fails if a page
 // that the landing page links to is missing there.
 // Usage: node build-landing.mjs <site-dir>
@@ -53,12 +54,17 @@ function item({ name, description, formerNames, sha, date, source }) {
   );
 }
 
-// The ecosystem maps show how the code repos work together. The "Start here" box lists them below
-// its repos.
+// The ecosystem maps show how the code repos work together. The shared-resource page shows what
+// the code repos share. The "Start here" box lists both below its repos.
 const MAPS_ITEM = entry(
   "./architecture.html",
   "Ecosystem maps",
   "How the code repos work together at run time: which app calls which API, and which data they share.",
+);
+const SHARED_RESOURCES_ITEM = entry(
+  "./shared-resources.html",
+  "Shared resources",
+  "What the code repos share to build, deploy, and run, for example the container registry, the clusters, and the shared database.",
 );
 
 function section(area, extra = []) {
@@ -124,7 +130,7 @@ the source commit that the docs describe. The ${link("./glossary.html", "estate 
 business terms of all repos.</p>
 <p class="welcome"><strong>New volunteer?</strong> Read ${link("./contribute.html", "How to contribute to Greenstand")}:
 how to join the community, pick a first task, and get help.</p>
-${section(start, [MAPS_ITEM])}
+${section(start, [MAPS_ITEM, SHARED_RESOURCES_ITEM])}
 <nav class="jump" aria-label="Areas">
 <span>Areas:</span>
 ${jump}

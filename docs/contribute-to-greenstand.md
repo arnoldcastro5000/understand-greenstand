@@ -34,6 +34,9 @@ The full steps are in [Join the team](https://github.com/Greenstand/Greenstand-O
   viewer with a guided tour, an onboarding guide, and a glossary.
 - Look at the [ecosystem maps](../ARCHITECTURE.md). They show how the repos work together:
   which app calls which API, and which data they share.
+- Look at the [shared-resource page](./shared-resources.md). It shows what the code repos share
+  to build, deploy, and run, for example the container registry, the clusters, and the shared
+  database.
 - Use the [estate glossary](../GLOSSARY.md) when a business term is new to you, for example
   capture, token, or wallet.
 
