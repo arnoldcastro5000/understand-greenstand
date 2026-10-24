@@ -8,7 +8,9 @@
 // at its snapshot (checkedAt), so a regeneration fails the check until a person checks them
 // again. Only names of the known kinds go on the page, and no name with a dot (no host, no
 // bucket). The ## heading above the blocks of a resource is its name, and its GitHub anchor is
-// its id: the links from other pages use the id.
+// its id: the links from other pages use the id. A resource with an empty evidence list (no
+// evidence of a use by a code repo) has the count 0 in the at-a-glance table, no blocks, and one
+// ## heading, its name, with its id as the anchor.
 // Usage: node build-shared-resources.mjs              rewrite the built text
 //        node build-shared-resources.mjs --check      exit 1 if the built text is stale (CI)
 //        node build-shared-resources.mjs --evidence   exit 1 if a name is not in its cited lines
@@ -37,8 +39,9 @@ const markers = (id, part) => ({
 
 // The uses of a resource, in the order of the uses tables. "sign in" is one use.
 const USES = ["push", "pull", "deploy", "route", "read", "write", "publish", "consume", "sign in"];
-// The link text of an evidence link.
-const LABELS = ["build workflow", "deploy workflow", "test workflow", "manifest", "Dockerfile", "Terraform", "Airflow DAG"];
+// The link text of an evidence link. "source file" is a file of the code (for example the config of
+// the broker queues).
+const LABELS = ["build workflow", "deploy workflow", "test workflow", "manifest", "Dockerfile", "Terraform", "Airflow DAG", "source file"];
 // The kinds of names that a volunteer types, in the order of the names tables.
 const KINDS = ["secret", "image", "schema", "overlay", "route", "queue", "realm"];
 // A route is a path prefix that a code repo adds to the API gateway: the use "route" and the kind
@@ -87,7 +90,7 @@ function validData(data) {
     else if (ids.has(id)) fail(`${at}: the id ${id} is used twice`);
     ids.add(id);
     if (typeof resource.name !== "string" || !resource.name.trim() || resource.name.includes(EM_DASH)) fail(`${at}: the name must be set, with no em dash`);
-    if (!Array.isArray(evidence) || !evidence.length) return fail(`${at}: evidence must be a list with at least one entry`);
+    if (!Array.isArray(evidence)) return fail(`${at}: evidence must be a list (an empty list: no evidence of a use by a code repo)`);
     evidence.forEach((e, j) => {
       const where = `${typeof id === "string" ? id : at}, evidence ${j + 1}`;
       if (!isObject(e)) return fail(`${where} must be an object`);
@@ -140,6 +143,9 @@ const data = validData(readDocsFile(DATA, errors, JSON.parse));
 const byCodeUnits = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 const reposOf = (resource) => [...new Set(resource.evidence.map((e) => e.repo))].sort(byCodeUnits);
 const usesOf = (resource, repo) => USES.filter((u) => resource.evidence.some((e) => e.repo === repo && e.use === u));
+// A use as Markdown for the tables: a no-break space keeps the words of "sign in" on one line in a
+// narrow cell.
+const markdownUse = (use) => use.replaceAll(" ", "&nbsp;");
 
 // The uses table: one row per code repo, in the order of the alphabet. Each evidence link goes to
 // the file at the checked commit, with its lines. When a label shows more than once in a row, each
@@ -155,7 +161,7 @@ function usesTable(resource) {
       const text = repeats > 1 ? `${e.label}&nbsp;${seen.get(e.label)}` : e.label;
       return `[${text}](https://github.com/${estate.sourceOrg}/${repo}/blob/${data.checkedAt[repo]}/${urlPath(e.path)}${lineAnchor(rangeOf.get(e))})`;
     });
-    return `| ${repo} | ${usesOf(resource, repo).join(", ")} | ${links.join(", ")} |`;
+    return `| ${repo} | ${usesOf(resource, repo).map(markdownUse).join(", ")} | ${links.join(", ")} |`;
   });
   return ["| Code repo | Use | Evidence |", "|---|---|---|", ...rows].join("\n");
 }
@@ -173,14 +179,14 @@ function namesBlock(resource) {
 }
 
 // The at-a-glance table: each resource (a link to its section), the count of code repos that use
-// it, and the count of each use.
+// it, and the count of each use. A resource with no evidence has the count 0.
 function glanceTable() {
   const rows = data.resources.map((resource) => {
     const repoList = reposOf(resource);
     const useCounts = USES.map((u) => [u, repoList.filter((repo) => usesOf(resource, repo).includes(u)).length])
       .filter(([, n]) => n)
-      .map(([u, n]) => `${n} ${u}`);
-    return `| [${resource.name}](#${resource.id}) | ${repoList.length} (${useCounts.join(", ")}) |`;
+      .map(([u, n]) => `${n} ${markdownUse(u)}`);
+    return `| [${resource.name}](#${resource.id}) | ${repoList.length ? `${repoList.length} (${useCounts.join(", ")})` : "0"} |`;
   });
   return ["| Resource | Code repos that use it |", "|---|---|", ...rows].join("\n");
 }
@@ -198,7 +204,7 @@ const shownText = (markdown) =>
 // fenced code do not count. A list item, a quote, or an HTML block ends a paragraph, so a "---"
 // line after one of them (or after a blank line) is not an underline. Every heading gets its
 // anchor in order, so a repeat gets "-1".
-// Returns a function: the ## heading above a position of the page, or undefined.
+// Returns the headings in order: { offset, level, text, anchor }.
 function headingsOf(page) {
   const slug = slugger();
   const pageLines = page.split("\n");
@@ -223,7 +229,7 @@ function headingsOf(page) {
     offset += line.length + 1;
   });
   for (const h of headings) h.anchor = slug(shownText(h.text));
-  return (position) => headings.filter((h) => h.level === 2 && h.offset < position).at(-1);
+  return headings;
 }
 
 // The page with its built text, or the page unchanged if a part fails.
@@ -243,25 +249,39 @@ function buildPage(page) {
   for (const [, id, part] of page.matchAll(/<!-- BEGIN shared resource (\S+) (uses|names):/g)) {
     if (!ids.has(id)) fail(` has a ${part} block for "${id}", which is not a resource in ${DATA}`);
   }
-  const headingAbove = headingsOf(page);
+  const sectionHeadings = headingsOf(page).filter((h) => h.level === 2);
+  const headingAbove = (position) => sectionHeadings.filter((h) => h.offset < position).at(-1);
+  // The ## heading of a section is the name of its resource, with the id as its anchor.
+  const checkHeading = (heading, resource, what) => {
+    if (heading.text !== resource.name) fail(`: ${what} is "${heading.text}", but its name in ${DATA} is "${resource.name}"`);
+    if (heading.anchor !== resource.id) fail(`: ${what} has the anchor #${heading.anchor}, but the id is ${resource.id}: the links from other pages use the id`);
+  };
   let next = replaceMarked(PAGE, page, GLANCE, glanceTable(), errors);
   for (const resource of data.resources) {
+    // A resource with no evidence has no built tables, and one ## heading with its name: the
+    // at-a-glance table links to it. A marker counts with any text after its part.
+    if (!resource.evidence.length) {
+      for (const part of PARTS) {
+        if (new RegExp(`<!-- (?:BEGIN|END) shared resource ${escapeRegExp(resource.id)} ${part}(?=[:\\s])`).test(page)) {
+          fail(` has a ${part} block for ${resource.id}, but ${resource.id} has no evidence: remove the block`);
+        }
+      }
+      const named = sectionHeadings.filter((h) => h.text === resource.name);
+      if (!named.length) {
+        fail(` has no ## heading "${resource.name}" with the anchor #${resource.id}: the at-a-glance table and the links from other pages use the id`);
+      } else if (named.length > 1) {
+        fail(` has ${named.length} ## headings "${resource.name}": ${resource.id} has one section`);
+      } else checkHeading(named[0], resource, `the ## heading of ${resource.id}`);
+      continue;
+    }
     for (const part of PARTS) {
       const m = markers(resource.id, part);
       const before = errors.length;
       next = replaceMarked(PAGE, next, m, part === "uses" ? usesTable(resource) : namesBlock(resource), errors);
       if (errors.length > before) continue;
       const heading = headingAbove(page.indexOf(m.begin));
-      if (!heading) {
-        fail(`: the ${m.what} has no ## heading above it`);
-        continue;
-      }
-      if (heading.text !== resource.name) {
-        fail(`: the ## heading above the ${m.what} is "${heading.text}", but its name in ${DATA} is "${resource.name}"`);
-      }
-      if (heading.anchor !== resource.id) {
-        fail(`: the ## heading above the ${m.what} has the anchor #${heading.anchor}, but the id is ${resource.id}: the links from other pages use the id`);
-      }
+      if (!heading) fail(`: the ${m.what} has no ## heading above it`);
+      else checkHeading(heading, resource, `the ## heading above the ${m.what}`);
     }
   }
   return next;

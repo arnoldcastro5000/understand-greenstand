@@ -25,8 +25,10 @@ name: Estate index
 # step 2), remove the reference, or correct the project block (step 2).
 # Also fails when the built text of the shared-resource page (docs/shared-resources.md) is stale,
 # when shared-resources.json has an error, when a repo was regenerated after its facts were
-# checked, or when the ## heading above the blocks of a resource is not its name with its id as
-# the anchor. Fix: run `node .github/scripts/build-shared-resources.mjs` and follow its errors.
+# checked, or when the ## heading of a resource is not its name with its id as the anchor. The
+# heading of a resource is the ## heading above its blocks or, for a resource with no evidence (no
+# blocks), its one ## heading. Fix: run `node .github/scripts/build-shared-resources.mjs` and
+# follow its errors.
 # When a push or a pull request changes shared-resources.json, also fails when a name is not in
 # its cited lines at the snapshot (the script reads them through the GitHub API). Fix the
 # evidence entry that the error names.
