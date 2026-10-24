@@ -18,7 +18,7 @@
 //          set). CI runs it only when shared-resources.json changes.
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { EM_DASH, escapeRegExp, fencedLines, isObject, loadEstate, readDocsFile, replaceMarked, root } from "./estate.mjs";
+import { EM_DASH, escapeRegExp, expandRepoName, fencedLines, hasWholeName, isObject, loadEstate, readDocsFile, replaceMarked, root, urlPath } from "./estate.mjs";
 import { slugger } from "./slug.mjs";
 
 const SCRIPT = ".github/scripts/build-shared-resources.mjs";
@@ -48,9 +48,6 @@ const KINDS = ["secret", "image", "schema", "overlay", "route", "queue", "realm"
 // "route". It is "/" and one or more parts, each after a "/", with an optional "/" at the end.
 // "/" alone is no route: the evidence check would find it in "rewrite: /" too.
 const ROUTE = /^(\/[A-Za-z0-9_-]+)+\/?$/;
-// The one expression that the evidence check expands: a build workflow often gives the image
-// name as greenstand/${{ github.event.repository.name }}. GitHub expressions ignore case.
-const REPO_NAME_EXPRESSION = /\$\{\{\s*github\.event\.repository\.name\s*\}\}/gi;
 
 const mode = process.argv.includes("--evidence") ? "evidence" : process.argv.includes("--check") ? "check" : "write";
 const { estate, repos, errors } = loadEstate();
@@ -61,12 +58,6 @@ const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 const rangeOf = new Map();
 // The line anchor of a GitHub file link: #L7 or #L3-L5.
 const lineAnchor = ({ first, last }) => (first === last ? `#L${first}` : `#L${first}-L${last}`);
-// A path in a repo as a URL path. "(" and ")" are encoded too, so a Markdown link stays whole.
-const urlPath = (path) =>
-  path
-    .split("/")
-    .map((segment) => encodeURIComponent(segment).replace(/[()]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`))
-    .join("/");
 
 // Check shared-resources.json in both directions, and return it only if it is valid: each
 // evidence entry names a code repo, a known use and label, a path in the repo, its lines, and at
@@ -288,8 +279,7 @@ function buildPage(page) {
 }
 
 // Read each cited file at the snapshot of its repo, once, and check that each name of each
-// evidence entry is in the cited lines. A name counts only as a whole name: greenstand/a is not
-// in greenstand/a-dev or in greenstand/a.old.
+// evidence entry is in the cited lines, by the name rule of estate.mjs (hasWholeName).
 async function checkEvidence() {
   const { GITHUB_TOKEN: token } = process.env;
   const fetched = new Map(); // "<repo>@<sha>:<path>" -> a promise of { content } or { status }
@@ -322,10 +312,10 @@ async function checkEvidence() {
         errors.push(`${where}: the file has ${fileLines.length} lines`);
         continue;
       }
-      const cited = fileLines.slice(first - 1, last).join("\n").replace(REPO_NAME_EXPRESSION, e.repo);
+      const cited = expandRepoName(fileLines.slice(first - 1, last).join("\n"), e.repo);
       for (const typed of e.names) {
         names++;
-        if (!new RegExp(`(?<![\\w/-])${escapeRegExp(typed.name)}(?![\\w/.-])`).test(cited)) errors.push(`${where}: ${typed.name} is not in the cited lines`);
+        if (!hasWholeName(cited, typed.name)) errors.push(`${where}: ${typed.name} is not in the cited lines`);
       }
     }
   }
