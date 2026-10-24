@@ -19,6 +19,9 @@ term to the repos and domains that use it.
 The [ecosystem maps](./ARCHITECTURE.md) show how the code repos work together at run time:
 capture and verification, the web map, the wallet, the shared database, and the platform.
 
+The [shared-resource page](./docs/shared-resources.md) shows what the code repos share to build,
+deploy, and run, for example the container registry, the clusters, and the shared database.
+
 Each source repo also has one directory under [`repos/`](./repos/). A directory holds that
 repo's `knowledge-graph.json` plus rendered domain and onboarding markdown, produced by
 the [Understand-Anything](https://github.com/Egonex-AI/Understand-Anything) skill suite
