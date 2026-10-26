@@ -19,12 +19,10 @@
 //          set). CI runs it only when shared-resources.json changes.
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { EM_DASH, escapeRegExp, expandRepoName, fencedLines, hasWholeName, isObject, loadEstate, readDocsFile, replaceMarked, root, urlPath } from "./estate.mjs";
+import { EM_DASH, SHARED_RESOURCES_DATA as DATA, SHARED_RESOURCES_PAGE as PAGE, escapeRegExp, expandRepoName, fencedLines, hasWholeName, isObject, loadEstate, readDocsFile, replaceMarked, root, urlPath } from "./estate.mjs";
 import { slugger } from "./slug.mjs";
 
 const SCRIPT = ".github/scripts/build-shared-resources.mjs";
-const DATA = "shared-resources.json";
-const PAGE = "docs/shared-resources.md";
 const BUILT = `built by ${SCRIPT} from ${DATA}. Do not edit.`;
 const GLANCE = {
   begin: `<!-- BEGIN shared resources at a glance: ${BUILT} -->`,

@@ -151,6 +151,24 @@ export function readDocsFile(at, errors, parse = (text) => text) {
   }
 }
 
+// The data file of the shared-resource page, and the page. build-shared-resources.mjs builds the
+// page from the data file and checks all of the data file.
+export const SHARED_RESOURCES_DATA = "shared-resources.json";
+export const SHARED_RESOURCES_PAGE = "docs/shared-resources.md";
+
+// Read the resources of the data file for a script that uses only some of their fields. readable
+// checks the shape of those fields in one resource, and fields names them in the error. Return
+// the resources, or record in errors what is wrong and return null.
+export function readSharedResources(errors, fields, readable) {
+  return readDocsFile(SHARED_RESOURCES_DATA, errors, (text) => {
+    const data = JSON.parse(text);
+    if (!isObject(data) || !Array.isArray(data.resources) || !data.resources.every((r) => isObject(r) && readable(r))) {
+      throw new Error(`must have a list of resources, each with ${fields}. Run: node .github/scripts/build-shared-resources.mjs --check`);
+    }
+    return data.resources;
+  });
+}
+
 // Read the graph of a repo (repos/<name>/knowledge-graph.json) and check the shape of the parts
 // that the scripts read: a list of nodes, and the lists of edges, layers, and tour steps (each
 // optional). Return the graph, or record in errors what is wrong and return null. A missing graph

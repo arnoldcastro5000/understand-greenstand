@@ -7,7 +7,9 @@ name: Estate index
 # error, or when a repo was regenerated after its edges were checked. Fix: run
 # `node .github/scripts/build-ecosystem-maps.mjs` and follow its errors.
 # Also fails when a glossary (repos/<name>/GLOSSARY.md, or the estate GLOSSARY.md) does not
-# match the domain graphs. Fix: run `node .github/scripts/build-glossary.mjs`.
+# match the domain graphs. The estate glossary also lists the resources of shared-resources.json.
+# Thus a change of shared-resources.json can make it stale. Fix: run
+# `node .github/scripts/build-glossary.mjs`.
 # Also fails when the Start here or Regenerating section of a per-repo README
 # (repos/<name>/README.md) is missing or stale. The Start here section comes from estate.json,
 # the graph, shared-resources.json, and the title of docs/shared-resources.md. Thus a change of
