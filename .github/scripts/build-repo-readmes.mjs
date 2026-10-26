@@ -15,7 +15,7 @@
 //        node build-repo-readmes.mjs --check   exit 1 if a section is stale or a check fails (CI)
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { EM_DASH, fencedLines, isObject, loadEstate, markedBlock, readDocsFile, readGraph, replaceMarked, root } from "./estate.mjs";
+import { EM_DASH, SHARED_RESOURCES_PAGE, fencedLines, isObject, loadEstate, markedBlock, readDocsFile, readGraph, readSharedResources, replaceMarked, root } from "./estate.mjs";
 
 const SCRIPT = ".github/scripts/build-repo-readmes.mjs";
 const START_HERE = {
@@ -31,8 +31,6 @@ const REGENERATING = {
   optional: true,
 };
 const RECIPE = "docs/regenerating.md";
-const SHARED_RESOURCES_DATA = "shared-resources.json";
-const SHARED_RESOURCES_PAGE = "docs/shared-resources.md";
 // A Regenerating heading: any level, any case, "#" or underline form ("Regenerating" + "---").
 const REGENERATING_HEADING = /^ {0,3}(#{1,6}[ \t]+)?regenerating\b/i;
 const SETEXT_UNDERLINE = /^ {0,3}(=+|-+)[ \t]*$/;
@@ -61,14 +59,11 @@ const linkText = (title) => title.replace(/[\\`*_[\]<>]/g, "\\$&");
 
 // The resources of shared-resources.json. The bullet reads only the id, the name, and the repo of
 // each evidence entry; build-shared-resources.mjs checks the rest of the file.
-const resources = readDocsFile(SHARED_RESOURCES_DATA, errors, (text) => {
-  const data = JSON.parse(text);
-  const readable = (r) => isObject(r) && typeof r.id === "string" && typeof r.name === "string" && Array.isArray(r.evidence) && r.evidence.every(isObject);
-  if (!isObject(data) || !Array.isArray(data.resources) || !data.resources.every(readable)) {
-    throw new Error("must have a list of resources, each with an id, a name, and an evidence list of objects. Run: node .github/scripts/build-shared-resources.mjs --check");
-  }
-  return data.resources;
-});
+const resources = readSharedResources(
+  errors,
+  "an id, a name, and an evidence list of objects",
+  (r) => typeof r.id === "string" && typeof r.name === "string" && Array.isArray(r.evidence) && r.evidence.every(isObject),
+);
 
 // The path of the source repo's CONTRIBUTING.md, if it is a described file (a node in the
 // graph), in the order of places that GitHub uses. The link points to the default branch

@@ -8,7 +8,7 @@
 //   README.md is recipe output too, but the rename steps fix a former name in it directly,
 //   so the check reads it.
 // - estate.json, which records the former names, and GLOSSARY.md, which is generated from the
-//   domain graphs.
+//   domain graphs and shared-resources.json.
 // - the generated blocks between BEGIN and END markers (the README index shows the former name).
 // Usage: node check-former-names.mjs   exit 1 and show each line that contains a former name (CI)
 import { execFileSync } from "node:child_process";

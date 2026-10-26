@@ -153,9 +153,10 @@ Limits:
    node .github/scripts/build-glossary.mjs
    ```
 
-   The script writes `repos/<repo-name>/GLOSSARY.md` and the estate glossary `GLOSSARY.md`
-   from the domain graphs alone, so it needs no other input. The `Estate index` check fails a
-   pull request if a glossary is missing or stale.
+   The script writes `repos/<repo-name>/GLOSSARY.md` from the domain graph of the repo. It
+   writes the estate glossary `GLOSSARY.md` from all domain graphs and from the shared resources
+   in [`shared-resources.json`](../shared-resources.json). The `Estate index` check fails a pull
+   request if a glossary is missing or stale.
 
 6. Refresh the index in the top `README.md`. For a new repo, first add an entry with its area
    and a one-line description to [`estate.json`](../estate.json). Then run:

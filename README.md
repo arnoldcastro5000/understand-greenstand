@@ -13,8 +13,9 @@ The landing page indexes every documented repo by area, like the index below. Ea
 interactive knowledge-graph viewer (structural + domain views, a guided tour, and inline source
 loaded from GitHub) plus a rendered onboarding guide, glossary, and README.
 
-The [estate glossary](GLOSSARY.md) lists the business terms of all repos, A to Z, and links each
-term to the repos and domains that use it.
+The [estate glossary](GLOSSARY.md) lists the business terms of all repos and the shared
+resources, A to Z. It links each term to the repos and domains that use it, and each shared
+resource to its section of the shared-resource page.
 
 The [ecosystem maps](./ARCHITECTURE.md) show how the code repos work together at run time:
 capture and verification, the web map, the wallet, the shared database, and the platform.

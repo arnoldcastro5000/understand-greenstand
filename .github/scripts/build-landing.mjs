@@ -127,7 +127,7 @@ ${BASE_STYLE}
 <p class="lede">Machine-generated documentation for the core-active Greenstand estate. Each repo has an
 interactive knowledge-graph viewer, an onboarding guide, a glossary, and a README. The snapshot is
 the source commit that the docs describe. The ${link("./glossary.html", "estate glossary")} lists the
-business terms of all repos.</p>
+business terms of all repos and the shared resources.</p>
 <p class="welcome"><strong>New volunteer?</strong> Read ${link("./contribute.html", "How to contribute to Greenstand")}:
 how to join the community, pick a first task, and get help.</p>
 ${section(start, [MAPS_ITEM, SHARED_RESOURCES_ITEM])}
