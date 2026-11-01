@@ -14,7 +14,11 @@ on:
       - "ARCHITECTURE.md"
       - "docs/contribute-to-greenstand.md"
       - "docs/shared-resources.md"
+      - "capture-journey.json"
+      - "docs/capture-journey/**"
       - "viewer/**"
+      - ".github/scripts/build-capture-journey.mjs"
+      - ".github/scripts/capture-journey-page.mjs"
       - ".github/scripts/build-landing.mjs"
       - ".github/scripts/build-moved.mjs"
       - ".github/scripts/estate.mjs"
@@ -156,6 +160,9 @@ jobs:
           # The shared-resource page, linked from the landing page, the ecosystem maps, the volunteer
           # guide, README.md, and each per-repo README.
           node .github/scripts/render-md.mjs docs/shared-resources.md "$OUT/shared-resources.html" "The shared resources of the code repos" "./" "All viewers"
+          # The capture journey: the illustrated page (capture-journey-page.mjs) and its images,
+          # built from capture-journey.json.
+          node .github/scripts/build-capture-journey.mjs --site "$OUT"
           # Moved pages: the old subpath of a renamed repo sends readers to the new subpath.
           node .github/scripts/build-moved.mjs "$OUT"
           # Landing index: the areas and links of estate.json, as in the README.md index.

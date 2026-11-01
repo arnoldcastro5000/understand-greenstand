@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 620" role="img" aria-labelledby="t">
+<title id="t">The bundle chain: cloud storage, then three steps, then the field data service. On the side, the older path also gets each capture and stores the older tree record.</title>
+<style>
+  .bg{fill:#ffffff}.card{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1.5}.line{stroke:#8c959f;stroke-width:2;fill:none}
+  .t{font:600 17px system-ui,-apple-system,"Segoe UI",sans-serif;fill:#1f2328}.s{font:14px system-ui,-apple-system,"Segoe UI",sans-serif;fill:#656d76}
+  .t2{font:600 15px system-ui,-apple-system,"Segoe UI",sans-serif;fill:#1f2328}.s2{font:13px system-ui,-apple-system,"Segoe UI",sans-serif;fill:#656d76}
+  .mono{font:13px ui-monospace,Menlo,monospace;fill:#656d76}.num{font:700 15px system-ui,sans-serif;fill:#ffffff}
+  .g{fill:#4c9a2a}.gl{fill:#dafbe1}.a{fill:#bf8700}.al{fill:#fff8c5}.r{fill:#cf222e}.b{fill:#0969da}.bl{fill:#ddf4ff}.w{fill:#ffffff}
+  .tree1{fill:#4c9a2a}.trunk{fill:#8a6a3b}.dash{stroke-dasharray:6 5}
+  @media (prefers-color-scheme: dark){.bg{fill:#0d1117}.card{fill:#161b22;stroke:#30363d}.t,.t2{fill:#e6edf3}.s,.s2,.mono{fill:#8b949e}
+  .gl{fill:#12261e}.al{fill:#272115}.bl{fill:#0c2d6b}.line{stroke:#6e7681}.w{fill:#0d1117}}
+</style>
+<rect class="bg" width="480" height="620" rx="12"/>
+<g transform="translate(0 34)">
+<path class="card" d="M150 78a34 34 0 0 1 8-60 44 44 0 0 1 84-8 38 38 0 0 1 74 18 30 30 0 0 1 14 50z"/>
+<rect class="w" x="214" y="36" width="34" height="42" rx="3" stroke="#8c959f" stroke-width="1.5"/>
+<path d="M221 48h20M221 56h20M221 64h14" stroke="#8c959f" stroke-width="2"/>
+<text class="t" x="240" y="106" text-anchor="middle">Cloud storage: photos and bundles</text>
+<path class="line" d="M240 116v22"/><path d="M233 134l7 9 7-9z" fill="#8c959f"/>
+<g><rect class="card" x="40" y="148" width="400" height="74" rx="10"/><circle class="g" cx="76" cy="185" r="16"/><text class="num" x="76" y="190" text-anchor="middle">1</text>
+<text class="t" x="104" y="180">Keep the new bundle</text><text class="mono" x="104" y="202">bulk-pack-consumer</text></g>
+<path class="line" d="M240 222v18"/><path d="M233 236l7 9 7-9z" fill="#8c959f"/>
+<g><rect class="card" x="40" y="250" width="400" height="74" rx="10"/><circle class="g" cx="76" cy="287" r="16"/><text class="num" x="76" y="292" text-anchor="middle">2</text>
+<text class="t" x="104" y="282">Every 5 minutes, open the bundles</text><text class="mono" x="104" y="304">bulk-pack-processor</text></g>
+<path class="line" d="M240 324v18"/><path d="M233 338l7 9 7-9z" fill="#8c959f"/>
+<g><rect class="card" x="40" y="352" width="400" height="74" rx="10"/><circle class="g" cx="76" cy="389" r="16"/><text class="num" x="76" y="394" text-anchor="middle">3</text>
+<text class="t" x="104" y="384">Pass on each capture</text><text class="mono" x="104" y="406">bulk-pack-transformer-v2</text></g>
+<path class="line" d="M125 426v26"/><path d="M118 448l7 9 7-9z" fill="#8c959f"/>
+<path class="bl" d="M55 466v34a70 9 0 0 0 140 0v-34"/><ellipse class="bl" cx="125" cy="466" rx="70" ry="9"/>
+<path d="M55 466v34a70 9 0 0 0 140 0v-34" fill="none" stroke="#0969da" stroke-width="1.5"/><ellipse cx="125" cy="466" rx="70" ry="9" fill="none" stroke="#0969da" stroke-width="1.5"/>
+<text class="t" x="125" y="534" text-anchor="middle">The field data service</text>
+<path class="line dash" d="M440 287h20v170h-122v8"/><path d="M331 461l7 9 7-9z" fill="#8c959f"/>
+<g><rect class="card dash" x="228" y="474" width="220" height="96" rx="10"/>
+<text class="t2" x="242" y="497">The older path</text><text class="mono" x="242" y="517">bulk-pack-transformer</text>
+<text class="s2" x="242" y="539">Also gets each capture.</text><text class="s2" x="242" y="557">Stores the older tree record.</text></g>
+</g>
+</svg>

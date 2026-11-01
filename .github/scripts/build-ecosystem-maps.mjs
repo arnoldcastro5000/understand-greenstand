@@ -8,7 +8,7 @@
 //        node build-ecosystem-maps.mjs --check   exit 1 if a map is stale (CI)
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { EM_DASH, loadEstate, readDocsFile, replaceMarked, root } from "./estate.mjs";
+import { EM_DASH, loadEstate, parseJson, readDocsFile, replaceMarked, root } from "./estate.mjs";
 
 const SCRIPT = ".github/scripts/build-ecosystem-maps.mjs";
 const DOC = "ARCHITECTURE.md";
@@ -64,7 +64,7 @@ function validEcosystem(eco, codeRepos) {
 }
 
 const codeRepos = new Map(repos.filter((r) => !r.docs).map((r) => [r.name, r]));
-const ecosystem = validEcosystem(readDocsFile("ecosystem.json", errors, JSON.parse), codeRepos);
+const ecosystem = validEcosystem(readDocsFile("ecosystem.json", errors, parseJson), codeRepos);
 
 // Mermaid ids: letters, digits, and "_" only. A store of data is a cylinder.
 const mermaidId = (name) => `n_${name.replace(/[^A-Za-z0-9]/g, "_")}`;

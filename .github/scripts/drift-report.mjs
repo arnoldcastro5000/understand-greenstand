@@ -17,7 +17,7 @@ import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { appendFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { expandRepoName, hasWholeName, loadEstate, readDocsFile, root, urlPath } from "./estate.mjs";
+import { expandRepoName, hasWholeName, loadEstate, parseJson, plural, readDocsFile, root, urlPath } from "./estate.mjs";
 
 // A repo is due when any described file was removed or renamed. It is also due when at least
 // DUE_MIN_FILES described files changed, and they are at least DUE_PERCENT% of its described
@@ -43,7 +43,7 @@ const { GITHUB_TOKEN: token, GITHUB_REPOSITORY: docsRepo, GITHUB_STEP_SUMMARY: s
 const inActions = process.env.GITHUB_ACTIONS === "true";
 
 const { estate, repos, errors } = loadEstate();
-const sharedResources = readDocsFile("shared-resources.json", errors, JSON.parse);
+const sharedResources = readDocsFile("shared-resources.json", errors, parseJson);
 if (errors.length) fail(errors);
 // The issue belongs to github-actions: a local sync would open a second one under your name.
 if (syncIssue && !inActions) fail(["--sync-issue runs only in GitHub Actions"]);
@@ -157,8 +157,6 @@ async function goneFacts(results) {
   }
   return gone;
 }
-
-const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 function reasons(r) {
   if (r.broken) return [r.broken];

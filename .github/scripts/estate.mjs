@@ -1,15 +1,20 @@
 // Load the estate: estate.json (areas, descriptions, URLs) plus repos/*/meta.json (snapshots).
+// Each build and check script imports this module, so the outputs cannot drift apart:
 // build-index.mjs (the README.md index), build-landing.mjs (the Pages landing page),
 // build-moved.mjs (the moved pages of renamed repos), build-glossary.mjs,
 // build-repo-readmes.mjs, build-onboarding.mjs, build-ecosystem-maps.mjs,
-// build-shared-resources.mjs, check-former-names.mjs, check-graphs.mjs, drift-report.mjs, and
-// render-md.mjs read it, so the outputs cannot drift apart.
+// build-shared-resources.mjs, build-capture-journey.mjs, capture-journey-page.mjs,
+// check-former-names.mjs, check-graphs.mjs, check-safety-review.mjs, drift-report.mjs, and
+// render-md.mjs.
 // Returns { estate, areas, repos, count, errors }. Each repo in areas gets its snapshot, its
 // Source URL, and its valid former names (a list, often empty). repos lists the repos of all
 // areas, in order. errors lists every problem at once; the caller prints them and exits.
-// Also exports the helpers that the build scripts share: readDocsFile, markedBlock,
+// Also exports the helpers that the build scripts share: readDocsFile, parseJson, markedBlock,
 // replaceMarked, formerNamesText, EM_DASH, fencedLines, readGraph, isObject, escapeRegExp,
-// urlPath, and the name rule of the shared-resource facts (expandRepoName, hasWholeName).
+// urlPath, plural, the name rule of the evidence (expandRepoName, hasWholeName, missingNames),
+// the evidence form (isRepoPath, parseLines, lineAnchor, citedLines), the GitHub API of the
+// evidence checks (githubApi, RAW, answerStatus), and the paths of the shared-resource page and of
+// the capture journey.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -18,6 +23,16 @@ export const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 // The em dash. This repo's text uses none, and the checks look for it.
 export const EM_DASH = String.fromCharCode(0x2014);
+
+// A count with its word: "1 file", "2 files", "2 evidence entries".
+export const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+
+// A JSON text as a value. A text that starts with a byte order mark gets a clear error: the mark is
+// not visible in most editors, and JSON.parse names it only as an "Unexpected token".
+export function parseJson(text) {
+  if (text.startsWith(String.fromCharCode(0xfeff))) throw new Error("the file starts with a byte order mark (BOM): save it as UTF-8 without a BOM");
+  return JSON.parse(text);
+}
 
 // A JSON object: not null, and not a list.
 export const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
@@ -39,6 +54,56 @@ export const urlPath = (path) =>
 export const expandRepoName = (text, repo) => text.replace(/\$\{\{\s*github\.event\.repository\.name\s*\}\}/gi, repo);
 // A name counts only as a whole name: greenstand/a is not in greenstand/a-dev or in greenstand/a.old.
 export const hasWholeName = (text, name) => new RegExp(`(?<![\\w/-])${escapeRegExp(name)}(?![\\w/.-])`).test(text);
+
+// The form of an evidence entry (shared-resources.json, capture-journey.json). A path in a repo:
+// a text with no leading "/" and no empty, ".", or ".." part.
+export const isRepoPath = (path) =>
+  typeof path === "string" && path !== "" && !path.startsWith("/") && !path.split("/").some((s) => s === "" || s === "." || s === "..");
+// The cited lines: "<n>" or "<first>-<last>", one written form for each range: no leading zero,
+// and the first line before the last. Returns { first, last }, or null for any other value.
+export function parseLines(lines) {
+  const m = typeof lines === "string" ? lines.match(/^([1-9]\d*)(?:-([1-9]\d*))?$/) : null;
+  const range = m && { first: Number(m[1]), last: Number(m[2] ?? m[1]) };
+  return range && (m[2] === undefined || range.first < range.last) ? range : null;
+}
+// The line anchor of a GitHub file link: #L7 or #L3-L5.
+export const lineAnchor = ({ first, last }) => (first === last ? `#L${first}` : `#L${first}-L${last}`);
+
+// The GitHub API of the evidence checks (build-shared-resources.mjs and
+// build-capture-journey.mjs), for the repos of one owner: each request once. get(path, accept)
+// answers { body } (a text for the raw media type, else the JSON value) or { status } (the HTTP
+// status, or null with the error when GitHub gives no answer). file() reads a file of a repo at a
+// commit.
+export const RAW = "application/vnd.github.raw";
+export function githubApi(owner, token) {
+  const asked = new Map(); // "<accept> <path>" -> a promise of the answer
+  const get = (path, accept = "application/vnd.github+json") => {
+    const key = `${accept} ${path}`;
+    if (!asked.has(key)) {
+      const headers = { Accept: accept, ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+      asked.set(
+        key,
+        fetch(`https://api.github.com/repos/${owner}/${path}`, { headers }).then(
+          async (res) => (res.ok ? { body: accept === RAW ? await res.text() : await res.json() } : { status: res.status }),
+          (e) => ({ status: null, error: e.message }),
+        ),
+      );
+    }
+    return asked.get(key);
+  };
+  const file = (repo, path, commit, accept = RAW) => get(`${repo}/contents/${urlPath(path)}?ref=${commit}`, accept);
+  return { get, file };
+}
+// The status of an answer with no body, for an error: "HTTP 404", or "no answer: <error>".
+export const answerStatus = (answer) => (answer.status === null ? `no answer: ${answer.error}` : `HTTP ${answer.status}`);
+// The cited lines of a file: { text } with the lines, or { count } (the lines of the file) when the
+// file is shorter than the range. CRLF counts as one line end.
+export function citedLines(fileText, { first, last }) {
+  const lines = fileText.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n");
+  return last > lines.length ? { count: lines.length } : { text: lines.slice(first - 1, last).join("\n") };
+}
+// The names that a text does not hold, by the name rule (hasWholeName), in their order.
+export const missingNames = (text, names) => names.filter((name) => !hasWholeName(text, name));
 
 // Which lines of a Markdown text are fenced code: a fence line, or a line between an opening
 // fence and its closing fence. As in CommonMark, a closing fence uses the character of the
@@ -156,12 +221,19 @@ export function readDocsFile(at, errors, parse = (text) => text) {
 export const SHARED_RESOURCES_DATA = "shared-resources.json";
 export const SHARED_RESOURCES_PAGE = "docs/shared-resources.md";
 
+// The data file of the capture journey, its text copy for GitHub, and its image directory.
+// build-capture-journey.mjs builds the copy and the page of the Pages site from the data file,
+// and checks all of the data file.
+export const CAPTURE_JOURNEY_DATA = "capture-journey.json";
+export const CAPTURE_JOURNEY_COPY = "docs/capture-journey.md";
+export const CAPTURE_JOURNEY_IMAGES = "docs/capture-journey";
+
 // Read the resources of the data file for a script that uses only some of their fields. readable
 // checks the shape of those fields in one resource, and fields names them in the error. Return
 // the resources, or record in errors what is wrong and return null.
 export function readSharedResources(errors, fields, readable) {
   return readDocsFile(SHARED_RESOURCES_DATA, errors, (text) => {
-    const data = JSON.parse(text);
+    const data = parseJson(text);
     if (!isObject(data) || !Array.isArray(data.resources) || !data.resources.every((r) => isObject(r) && readable(r))) {
       throw new Error(`must have a list of resources, each with ${fields}. Run: node .github/scripts/build-shared-resources.mjs --check`);
     }
@@ -177,7 +249,7 @@ export function readGraph(name, errors) {
   const at = `repos/${name}/knowledge-graph.json`;
   if (!existsSync(join(root, at))) return null;
   // Wrap the value: readDocsFile returns null for an error, and the JSON text "null" is null too.
-  const read = readDocsFile(at, errors, (text) => ({ graph: JSON.parse(text) }));
+  const read = readDocsFile(at, errors, (text) => ({ graph: parseJson(text) }));
   if (read === null) return null;
   const { graph } = read;
   if (!isObject(graph)) return errors.push(`${at}: the graph must be a JSON object`), null;
