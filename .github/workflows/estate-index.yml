@@ -37,6 +37,15 @@ name: Estate index
 # When a push or a pull request changes shared-resources.json, also fails when a name is not in
 # its cited lines at the snapshot (the script reads them through the GitHub API). Fix the
 # evidence entry that the error names.
+# Also fails when the text copy of the capture journey (docs/capture-journey.md) is stale,
+# when capture-journey.json has an error, or when the image directory docs/capture-journey/ does not
+# hold exactly the images of the data file. Fix: run
+# `node .github/scripts/build-capture-journey.mjs` and follow its errors.
+# When a push or a pull request changes capture-journey.json, its images, or the code that builds
+# and checks them, also fails when GitHub does not hold a capture journey fact: a name is not in
+# its cited lines at the commit of the entry, a repo is not public, the issue of a "Not working
+# today" flag is not open, or an image is not the file of its source. Fix the entry that the
+# error names.
 # No path filter: a path-filtered check stays pending forever if it is ever made required.
 
 on:
@@ -86,6 +95,9 @@ jobs:
       - name: Check the shared-resource page
         run: node .github/scripts/build-shared-resources.mjs --check
 
+      - name: Check the capture journey
+        run: node .github/scripts/build-capture-journey.mjs --check
+
       # Only when shared-resources.json changes: the step reads GitHub, and the other steps stay
       # offline. BASE is the commit before the push, or the base of the pull request. When it is
       # not known (a new branch), the step runs.
@@ -101,4 +113,22 @@ jobs:
             echo "shared-resources.json did not change since ${BASE:0:7}: no evidence check"
           else
             node .github/scripts/build-shared-resources.mjs --evidence
+          fi
+
+      # Only when the data, the images, or the code that builds and checks them changes: the step
+      # reads GitHub. BASE as in the step above; when it is not known (a new branch), the step runs.
+      - name: Check the evidence of the capture journey facts
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [[ "$BASE" =~ ^[0-9a-f]{40}$ && "$BASE" != 0000000000000000000000000000000000000000 ]] \
+            && git fetch --quiet --no-tags --depth=1 origin "$BASE" \
+            && git diff --quiet "$BASE" HEAD -- capture-journey.json docs/capture-journey \
+              .github/scripts/build-capture-journey.mjs .github/scripts/capture-journey-page.mjs \
+              .github/scripts/estate.mjs; then
+            echo "the capture journey data, images, and code did not change since ${BASE:0:7}: no evidence check"
+          else
+            node .github/scripts/build-capture-journey.mjs --evidence
           fi

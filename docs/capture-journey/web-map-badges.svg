@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 250" role="img" aria-labelledby="t">
+<title id="t">A drawing of the web map tree page: the badge Waiting for verification, then the badge Verified</title>
+<style>
+  .bg{fill:#ffffff}.card{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1.5}.line{stroke:#8c959f;stroke-width:2;fill:none}
+  .t{font:600 17px system-ui,-apple-system,"Segoe UI",sans-serif;fill:#1f2328}.s{font:14px system-ui,-apple-system,"Segoe UI",sans-serif;fill:#656d76}
+  .mono{font:13px ui-monospace,Menlo,monospace;fill:#656d76}.num{font:700 15px system-ui,sans-serif;fill:#ffffff}
+  .g{fill:#4c9a2a}.gl{fill:#dafbe1}.a{fill:#bf8700}.al{fill:#fff8c5}.r{fill:#cf222e}.b{fill:#0969da}.bl{fill:#ddf4ff}.w{fill:#ffffff}
+  .tree1{fill:#4c9a2a}.trunk{fill:#8a6a3b}.dash{stroke-dasharray:6 5}
+  @media (prefers-color-scheme: dark){.bg{fill:#0d1117}.card{fill:#161b22;stroke:#30363d}.t{fill:#e6edf3}.s,.mono{fill:#8b949e}
+  .gl{fill:#12261e}.al{fill:#272115}.bl{fill:#0c2d6b}.line{stroke:#6e7681}.w{fill:#0d1117}}
+</style>
+<rect class="bg" width="480" height="250" rx="12"/>
+<g><rect class="card" x="16" y="16" width="200" height="218" rx="10"/><rect class="gl" x="28" y="28" width="176" height="120" rx="6"/>
+<rect class="trunk" x="113" y="96" width="6" height="40"/><circle class="tree1" cx="116" cy="82" r="30"/>
+<rect class="al" x="28" y="160" width="176" height="28" rx="14"/><text x="116" y="179" text-anchor="middle" style="font:600 13px system-ui,sans-serif;fill:#9a6700">Waiting for verification</text>
+<text class="s" x="116" y="216" text-anchor="middle">After the upload</text></g>
+<path class="line" d="M226 125h20"/><path d="M244 118l9 7-9 7z" fill="#8c959f"/>
+<g><rect class="card" x="264" y="16" width="200" height="218" rx="10"/><rect class="gl" x="276" y="28" width="176" height="120" rx="6"/>
+<rect class="trunk" x="361" y="96" width="6" height="40"/><circle class="tree1" cx="364" cy="82" r="30"/>
+<rect class="gl" x="276" y="160" width="176" height="28" rx="14" stroke="#4c9a2a" stroke-width="1.5"/><text x="364" y="179" text-anchor="middle" style="font:600 13px system-ui,sans-serif;fill:#1a7f37">Verified</text>
+<text class="s" x="364" y="216" text-anchor="middle">After the approval</text></g>
+</svg>

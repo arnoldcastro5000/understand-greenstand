@@ -11,3 +11,5 @@
       close that issue.
 - [ ] If this pull request changes `docs/shared-resources.md` or `shared-resources.json`: I
       confirm that the page has no security detail.
+- [ ] If this pull request changes `docs/capture-journey.md`, `capture-journey.json`, or
+      `docs/capture-journey/`: I confirm that the page has no security detail.

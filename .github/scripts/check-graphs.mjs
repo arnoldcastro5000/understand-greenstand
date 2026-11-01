@@ -10,7 +10,7 @@
 // Usage: node check-graphs.mjs   exit 1 and show each problem (CI)
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { isObject, loadEstate, readDocsFile, readGraph, root } from "./estate.mjs";
+import { isObject, loadEstate, parseJson, readDocsFile, readGraph, root } from "./estate.mjs";
 
 const IS_DATA = `is a node for a file of .ua/, the data directory of Understand-Anything. Regenerate the repo with --exclude ".ua/" (docs/regenerating.md, step 2).`;
 // A path in .ua/ at the root of the source repo: the filePath of a node, or the path in its ID
@@ -58,7 +58,7 @@ for (const { name } of repos) {
   // A repo can lack a domain graph. Wrap the value: readDocsFile returns null for an error.
   const domainAt = `repos/${name}/domain-graph.json`;
   if (!existsSync(join(root, domainAt))) continue;
-  const domain = readDocsFile(domainAt, errors, (text) => ({ graph: JSON.parse(text) }));
+  const domain = readDocsFile(domainAt, errors, (text) => ({ graph: parseJson(text) }));
   if (domain === null) continue;
   if (!isObject(domain.graph)) errors.push(`${domainAt}: the domain graph must be a JSON object`);
   else checkProject(domainAt, domain.graph.project, name);

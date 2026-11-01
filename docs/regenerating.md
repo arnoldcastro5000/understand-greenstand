@@ -293,3 +293,6 @@ working.
   where the repo appears). Then check the edited text of the page too: the notes and "Who looks
   after it". The pull request reads each cited file and fails when a name is not in its lines.
   See [The shared resources of the code repos](./shared-resources.md).
+- A regeneration does not change the capture journey
+  ([`capture-journey.json`](../capture-journey.json)): each of its evidence entries pins its own
+  commit, not the snapshot of a repo.

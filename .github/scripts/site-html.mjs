@@ -1,5 +1,6 @@
 // The shared parts of the generated HTML pages of the Pages site: the landing page
-// (build-landing.mjs) and the moved pages (build-moved.mjs).
+// (build-landing.mjs), the moved pages (build-moved.mjs), and the page of the capture journey
+// (build-capture-journey.mjs).
 
 // Escape text for HTML text and for a double-quoted attribute.
 export const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");

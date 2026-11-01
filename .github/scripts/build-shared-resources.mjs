@@ -19,7 +19,7 @@
 //          set). CI runs it only when shared-resources.json changes.
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { EM_DASH, SHARED_RESOURCES_DATA as DATA, SHARED_RESOURCES_PAGE as PAGE, escapeRegExp, expandRepoName, fencedLines, hasWholeName, isObject, loadEstate, readDocsFile, replaceMarked, root, urlPath } from "./estate.mjs";
+import { EM_DASH, SHARED_RESOURCES_DATA as DATA, SHARED_RESOURCES_PAGE as PAGE, answerStatus, citedLines, escapeRegExp, expandRepoName, fencedLines, githubApi, isObject, isRepoPath, lineAnchor, loadEstate, missingNames, parseJson, parseLines, plural, readDocsFile, replaceMarked, root, urlPath } from "./estate.mjs";
 import { slugger } from "./slug.mjs";
 
 const SCRIPT = ".github/scripts/build-shared-resources.mjs";
@@ -51,12 +51,9 @@ const ROUTE = /^(\/[A-Za-z0-9_-]+)+\/?$/;
 const mode = process.argv.includes("--evidence") ? "evidence" : process.argv.includes("--check") ? "check" : "write";
 const { estate, repos, errors } = loadEstate();
 const codeRepos = new Map(repos.filter((r) => !r.docs).map((r) => [r.name, r]));
-const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
 // The cited lines of each evidence entry, { first, last }, parsed once by validData.
 const rangeOf = new Map();
-// The line anchor of a GitHub file link: #L7 or #L3-L5.
-const lineAnchor = ({ first, last }) => (first === last ? `#L${first}` : `#L${first}-L${last}`);
 
 // Check shared-resources.json in both directions, and return it only if it is valid: each
 // evidence entry names a code repo, a known use and label, a path in the repo, its lines, and at
@@ -88,15 +85,10 @@ function validData(data) {
       else evidenceRepos.add(e.repo);
       if (!USES.includes(e.use)) fail(`${where}: unknown use ${JSON.stringify(e.use)} (use one of: ${USES.join(", ")})`);
       if (!LABELS.includes(e.label)) fail(`${where}: unknown label ${JSON.stringify(e.label)} (use one of: ${LABELS.join(", ")})`);
-      if (typeof e.path !== "string" || !e.path || e.path.startsWith("/") || e.path.split("/").some((s) => s === "" || s === "." || s === "..")) {
-        fail(`${where}: the path ${JSON.stringify(e.path)} must be a path in the repo`);
-      }
-      // One written form for each range: no leading zero, and the first line before the last.
-      const m = typeof e.lines === "string" ? e.lines.match(/^([1-9]\d*)(?:-([1-9]\d*))?$/) : null;
-      const range = m && { first: Number(m[1]), last: Number(m[2] ?? m[1]) };
-      if (!range || (m[2] !== undefined && range.first >= range.last)) {
-        fail(`${where}: lines must be "<n>" or "<first>-<last>", with 1 <= first < last; it is ${JSON.stringify(e.lines)}`);
-      } else rangeOf.set(e, range);
+      if (!isRepoPath(e.path)) fail(`${where}: the path ${JSON.stringify(e.path)} must be a path in the repo`);
+      const range = parseLines(e.lines);
+      if (!range) fail(`${where}: lines must be "<n>" or "<first>-<last>", with 1 <= first < last; it is ${JSON.stringify(e.lines)}`);
+      else rangeOf.set(e, range);
       if (!Array.isArray(e.names) || !e.names.length) return fail(`${where}: names must be a list with at least one name`);
       for (const typed of e.names) {
         if (!KINDS.includes(typed?.kind)) fail(`${where}: unknown kind ${JSON.stringify(typed?.kind)} (use one of: ${KINDS.join(", ")})`);
@@ -126,7 +118,7 @@ function validData(data) {
   return errors.length > before ? null : data;
 }
 
-const data = validData(readDocsFile(DATA, errors, JSON.parse));
+const data = validData(readDocsFile(DATA, errors, parseJson));
 
 // Alphabetical order by code units (ticket 05, Answer 8), so the order does not depend on the
 // locale data of Node.
@@ -293,47 +285,33 @@ function buildPage(page) {
 }
 
 // Read each cited file at the snapshot of its repo, once, and check that each name of each
-// evidence entry is in the cited lines, by the name rule of estate.mjs (hasWholeName).
+// evidence entry is in the cited lines, by the name rule of estate.mjs (missingNames).
 async function checkEvidence() {
-  const { GITHUB_TOKEN: token } = process.env;
-  const fetched = new Map(); // "<repo>@<sha>:<path>" -> a promise of { content } or { status }
-  const read = (repo, path) => {
-    const sha = codeRepos.get(repo).sha;
-    const key = `${repo}@${sha}:${path}`;
-    if (!fetched.has(key)) {
-      const headers = { Accept: "application/vnd.github.raw", ...(token ? { Authorization: `Bearer ${token}` } : {}) };
-      fetched.set(
-        key,
-        fetch(`https://api.github.com/repos/${estate.sourceOrg}/${repo}/contents/${urlPath(path)}?ref=${sha}`, { headers }).then(async (res) =>
-          res.ok ? { content: await res.text() } : { status: res.status },
-        ),
-      );
-    }
-    return fetched.get(key);
-  };
+  const api = githubApi(estate.sourceOrg, process.env.GITHUB_TOKEN);
+  const files = new Set(); // "<repo>@<sha>:<path>"
   let names = 0;
   for (const resource of data.resources) {
     for (const [j, e] of resource.evidence.entries()) {
-      const { first, last } = rangeOf.get(e);
-      const where = `${resource.id}, evidence ${j + 1} (${e.repo} ${e.path}${lineAnchor({ first, last })} at ${data.checkedAt[e.repo]})`;
-      const file = await read(e.repo, e.path);
-      if (file.content === undefined) {
-        errors.push(`${where}: the file is not in the repo at the snapshot (HTTP ${file.status})`);
+      const range = rangeOf.get(e);
+      const sha = codeRepos.get(e.repo).sha;
+      const where = `${resource.id}, evidence ${j + 1} (${e.repo} ${e.path}${lineAnchor(range)} at ${data.checkedAt[e.repo]})`;
+      files.add(`${e.repo}@${sha}:${e.path}`);
+      const file = await api.file(e.repo, e.path, sha);
+      if (file.body === undefined) {
+        errors.push(`${where}: the file is not in the repo at the snapshot (${answerStatus(file)})`);
         continue;
       }
-      const fileLines = file.content.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n");
-      if (last > fileLines.length) {
-        errors.push(`${where}: the file has ${fileLines.length} lines`);
+      const cited = citedLines(file.body, range);
+      if (cited.text === undefined) {
+        errors.push(`${where}: the file has ${cited.count} lines`);
         continue;
       }
-      const cited = expandRepoName(fileLines.slice(first - 1, last).join("\n"), e.repo);
-      for (const typed of e.names) {
-        names++;
-        if (!hasWholeName(cited, typed.name)) errors.push(`${where}: ${typed.name} is not in the cited lines`);
-      }
+      names += e.names.length;
+      const missing = missingNames(expandRepoName(cited.text, e.repo), e.names.map((typed) => typed.name));
+      for (const name of missing) errors.push(`${where}: ${name} is not in the cited lines`);
     }
   }
-  return { entries: data.resources.flatMap((r) => r.evidence).length, names, files: fetched.size };
+  return { entries: data.resources.flatMap((r) => r.evidence).length, names, files: files.size };
 }
 
 if (mode === "evidence") {

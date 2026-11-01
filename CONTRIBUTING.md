@@ -22,6 +22,10 @@ writes which file. A regeneration replaces a direct edit of a generated file. To
 generated file, change its input or the recipe. Text that is not generated is edited text.
 Change it directly in its file.
 
+The capture journey is generated from [`capture-journey.json`](./capture-journey.json): the text
+copy `docs/capture-journey.md` and the illustrated page on the Pages site. To change them, change
+the data file, then run `node .github/scripts/build-capture-journey.mjs`.
+
 ## Change the docs
 
 1. Follow [Set up your clone](./docs/private-names.md#set-up-your-clone) in
@@ -36,6 +40,7 @@ Change it directly in its file.
    node .github/scripts/build-index.mjs --check
    node .github/scripts/build-ecosystem-maps.mjs --check
    node .github/scripts/build-shared-resources.mjs --check
+   node .github/scripts/build-capture-journey.mjs --check
    node .github/scripts/build-glossary.mjs --check
    node .github/scripts/build-repo-readmes.mjs --check
    node .github/scripts/build-onboarding.mjs --check
@@ -47,15 +52,25 @@ Change it directly in its file.
    `node .github/scripts/build-shared-resources.mjs --evidence`. It reads each cited file on
    GitHub and checks that each name is in its cited lines. The pull request runs it too.
 
+   If you change `capture-journey.json` or an image in `docs/capture-journey/`, also run the
+   command below. It reads each cited file, image source, and issue on GitHub. It uses your token:
+   without a token, GitHub allows only 60 requests an hour. The pull request runs it too.
+
+   ```
+   GITHUB_TOKEN="$(gh auth token)" node .github/scripts/build-capture-journey.mjs --evidence
+   ```
+
 6. Open a pull request. `main` accepts changes only through a pull request. The required checks
    must pass.
 
-## Change the shared-resource page
+## Change the shared-resource page or the capture journey
 
-The page `docs/shared-resources.md` must hold no security detail. A security detail is a fact
-that helps an attacker or shows a weak point of a shared resource or a code repo. Thus a pull
-request that changes `docs/shared-resources.md` or `shared-resources.json` needs a safety review.
-A reviewer who did not write the change checks the changed text against the local findings list,
+The page `docs/shared-resources.md` must hold no security detail. The same holds for the capture
+journey. A security detail is a fact that helps an attacker or shows a weak point of a shared
+resource or a code repo. Thus a pull request that changes `docs/shared-resources.md` or
+`shared-resources.json` needs a safety review. So does a pull request that changes
+`docs/capture-journey.md`, `capture-journey.json`, or a file in `docs/capture-journey/`. A
+reviewer who did not write the change checks the changed text against the local findings list,
 before the pull request opens. This list is private. If you do not have the list, ask a
 maintainer to do the review. When the text has no security detail, the reviewer gives you this
 line, and you add it to the pull request text:
@@ -63,6 +78,8 @@ line, and you add it to the pull request text:
 `Safety review: the page text was checked against the local findings list on <YYYY-MM-DD>. It
 has no security detail.`
 
-Keep the item about the page unticked in the pull request text. The maintainer who merges ticks
-it. The required `private-names` check fails until the pull request text has the line and the
-ticked item.
+The pull request template has one item for each page. Keep the item of each page that the pull
+request changes unticked in the pull request text. The maintainer who merges ticks it. The
+required `private-names` check fails until the pull request text has the line and the ticked item
+of each page that the pull request changes. Add the line once, also when the pull request
+changes both pages.
