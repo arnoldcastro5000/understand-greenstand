@@ -400,7 +400,9 @@ function copyText(view) {
     `- **For developers:** ${mdText(view.legend.dev)}`,
     "",
     "```mermaid",
-    "flowchart LR",
+    // Top to bottom: the stages are a chain, and a chain from left to right is too small to read
+    // on a phone.
+    "flowchart TB",
     ...view.stages.map((s, i) => `  s${i + 1}["${i + 1}. ${mermaidLabel(s.short)}"]`),
     ...(view.stages.length > 1 ? [`  ${view.stages.map((_, i) => `s${i + 1}`).join(" --> ")}`] : []),
     "```",

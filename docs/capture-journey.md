@@ -17,7 +17,7 @@ How to read this page:
 - **For developers:** The repo, the file, and the lines at the commit that this page describes.
 
 ```mermaid
-flowchart LR
+flowchart TB
   s1["1. On the phone"]
   s2["2. The upload"]
   s3["3. The bundle chain"]
