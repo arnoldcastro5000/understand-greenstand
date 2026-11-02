@@ -27,6 +27,7 @@ on:
       - ".github/scripts/site-colors.mjs"
       - ".github/scripts/site-html.mjs"
       - ".github/scripts/slug.mjs"
+      - ".github/scripts/start-path.mjs"
       - ".github/workflows/deploy-viewers.yml"
   workflow_dispatch:
 
@@ -191,8 +192,8 @@ jobs:
           node .github/scripts/build-capture-journey.mjs --site "$OUT"
           # Moved pages: the old subpath of a renamed repo sends readers to the new subpath.
           node .github/scripts/build-moved.mjs "$OUT"
-          # Landing index: the areas and links of estate.json, as in the README.md index, and the
-          # title of capture-journey.json for its capture journey entry.
+          # Landing index: the areas and links of estate.json and the steps of the Start here path
+          # (start-path.mjs), as in the README.md index.
           # It fails if a page that the landing page links to is missing.
           node .github/scripts/build-landing.mjs "$OUT"
 

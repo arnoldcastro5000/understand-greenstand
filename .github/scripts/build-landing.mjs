@@ -2,8 +2,8 @@
 // Build the landing page of the Pages site (<site-dir>/index.html) from the estate
 // (estate.mjs), so it shows the same areas, repos, and links as the README.md index. Like the top
 // of README.md, it also links the estate glossary, the volunteer guide, the capture journey, the
-// ecosystem maps, and the shared-resource page. The name of the capture journey entry is the title
-// in capture-journey.json.
+// ecosystem maps, and the shared-resource page. The Start here box shows the steps of the Start
+// here path (start-path.mjs), like the Start here section of the estate index.
 // The page is in the site look (site-html.mjs). The estate strip shows each repo as a cell in the
 // color of its area; each cell links to the entry of the repo. On wide screens the strip stands
 // upright in the legend rail, with the names of the repos and the areas.
@@ -13,8 +13,9 @@
 // Usage: node build-landing.mjs <site-dir>
 import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { CAPTURE_JOURNEY_DATA, formerNamesText, isObject, loadEstate, parseJson, readDocsFile } from "./estate.mjs";
+import { formerNamesText, loadEstate } from "./estate.mjs";
 import { ARCHIVO, PARCEL_FIELD, WIDE, esc, siteHead, siteStyle } from "./site-html.mjs";
+import { startPath } from "./start-path.mjs";
 
 const site = process.argv[2];
 if (!site) {
@@ -23,6 +24,7 @@ if (!site) {
 }
 
 const { areas, repos, count, errors } = loadEstate();
+const steps = startPath(errors);
 
 // The deploy workflow assembles these files beside each viewer.
 const ASSEMBLED = ["index.html", "knowledge-graph.json", "onboarding.html", "readme.html", "glossary.html"];
@@ -30,16 +32,17 @@ for (const { name } of repos) {
   for (const f of ASSEMBLED) if (!existsSync(join(site, name, f))) errors.push(`${site}/${name}/${f} is missing`);
 }
 // The deploy workflow writes these files at the site root: the pages of the estate glossary, the
-// volunteer guide, the ecosystem maps, the shared-resource page, and the capture journey, and the
-// font and the parcel field of the site look.
-const ROOT_FILES = ["glossary.html", "contribute.html", "architecture.html", "shared-resources.html", "capture-journey.html", ARCHIVO, PARCEL_FIELD];
+// volunteer guide, and the steps of the Start here path, and the font and the parcel field of the
+// site look.
+const ROOT_FILES = ["glossary.html", "contribute.html", ...steps.filter((s) => !s.links).map((s) => s.page), ARCHIVO, PARCEL_FIELD];
 for (const f of ROOT_FILES) if (!existsSync(join(site, f))) errors.push(`${site}/${f} is missing`);
 
 const link = (href, text) => `<a href="${esc(href)}">${text}</a>`;
 const anchor = (title) => title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 // The id of the entry of a repo: the cell of the repo in the estate strip links to it.
 const repoId = (name) => `repo-${name}`;
-// The style that gives an element the color of an area (estate.mjs checks the color).
+// The style that gives an element the color of an area (estate.mjs checks the color). The
+// featured area has no color.
 const areaStyle = (area) => `--area: var(--c-${area.color})`;
 // A chip: a small square in the color of the area, with no words.
 const CHIP = '<i class="chip" aria-hidden="true"></i>';
@@ -49,7 +52,7 @@ function entry(href, name, description, { more = [], id = null } = {}) {
   return [id ? `<li id="${esc(id)}">` : "<li>", `<a class="name" href="${esc(href)}">${name}</a>`, `<p class="desc">${description}</p>`, ...more, "</li>"].join("\n");
 }
 
-function item({ name, description, formerNames, sha, date, source }) {
+function item({ name, description, note, formerNames, sha, date, source }) {
   const links = [
     link(`./${name}/`, "Viewer"),
     link(`./${name}/onboarding.html`, "Onboarding"),
@@ -61,7 +64,7 @@ function item({ name, description, formerNames, sha, date, source }) {
   return entry(
     `./${name}/`,
     esc(name),
-    `${esc(description)}${formerNamesText(formerNames, (n) => `<code>${esc(n)}</code>`)}`,
+    `${esc(description)}${formerNamesText(formerNames, (n) => `<code>${esc(n)}</code>`)}${note ? ` ${esc(note)}` : ""}`,
     {
       more: [`<p class="links"><span>${links}</span><span class="snap">Snapshot ${esc(date)} at ${commit}</span></p>`],
       id: repoId(name),
@@ -69,46 +72,29 @@ function item({ name, description, formerNames, sha, date, source }) {
   );
 }
 
-// The capture journey tells how one capture travels through the system. The ecosystem maps show
-// how the code repos work together. The shared-resource page shows what the code repos share. The
-// "Start here" box lists the three below its repos: the story first, for a new volunteer.
-// The script reads only the title of capture-journey.json; build-capture-journey.mjs checks the
-// rest of the file.
-const journeyTitle = readDocsFile(CAPTURE_JOURNEY_DATA, errors, (text) => {
-  const data = parseJson(text);
-  if (!isObject(data) || typeof data.title !== "string" || !data.title.trim()) {
-    throw new Error("must have a title (a text). Run: node .github/scripts/build-capture-journey.mjs --check");
-  }
-  return data.title;
-});
-// The entry of the capture journey. The page template calls it after the error exit, so the
-// title is set.
-const journeyItem = (title) => entry(
-  "./capture-journey.html",
-  esc(title),
-  "How one capture travels from the grower's phone to the grower's reward, step by step, with pictures.",
-);
-const MAPS_ITEM = entry(
-  "./architecture.html",
-  "Ecosystem maps",
-  "How the code repos work together at run time: which app calls which API, and which data they share.",
-);
-const SHARED_RESOURCES_ITEM = entry(
-  "./shared-resources.html",
-  "Shared resources",
-  "What the code repos share to build, deploy, and run, for example the container registry, the clusters, and the shared database.",
-);
+// One numbered step of the Start here path: a page of the docs repo with its name as the link,
+// or a name in plain text with a links line.
+function step({ name, description, page, links }) {
+  if (!links) return entry(`./${page}`, esc(name), esc(description));
+  return [
+    "<li>",
+    `<span class="name">${esc(name)}</span>`,
+    `<p class="desc">${esc(description)}</p>`,
+    `<p class="links"><span>${links.map((l) => link(l.url, esc(l.text))).join(" · ")}</span></p>`,
+    "</li>",
+  ].join("\n");
+}
 
 // An area: its heading, its intro, and its entries. The entries of the featured area are the
-// numbered steps of the newcomer's path; the other areas list their repos.
-function section(area, extra = []) {
+// numbered steps of the Start here path; the other areas list their repos.
+function section(area) {
   const lines = [
-    `<section id="${anchor(area.title)}" class="area${area.featured ? " featured" : ""}" style="${areaStyle(area)}">`,
+    `<section id="${anchor(area.title)}" ${area.featured ? 'class="area featured"' : `class="area" style="${areaStyle(area)}"`}>`,
     `<h2>${area.featured ? "" : CHIP}${esc(area.title)}</h2>`,
   ];
   if (area.intro) lines.push(`<p class="intro">${esc(area.intro)}</p>`);
   const [open, close] = area.featured ? ['<ol class="path">', "</ol>"] : ['<ul class="register">', "</ul>"];
-  lines.push(open, ...area.repos.map(item), ...extra, close);
+  lines.push(open, ...(area.featured ? steps.map(step) : area.repos.map(item)), close);
   if (area.seeAlso) lines.push(`<p class="deeper">Go deeper: ${area.seeAlso.map((l) => link(l.url, esc(l.text))).join(" · ")}</p>`);
   lines.push("</section>");
   return lines.join("\n");
@@ -125,11 +111,17 @@ const CELL_GAP = 2;
 const AREA_GAP = 6;
 const group = (area, cells) => `<span class="group" style="${areaStyle(area)}; --n: ${area.repos.length}">${cells}</span>`;
 
+// The featured area ("Start here") goes first, in a box, with the steps of the path. The other
+// areas have the repos: the estate strip, the estate mark, and the jump links show them.
+// estate.mjs makes sure that exactly one area is featured, and that it has no repos.
+const start = areas.find((a) => a.featured);
+const others = areas.filter((a) => !a.featured);
+
 // The estate strip: one cell for each repo, in the groups of the areas. The name of the area (the
 // key) shows only in the legend rail.
 const strip = [
   '<nav class="strip" aria-label="Repos by area">',
-  ...areas.map((area) => group(area, `<span class="key">${esc(area.title)}</span>` +
+  ...others.map((area) => group(area, `<span class="key">${esc(area.title)}</span>` +
     area.repos.map(({ name }) => `<a class="cell" href="#${esc(repoId(name))}"><span class="label">${esc(name)}</span></a>`).join(""))),
   "</nav>",
 ].join("\n");
@@ -141,13 +133,13 @@ const strip = [
 // less the gaps in that area, shared by its cells. The masthead is the container of the strip, so
 // the page margins, the default font size, and a scroll bar do not change the rule.
 const MIN_TARGET = 24;
-const mostRepos = Math.max(...areas.map((a) => a.repos.length));
+const mostRepos = Math.max(...others.map((a) => a.repos.length));
 const linksFrom = Math.ceil(
-  repos.length * (MIN_TARGET + (CELL_GAP * (mostRepos - 1)) / mostRepos) + AREA_GAP * (areas.length - 1),
+  repos.length * (MIN_TARGET + (CELL_GAP * (mostRepos - 1)) / mostRepos) + AREA_GAP * (others.length - 1),
 );
 const mark = [
   '<div class="mark" aria-hidden="true">',
-  ...areas.map((area) => group(area, "<i></i>".repeat(area.repos.length))),
+  ...others.map((area) => group(area, "<i></i>".repeat(area.repos.length))),
   "</div>",
 ].join("\n");
 
@@ -157,10 +149,6 @@ const youAreHereCells = repos
   .map(({ name }) => `body:has([id=${JSON.stringify(repoId(name))}]:target) .cell[href=${JSON.stringify(`#${repoId(name)}`)}]`)
   .join(",\n  ");
 
-// The featured area ("Start here") goes first, in a box. The jump links list the other areas.
-// estate.mjs makes sure that exactly one area is featured.
-const start = areas.find((a) => a.featured);
-const others = areas.filter((a) => !a.featured);
 const jump = others.map((a) => `<a href="#${anchor(a.title)}" style="${areaStyle(a)}">${CHIP}${esc(a.title)}</a>`).join("\n");
 
 // The layout: on a phone, the title, the strip across the page as a picture, and one column. On a
@@ -268,7 +256,7 @@ the source commit that the docs describe. The ${link("./glossary.html", "estate 
 business terms of all repos and the shared resources.</p>
 <p class="welcome"><strong>New volunteer?</strong> Read ${link("./contribute.html", "How to contribute to Greenstand")}:
 how to join the community, pick a first task, and get help.</p>
-${section(start, [journeyItem(journeyTitle), MAPS_ITEM, SHARED_RESOURCES_ITEM])}
+${section(start)}
 <nav class="jump" aria-label="Areas">
 <span>Areas:</span>
 ${jump}

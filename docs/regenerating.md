@@ -159,7 +159,10 @@ Limits:
    request if a glossary is missing or stale.
 
 6. Refresh the index in the top `README.md`. For a new repo, first add an entry with its area
-   and a one-line description to [`estate.json`](../estate.json). Then run:
+   and a one-line description to [`estate.json`](../estate.json). Put it in an area with
+   repos: the featured area, Start here, has no repos. An entry can also have a `note`, for
+   example "Some of its information is out of date."; the note shows after the description.
+   Then run:
 
    ```
    node .github/scripts/build-index.mjs

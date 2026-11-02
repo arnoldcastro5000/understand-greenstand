@@ -60,8 +60,11 @@ The repos are grouped by area. For each repo:
 
 Learn the mission and the big picture of the platform before you read the code.
 
-- **[Greenstand-Overview](repos/Greenstand-Overview/)**: The org overview and onboarding repo: contributor guide, roadmap, and team directory. Docs, not code.\
-  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/Greenstand-Overview/) · [Onboarding](repos/Greenstand-Overview/ONBOARDING.md) · [Glossary](repos/Greenstand-Overview/GLOSSARY.md) · [README](repos/Greenstand-Overview/README.md) · [Source](https://github.com/Greenstand/Greenstand-Overview) · Snapshot 2026-09-03 at [`6861717`](https://github.com/Greenstand/Greenstand-Overview/commit/68617178870590e198bd045e835e718562235e55)
+1. **[The journey of a capture](docs/capture-journey.md)**: How one capture travels from the grower's phone to the grower's reward, step by step, with pictures.
+2. **[Ecosystem maps](ARCHITECTURE.md)**: How the code repos work together at run time: which app calls which API, and which data they share.
+3. **[Shared resources](docs/shared-resources.md)**: What the code repos share to build, deploy, and run, for example the container registry, the clusters, and the shared database.
+4. **Greenstand and the live map**: The Greenstand website: the mission, how Treetracker works, and how to help. The live Treetracker map: every verified tree, from growers around the world.\
+   [Website](https://greenstand.org) · [Live map](https://map.treetracker.org)
 
 Go deeper: [Documentation](https://github.com/Greenstand/greenstand-documentation) · [Architecture decisions](https://github.com/Greenstand/treetracker-decisions)
 
@@ -114,6 +117,11 @@ Go deeper: [Documentation](https://github.com/Greenstand/greenstand-documentatio
 - **[treetracker-infrastructure](repos/treetracker-infrastructure/)**: The infrastructure as code: Kubernetes, PostgreSQL, and observability on DigitalOcean and AWS. Terraform.\
   [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-infrastructure/) · [Onboarding](repos/treetracker-infrastructure/ONBOARDING.md) · [Glossary](repos/treetracker-infrastructure/GLOSSARY.md) · [README](repos/treetracker-infrastructure/README.md) · [Source](https://github.com/Greenstand/treetracker-infrastructure) · Snapshot 2026-09-03 at [`a740d11`](https://github.com/Greenstand/treetracker-infrastructure/commit/a740d11ffe60cb8d7f05b5006cf80583bd267aa5)
 
+### Organization
+
+- **[Greenstand-Overview](repos/Greenstand-Overview/)**: The org overview and onboarding repo: contributor guide, roadmap, and team directory. Docs, not code. Some of its information is out of date.\
+  [Viewer](https://arnoldcastro5000.github.io/understand-greenstand/Greenstand-Overview/) · [Onboarding](repos/Greenstand-Overview/ONBOARDING.md) · [Glossary](repos/Greenstand-Overview/GLOSSARY.md) · [README](repos/Greenstand-Overview/README.md) · [Source](https://github.com/Greenstand/Greenstand-Overview) · Snapshot 2026-09-03 at [`6861717`](https://github.com/Greenstand/Greenstand-Overview/commit/68617178870590e198bd045e835e718562235e55)
+
 <!-- END estate index -->
 
 ## Scope
@@ -121,5 +129,5 @@ Go deeper: [Documentation](https://github.com/Greenstand/greenstand-documentatio
 The estate covers 14 documented code repositories: the core Tree Tracker services, the wallet
 stack, the admin tools, the web map, the mobile app, the data-ingest services, and the
 infrastructure repo, plus the `treetracker-tile-server` fork (included by request). It also
-covers one docs repo, `Greenstand-Overview`, as the place to start. Other fork repos, private
+covers one docs repo, `Greenstand-Overview`, in the Organization area. Other fork repos, private
 repos, other docs repos, and dormant repos are out of scope.

@@ -162,7 +162,7 @@ Scope of this record: the build moves only the landing page and the shared base 
 
 **Key Characteristics:**
 - A mineral ground, an ink text color, and water blue for links only, from one data module of [light, dark] pairs.
-- Eight area colors (seven land-cover classes and ink for Start here) that fill cells, chips, and rules, never text.
+- Eight area colors (seven land-cover classes and ink for Organization) that fill cells, chips, and rules, never text.
 - An ink edge on each area fill, so that pale fills stay visible on the ground.
 - Archivo (a variable face with a width axis) for headings, labels, and numerals; the system sans for body text.
 - Square corners, hairline rules, and no elevation.
@@ -185,7 +185,7 @@ The area colors. `estate.json` gives each area a `"color"` (the area color name)
 - **Deciduous Green** (`deciduous`): Mobile.
 - **Mixed Forest Sage** (`mixed-forest`): Data ingest.
 - **Bare Ground Taupe** (`bare-ground`): Infrastructure.
-- **Ink** (the `ink` text color, `--c-ink`): Start here. It is the same value as the text ink.
+- **Ink** (the `ink` text color, `--c-ink`): Organization, the area of Greenstand's own documents, not code. It is the same value as the text ink. Start here has no repos, so it has no area color.
 
 Area colors fill the estate strip cells, the estate mark cells, the area chips, the 3px top rule of each area section, and the 14% tint of a target repo entry. Readers with red-green color blindness can tell the area colors apart (see the Color-Blind Key Rule).
 
@@ -232,7 +232,7 @@ Archivo comes from the npm package `@fontsource-variable/archivo` 5.3.0, file `a
 ### Hierarchy
 - **Display** (720, `clamp(2rem, 1.4rem + 2.6vw, 3.1rem)`, 1.15, -0.025em): the site title in the masthead. In the legend rail it is 1.95rem with a line height of 1.02. Below 30rem it takes a width of 78% and -0.02em.
 - **Headline** (660, 1.45rem, 1.15): the heading of an area section. The Start here heading is 680 and 1.55rem.
-- **Title** (640, 1.12rem, 1.3): the name link of a repo entry. In the Start here path it is 1.18rem.
+- **Title** (640, 1.12rem, 1.3): the name link of a repo entry. In the Start here path it is 1.18rem: a link to a page, or plain ink text for a step with a links line.
 - **Numeral** (600, 1.7rem, 1, width 75%, tabular figures, muted): the step number of the Start here path.
 - **Body** (400, 16.5px, 1.62): all running text. The lede and the volunteer line are 1.06rem in a 42rem column. Entry descriptions stop at 40rem. Small text (0.92rem) carries the entry links, the snapshot line, and the "Go deeper" line.
 - **Label** (600, 0.82rem, 1.2, width 87.5%): the area keys in the legend rail (muted) and the repo name that shows on hover or focus over a strip cell (ink). The rail names are 500 at 0.9rem; the jump links are 500 at 0.98rem; both have a width of 87.5%.
@@ -278,7 +278,7 @@ All corners are square (radius 0). Area fills are plain rectangles: strip cells,
 ## Components
 
 ### Estate strip (signature)
-One cell per repo, grouped by area, in the area colors. Each group takes a width in proportion to its repo count.
+One cell per repo, grouped by area, in the area colors. Each group takes a width in proportion to its repo count. Start here has no repos, so the strip has no Start here group.
 - **Cells:** flat area fill with the ink edge, 2px apart in an area, 6px between areas. Height `clamp(2rem, 1.3rem + 2.4vw, 3.25rem)`.
 - **Links:** each cell links to its repo entry. On hover or keyboard focus, the color block moves up and the repo name shows below the strip in the label style.
 - **In the legend rail:** the strip stands upright. Each group has its area name (the key, muted label) above it. Each row is a 1rem color block and the repo name; a row is at least `max(1.5rem, 24px)` high. The legend rail always shows the strip, never the estate mark. On hover the block moves right and the name gets a hairline underline.
@@ -307,7 +307,7 @@ The background of the site look: the boundaries of made-up field parcels, seen f
 - **Shadow Strategy:** none (see Elevation & Depth).
 - **Border:** none. Hairlines divide the steps.
 - **Internal Padding:** 1.6rem 1.75rem 1.4rem.
-- **Content:** the Start here heading (no chip, no rule), the intro in muted, and an ordered list of steps with muted Archivo numerals in the margin number column. The "Go deeper" line aligns with the step text.
+- **Content:** the Start here heading (no chip, no rule), the intro in muted, and an ordered list of steps with muted Archivo numerals in the margin number column. Most steps link a page of the docs repo: the name is the link. A step with links to other sites has its name in plain text and a links line under the description. The "Go deeper" line aligns with the step text.
 
 ### Area section and repo register
 - **Rule:** a 3px top rule in the area color, then the chip and the heading.

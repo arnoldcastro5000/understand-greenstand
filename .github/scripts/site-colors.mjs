@@ -32,7 +32,8 @@ export const LINES = {
 
 // The area colors: the land-cover class of each area (the "color" of an area in estate.json).
 // They fill the cells of the estate strip and the estate mark, the chips, the rules, and the tints
-// of an area; they never color text. Start here has the ink color.
+// of an area; they never color text. Organization has the ink color; Start here has no repos and
+// no color.
 export const AREA_COLORS = {
   ink: TEXTS.ink,
   evergreen: ["#35614e", "#33634d"],
