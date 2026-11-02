@@ -148,7 +148,7 @@ Greenstand's guide to earnings and payments gives the next steps for a typical c
 
 > **Not working today:** The wallet app tells each new user "we will gift you 1 token". The token does not arrive today. See [treetracker-wallet-app #914](https://github.com/Greenstand/treetracker-wallet-app/issues/914).
 
-Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture of an organization's growers into a wallet that the operator names. Chapter 2 tells that story.
+Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture of an organization's growers into a wallet that the operator names. Greenstand's white paper describes a goal, not the code of today. In that goal, each capture becomes a token in the wallet of the entity that is responsible for the tree. When claims conflict, the grower comes first. The token also holds a proof of the payment to the grower. The token job of today does not use the wallet of the grower, and no token holds payment data. Chapter 2 tells that story.
 
 <details>
 <summary>For developers</summary>
@@ -164,6 +164,10 @@ Tokens are not a grower reward today. An operator can start a job that puts one 
   - [`Earnings.js` lines 238 to 283](https://github.com/Greenstand/treetracker-earnings-api/blob/7b89333/server/models/Earnings.js#L238-L283): marks an earning as paid
 - [greenstand-documentation](https://github.com/Greenstand/greenstand-documentation) (outside the docs repo)
   - [`earningshow.md` line 14](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/user-guides/earningshow.md#L14): Greenstand's guide: the funder downloads the earnings, pays the growers, and logs the payments
+  - [`white-paper.md` line 13](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L13): the white paper: the model is a goal
+  - [`white-paper.md` line 114](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L114): the white paper: a token goes into the wallet of the responsible entity
+  - [`white-paper.md` line 214](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L214): the white paper: the grower comes first
+  - [`white-paper.md` line 290](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L290): the white paper: a token holds a proof of the payment
 - treetracker-wallet-app ([viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-wallet-app/), [onboarding guide](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-wallet-app/onboarding.html))
   - [`page.tsx` line 82](https://github.com/Greenstand/treetracker-wallet-app/blob/2c11089/apps/web/src/app/%28protected%29/wallet/page.tsx#L82): the gift message
 
