@@ -133,7 +133,7 @@
         {"kind": "guess", "text": "The organization is FCC, which we think is Freetown City Council. The job and the payments still run today. (The code shows no change since 2023.)", "question": "Is FCC the Freetown City Council, does the daily FCC earnings job still run, and do the funders still pay the growers and log the payments this way?"},
         {"kind": "broken", "text": "The wallet app tells each new user \"we will gift you 1 token\". The token does not arrive today.", "issue": {"repo": "treetracker-wallet-app", "number": 914}}
       ],
-      "note": "Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture of an organization's growers into a wallet that the operator names. Chapter 2 tells that story.",
+      "note": "Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture of an organization's growers into a wallet that the operator names. Greenstand's white paper describes a goal, not the code of today. In that goal, each capture becomes a token in the wallet of the entity that is responsible for the tree. When claims conflict, the grower comes first. The token also holds a proof of the payment to the grower. The token job of today does not use the wallet of the grower, and no token holds payment data. Chapter 2 tells that story.",
       "images": [
         {"file": "reward.svg", "alt": "A drawing of the reward steps", "caption": "A drawing of the reward steps"}
       ],
@@ -145,6 +145,10 @@
         {"repo": "treetracker-admin-client", "path": "src/components/common/CustomTableItemDetails/CustomTableItemDetails.js", "lines": "121", "commit": "c2076e4", "names": ["LOG PAYMENT"], "what": "the payment log of the detail panel"},
         {"repo": "treetracker-earnings-api", "path": "server/models/Earnings.js", "lines": "238-283", "commit": "7b89333", "names": ["earnings.status !== 'calculated'", "status: 'paid'"], "what": "marks an earning as paid"},
         {"repo": "greenstand-documentation", "path": "docs/user-guides/earningshow.md", "lines": "14", "commit": "6f415de", "names": ["Funders download", "upload payment data"], "what": "Greenstand's guide: the funder downloads the earnings, pays the growers, and logs the payments"},
+        {"repo": "greenstand-documentation", "path": "docs/introduction/the-model/white-paper.md", "lines": "13", "commit": "6f415de", "names": ["THIS MODEL IS A GOAL"], "what": "the white paper: the model is a goal"},
+        {"repo": "greenstand-documentation", "path": "docs/introduction/the-model/white-paper.md", "lines": "114", "commit": "6f415de", "names": ["minted as a digital token"], "what": "the white paper: a token goes into the wallet of the responsible entity"},
+        {"repo": "greenstand-documentation", "path": "docs/introduction/the-model/white-paper.md", "lines": "214", "commit": "6f415de", "names": ["highest priority goes to the individual growers"], "what": "the white paper: the grower comes first"},
+        {"repo": "greenstand-documentation", "path": "docs/introduction/the-model/white-paper.md", "lines": "290", "commit": "6f415de", "names": ["Hash of proof-of-grower-payment"], "what": "the white paper: a token holds a proof of the payment"},
         {"repo": "treetracker-wallet-app", "path": "apps/web/src/app/(protected)/wallet/page.tsx", "lines": "82", "commit": "2c11089", "names": ["we will gift you 1 token"], "what": "the gift message"}
       ]
     }
