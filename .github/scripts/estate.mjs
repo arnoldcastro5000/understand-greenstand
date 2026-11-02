@@ -4,8 +4,8 @@
 // build-moved.mjs (the moved pages of renamed repos), build-glossary.mjs,
 // build-repo-readmes.mjs, build-onboarding.mjs, build-ecosystem-maps.mjs,
 // build-shared-resources.mjs, build-capture-journey.mjs, capture-journey-page.mjs,
-// check-former-names.mjs, check-graphs.mjs, check-safety-review.mjs, drift-report.mjs, and
-// render-md.mjs.
+// check-former-names.mjs, check-graphs.mjs, check-safety-review.mjs, drift-report.mjs,
+// render-md.mjs, and start-path.mjs.
 // Returns { estate, areas, repos, count, errors }. Each repo in areas gets its snapshot, its
 // Source URL, and its valid former names (a list, often empty). repos lists the repos of all
 // areas, in order. errors lists every problem at once; the caller prints them and exits.
@@ -131,17 +131,43 @@ export function loadEstate() {
 
   if (!estate.siteUrl?.endsWith("/")) errors.push("estate.json: siteUrl must end with '/'");
 
-  // The landing page shows the featured area in its "Start here" box, and it lists the capture
-  // journey, the ecosystem maps, and the shared-resource page there. Thus exactly one area is
-  // featured.
+  // The landing page shows the featured area first, in its "Start here" box, with the steps of the
+  // Start here path (start-path.mjs). The estate index shows the areas in their order. Thus exactly
+  // one area is featured, and it is the first area.
   const featured = estate.areas.filter((a) => a.featured).length;
   if (featured !== 1) errors.push(`estate.json must have exactly one featured area (the "Start here" box of the landing page); it has ${featured}`);
+  else if (!estate.areas[0].featured) {
+    const { title } = estate.areas.find((a) => a.featured);
+    errors.push(`estate.json: the featured area ${JSON.stringify(title)} must be the first area: the estate index and the landing page show it first`);
+  }
+
+  // The featured area has no repos: its box shows the path, and the estate strip shows only the
+  // areas with repos. Thus it has no color either. Each other area has one or more repos.
+  for (const { title, featured, color, repos } of estate.areas) {
+    if (featured) {
+      if (color !== undefined || repos !== undefined) {
+        errors.push(`estate.json: the featured area ${JSON.stringify(title)} must have no color and no repos: the Start here box shows the path, and the estate strip shows only the areas with repos`);
+      }
+    } else if (!Array.isArray(repos) || repos.length === 0) {
+      errors.push(`estate.json: the area ${JSON.stringify(title)} must have a list of one or more repos`);
+    }
+  }
+  // From here on, each area has a list of repos. The list of the featured area is empty, unless
+  // the error above names its repos: then the repos stay, so that they get no false error.
+  const areaList = estate.areas.map((area) => ({ ...area, repos: Array.isArray(area.repos) ? area.repos : [] }));
+
+  // A note on a repo (for example that some of its information is out of date) shows with its
+  // description on the landing page, in the estate index, and in the per-repo README.
+  for (const { name, note } of areaList.flatMap((a) => a.repos)) {
+    if (note !== undefined && (typeof note !== "string" || !note.trim())) errors.push(`estate.json: the note of ${name} must be a text that is not empty`);
+  }
 
   // The site look fills the cells of an area in the estate strip with the color of the area: one
   // of the area colors of site-colors.mjs. Two areas with one color would look like one area, so
-  // each area needs its own color.
+  // each area with repos needs its own color.
   const colorOf = new Map(); // an area color -> the title of its area
-  for (const { title, color } of estate.areas) {
+  for (const { title, color, featured } of areaList) {
+    if (featured) continue;
     if (typeof color !== "string" || !Object.hasOwn(AREA_COLORS, color)) {
       errors.push(`estate.json: the color of the area ${JSON.stringify(title)} must be one of ${Object.keys(AREA_COLORS).join(", ")}`);
     } else if (colorOf.has(color)) {
@@ -155,7 +181,7 @@ export function loadEstate() {
   const dirs = readdirSync(join(root, "repos"), { withFileTypes: true })
     .filter((d) => d.isDirectory())
     .map((d) => d.name);
-  const listed = estate.areas.flatMap((a) => a.repos.map((r) => r.name));
+  const listed = areaList.flatMap((a) => a.repos.map((r) => r.name));
 
   // A renamed repo lists its former names in formerNames. The deploy writes a moved page at
   // the subpath of each former name (build-moved.mjs). Thus a former name must be a repo name
@@ -163,7 +189,7 @@ export function loadEstate() {
   // (a hidden file) and does not end with ".html" (a page at the root of the site).
   const formerNamesOf = new Map(); // the name of a repo -> its valid former names
   const nameOf = new Map(); // a valid former name -> the name of its repo
-  for (const { name, formerNames } of estate.areas.flatMap((a) => a.repos)) {
+  for (const { name, formerNames } of areaList.flatMap((a) => a.repos)) {
     if (formerNames === undefined) continue;
     if (!Array.isArray(formerNames) || !formerNames.every((f) => typeof f === "string")) {
       errors.push(`estate.json: formerNames of ${name} must be a list of repo names`);
@@ -202,7 +228,7 @@ export function loadEstate() {
     return { sha, date: at?.slice(0, 10) };
   }
 
-  const areas = estate.areas.map((area) => ({
+  const areas = areaList.map((area) => ({
     ...area,
     repos: area.repos
       .filter(({ name }) => dirs.includes(name))

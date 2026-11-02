@@ -4,16 +4,8 @@
   "areas": [
     {
       "title": "Start here",
-      "color": "ink",
       "featured": true,
       "intro": "Learn the mission and the big picture of the platform before you read the code.",
-      "repos": [
-        {
-          "name": "Greenstand-Overview",
-          "description": "The org overview and onboarding repo: contributor guide, roadmap, and team directory. Docs, not code.",
-          "docs": true
-        }
-      ],
       "seeAlso": [
         { "text": "Documentation", "url": "https://github.com/Greenstand/greenstand-documentation" },
         { "text": "Architecture decisions", "url": "https://github.com/Greenstand/treetracker-decisions" }
@@ -115,6 +107,18 @@
         {
           "name": "treetracker-infrastructure",
           "description": "The infrastructure as code: Kubernetes, PostgreSQL, and observability on DigitalOcean and AWS. Terraform."
+        }
+      ]
+    },
+    {
+      "title": "Organization",
+      "color": "ink",
+      "repos": [
+        {
+          "name": "Greenstand-Overview",
+          "description": "The org overview and onboarding repo: contributor guide, roadmap, and team directory. Docs, not code.",
+          "docs": true,
+          "note": "Some of its information is out of date."
         }
       ]
     }

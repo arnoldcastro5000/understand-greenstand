@@ -3,7 +3,8 @@
 // comes from the regeneration recipe. Each section sits between its own BEGIN and END markers.
 // - The "Start here" section, from estate.json, the repo's graph, and shared-resources.json. Its
 //   "Shared resources" bullet links the sections of the shared-resource page where the repo
-//   appears, or the page by its title (docs/shared-resources.md). A regeneration drops the
+//   appears, or the page by its title (docs/shared-resources.md). If the repo has a note in
+//   estate.json, the note comes first, right under the description. A regeneration drops the
 //   markers, so the script inserts the section again before the first "##" heading.
 // - The "Regenerating" section, which links the recipe by its title. Without the markers, the
 //   section takes the place of the README's own "## Regenerating" section, or it goes at the end.
@@ -98,14 +99,16 @@ function sharedResourcesBullet({ name, docs }) {
   return [`- **Shared resources:** ${links}. ${lead} how this repo uses the resource and who looks after it.`];
 }
 
-// The text between the Start here markers.
+// The text between the Start here markers. A repo with a note in estate.json gets the note first,
+// so that it comes right after the description at the top of the README.
 function startHereSection(repo) {
-  const { name, source } = repo;
+  const { name, source, note } = repo;
   const issues = `${source}/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22`;
   const path = contributingPath(name);
   const readme = `[README](${source}#readme)`;
   const sourceDocs = path ? `the ${readme} and the [${path}](${source}/blob/HEAD/${path})` : `the ${readme}`;
   return [
+    ...(note ? [note, ""] : []),
     "## Start here",
     "",
     `- **Explore:** open the [interactive viewer](${estate.siteUrl}${name}/). It has a guided tour of the repo. Then read the [onboarding guide](./ONBOARDING.md) and the [glossary](./GLOSSARY.md).`,
