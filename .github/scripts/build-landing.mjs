@@ -8,12 +8,13 @@
 // color of its area; each cell links to the entry of the repo. On wide screens the strip stands
 // upright in the legend rail, with the names of the repos and the areas.
 // The deploy workflow runs it after it assembles <site-dir>/<repo>/. It fails if a page
-// that the landing page links to, or the font of the site look, is missing there.
+// that the landing page links to, or the font or the parcel field of the site look, is missing
+// there.
 // Usage: node build-landing.mjs <site-dir>
 import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { CAPTURE_JOURNEY_DATA, formerNamesText, isObject, loadEstate, parseJson, readDocsFile } from "./estate.mjs";
-import { ARCHIVO, esc, siteHead, siteStyle } from "./site-html.mjs";
+import { ARCHIVO, PARCEL_FIELD, WIDE, esc, siteHead, siteStyle } from "./site-html.mjs";
 
 const site = process.argv[2];
 if (!site) {
@@ -30,8 +31,8 @@ for (const { name } of repos) {
 }
 // The deploy workflow writes these files at the site root: the pages of the estate glossary, the
 // volunteer guide, the ecosystem maps, the shared-resource page, and the capture journey, and the
-// font of the site look.
-const ROOT_FILES = ["glossary.html", "contribute.html", "architecture.html", "shared-resources.html", "capture-journey.html", ARCHIVO];
+// font and the parcel field of the site look.
+const ROOT_FILES = ["glossary.html", "contribute.html", "architecture.html", "shared-resources.html", "capture-journey.html", ARCHIVO, PARCEL_FIELD];
 for (const f of ROOT_FILES) if (!existsSync(join(site, f))) errors.push(`${site}/${f} is missing`);
 
 const link = (href, text) => `<a href="${esc(href)}">${text}</a>`;
@@ -232,8 +233,8 @@ ${siteStyle(".")}
   .links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem 1.25rem; font-size: .92rem; }
   .snap { color: var(--muted); font-variant-numeric: tabular-nums; }
   @container masthead (min-width: ${linksFrom}px) { .strip { display: flex; } .mark { display: none; } }
-  @media (min-width: 64rem) {
-    body { display: grid; grid-template-columns: 17.5rem minmax(0, 1fr); align-items: start; }
+  @media ${WIDE} {
+    body { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); align-items: start; }
     .masthead { position: sticky; top: 0; box-sizing: border-box; max-height: 100vh; overflow-y: auto;
       padding: 2rem 1.5rem 1.5rem 2rem; border-bottom: 0; scrollbar-width: thin; }
     h1 { margin-bottom: 1.25rem; font-size: 1.95rem; line-height: 1.02; }

@@ -21,6 +21,7 @@ on:
       - ".github/scripts/capture-journey-page.mjs"
       - ".github/scripts/build-landing.mjs"
       - ".github/scripts/build-moved.mjs"
+      - ".github/scripts/build-parcel-field.mjs"
       - ".github/scripts/estate.mjs"
       - ".github/scripts/render-md.mjs"
       - ".github/scripts/site-colors.mjs"
@@ -137,6 +138,9 @@ jobs:
           # Archivo, the font of the headings of the site look. build-landing.mjs fails without it.
           mkdir -p "$OUT/vendor/archivo"
           cp _archivo/package/LICENSE _archivo/package/files/archivo-latin-wdth-normal.woff2 "$OUT/vendor/archivo/"
+          # The parcel field, the drawing in the legend rail of the site look. build-landing.mjs fails
+          # without it.
+          node .github/scripts/build-parcel-field.mjs "$OUT"
           for dir in repos/*/; do
             repo="$(basename "$dir")"
             [ -f "$dir/knowledge-graph.json" ] || continue

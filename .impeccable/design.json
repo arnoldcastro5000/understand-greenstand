@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-02T05:01:30.379Z",
+  "generatedAt": "2026-11-02T15:45:30.000Z",
   "title": "Design System: understand-greenstand site look",
   "extensions": {
     "colorMeta": {
@@ -499,6 +499,36 @@
           "#edefed"
         ]
       },
+      "parcel-field": {
+        "role": "neutral",
+        "displayName": "Parcel Ink",
+        "canonical": "color-mix(in srgb, #1b2420 11.5%, transparent)",
+        "tonalRamp": [
+          "#0a0c0b",
+          "#222624",
+          "#3d4441",
+          "#5a645f",
+          "#7b8580",
+          "#9fa7a3",
+          "#c5cbc8",
+          "#ecefee"
+        ]
+      },
+      "parcel-field-dark": {
+        "role": "neutral",
+        "displayName": "Parcel Ink (dark)",
+        "canonical": "color-mix(in srgb, #e2e8e0 9.1%, transparent)",
+        "tonalRamp": [
+          "#0a0b0a",
+          "#242623",
+          "#40433f",
+          "#5e635d",
+          "#7f847e",
+          "#a2a6a1",
+          "#c7cac6",
+          "#edefed"
+        ]
+      },
       "edge-dark": {
         "role": "neutral",
         "displayName": "Ink Edge (dark)",
@@ -603,7 +633,7 @@
       {
         "name": "legend-rail",
         "value": "min-width: 64rem",
-        "purpose": "The sticky 17.5rem legend rail with the upright estate strip. The rail always shows the links and never the estate mark."
+        "purpose": "The sticky 17.5rem legend rail (`--rail`) with the upright estate strip. The rail always shows the links and never the estate mark. The parcel field lies under the rail, with the rail-edge hairline at its edge. `WIDE` in site-html.mjs; `NARROW` (`not all and (min-width: 64rem)`) is its exact opposite and puts the parcel field under the masthead."
       }
     ]
   },
@@ -671,17 +701,26 @@
       "description": "A link in running text: water blue with a soft 1px underline that takes the full color on hover.",
       "html": "<p class=\"ds-p\">The <a class=\"ds-link\" href=\"#\">estate glossary</a> lists the business terms of all repos.</p>",
       "css": ":host { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; --link: #2c5d84; --line: #c5cec3; --edge: color-mix(in srgb, #1b2420 25%, transparent); --display: \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; --c-ink: #1b2420; --c-evergreen: #35614e; --c-cropland: #92600d; --c-shrub: #bba25b; --c-wetland: #6f9db3; --c-deciduous: #6c8951; --c-mixed-forest: #b1bd97; --c-bare-ground: #7c796e; } @media (prefers-color-scheme: dark) { :host { --ground: #131915; --surface: #1b231e; --ink: #e2e8e0; --muted: #9aa79e; --link: #8fb9d9; --line: #2e3a33; --edge: color-mix(in srgb, #e2e8e0 25%, transparent); --c-ink: #e2e8e0; --c-evergreen: #33634d; --c-cropland: #916618; --c-shrub: #b49e56; --c-wetland: #7fb0c6; --c-deciduous: #49854f; --c-mixed-forest: #b1b38e; --c-bare-ground: #858377; } } .ds-p { margin: 0; color: var(--ink); background: var(--ground); font: 16.5px/1.62 system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; } .ds-link { color: var(--link); text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: color-mix(in srgb, var(--link) 35%, transparent); text-underline-offset: .2em; } .ds-link:hover { text-decoration-color: currentColor; } .ds-link:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }"
+    },
+    {
+      "name": "Parcel Field",
+      "kind": "custom",
+      "refersTo": "parcel-field",
+      "description": "The still background of the site look: the boundaries of made-up field parcels and some planting rows, in parcel ink, under the legend rail on a wide screen (with the rail-edge hairline) and under the masthead on a phone. Never under the content column. Hidden in forced colors, with more contrast, and in print.",
+      "html": "<div class=\"ds-rail\"><svg class=\"ds-field\" viewBox=\"0 0 280 200\" preserveAspectRatio=\"xMidYMid slice\" aria-hidden=\"true\"><path fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.1\" stroke-linejoin=\"round\" d=\"M-5 -5L120 -5L110 70L-5 80ZM120 -5L285 -5L285 60L110 70ZM-5 80L110 70L125 140L-5 150ZM110 70L285 60L285 130L125 140ZM-5 150L125 140L120 205L-5 205ZM125 140L285 130L285 205L120 205Z\"/><path stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-opacity=\".8\" d=\"M140 84h0M149 84h0M158 84h0M167 84h0M176 84h0M185 84h0M194 84h0M203 84h0M212 84h0M221 84h0M230 84h0M239 84h0M248 84h0M257 84h0M266 84h0M140 93h0M149 93h0M158 93h0M167 93h0M176 93h0M185 93h0M194 93h0M203 93h0M212 93h0M221 93h0M230 93h0M239 93h0M248 93h0M257 93h0M266 93h0M140 102h0M149 102h0M158 102h0M167 102h0M176 102h0M185 102h0M194 102h0M203 102h0M212 102h0M221 102h0M230 102h0M239 102h0M248 102h0M257 102h0M266 102h0M140 111h0M149 111h0M158 111h0M167 111h0M176 111h0M185 111h0M194 111h0M203 111h0M212 111h0M221 111h0M230 111h0M239 111h0M248 111h0M257 111h0M266 111h0M140 120h0M149 120h0M158 120h0M167 120h0M176 120h0M185 120h0M194 120h0M203 120h0M212 120h0M221 120h0M230 120h0M239 120h0M248 120h0M257 120h0M266 120h0\"/></svg><p class=\"ds-title\">understand-greenstand</p></div>",
+      "css": ":host { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; --link: #2c5d84; --line: #c5cec3; --edge: color-mix(in srgb, #1b2420 25%, transparent); --display: \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; --c-ink: #1b2420; --c-evergreen: #35614e; --c-cropland: #92600d; --c-shrub: #bba25b; --c-wetland: #6f9db3; --c-deciduous: #6c8951; --c-mixed-forest: #b1bd97; --c-bare-ground: #7c796e; --parcel-ink-share: 11.5%; } @media (prefers-color-scheme: dark) { :host { --ground: #131915; --surface: #1b231e; --ink: #e2e8e0; --muted: #9aa79e; --link: #8fb9d9; --line: #2e3a33; --edge: color-mix(in srgb, #e2e8e0 25%, transparent); --c-ink: #e2e8e0; --c-evergreen: #33634d; --c-cropland: #916618; --c-shrub: #b49e56; --c-wetland: #7fb0c6; --c-deciduous: #49854f; --c-mixed-forest: #b1b38e; --c-bare-ground: #858377; --parcel-ink-share: 9.1%; } } .ds-rail { position: relative; width: 17.5rem; height: 12.5rem; overflow: hidden; background: var(--ground); color: var(--ink); border-right: 1px solid var(--line); } .ds-field { position: absolute; inset: 0; width: 100%; height: 100%; color: color-mix(in srgb, var(--ink) var(--parcel-ink-share), transparent); } .ds-title { position: relative; margin: 0; padding: 2rem 1.5rem 0 2rem; font: 720 1.95rem/1.02 var(--display); letter-spacing: -.025em; } @media (forced-colors: active), (prefers-contrast: more), print { .ds-field { display: none; } .ds-rail { border-right: 0; } }"
     }
   ],
   "narrative": {
     "northStar": "The Land-Cover Map",
-    "overview": "The site reads as a land-cover classification map of the code estate. Each area of repos is a land-cover class. Each class has one flat, muted area color. The snapshot commit is the scene date. The reader sees the whole estate in one estate strip, learns the area key, follows the numbered Start here path, and then finds a repo entry with its proof links.\n\nThe site look is calm and dense. The page is a mineral ground with evergreen-black ink. Hairline rules divide the content. Apart from the link blue, the area colors are the only saturated colors on the page, and they fill shapes only. The pages follow the color scheme of the reader, so each color is a pair: one value for light, one value for dark (the `-dark` tokens). The site look refuses the GitHub-clone docs look (the former look) and the stock eco template: no leaf art, no gradients, no drop shadows, no Greenstand logo.\n\nScope of this record: the build moves only the landing page and the shared base to the site look. The shared base is the colors in `.github/scripts/site-colors.mjs` and `siteStyle` and `siteHead` in `.github/scripts/site-html.mjs`. The text pages (`render-md.mjs`), the capture journey page (`capture-journey-page.mjs`), and the moved pages (`build-moved.mjs`) still show the former look (`BASE_STYLE`). Later work moves them, and a later pass brings this file up to date. `BASE_STYLE` is not a rule source.",
+    "overview": "The site reads as a land-cover classification map of the code estate. Each area of repos is a land-cover class. Each class has one flat, muted area color. The snapshot commit is the scene date. The reader sees the whole estate in one estate strip, learns the area key, follows the numbered Start here path, and then finds a repo entry with its proof links.\n\nThe site look is calm and dense. The page is a mineral ground with evergreen-black ink. Hairline rules divide the content. The parcel field, the faint ink boundaries of made-up field parcels, lies behind the legend rail. It is decoration, not data. Apart from the link blue, the area colors are the only saturated colors on the page, and they fill shapes only. The pages follow the color scheme of the reader, so each color is a pair: one value for light, one value for dark (the `-dark` tokens). The site look refuses the GitHub-clone docs look (the former look) and the stock eco template: no leaf art, no gradients, no drop shadows, no Greenstand logo.\n\nScope of this record: the build moves only the landing page and the shared base to the site look. The shared base is the colors in `.github/scripts/site-colors.mjs`, `siteStyle` and `siteHead` in `.github/scripts/site-html.mjs`, and the parcel field (`.github/scripts/build-parcel-field.mjs` writes `art/parcel-field.svg`). Only the landing page shows the parcel field today. The text pages (`render-md.mjs`), the capture journey page (`capture-journey-page.mjs`), and the moved pages (`build-moved.mjs`) still show the former look (`BASE_STYLE`). Later work moves them, and a later pass brings this file up to date. `BASE_STYLE` is not a rule source.",
     "keyCharacteristics": [
       "A mineral ground, an ink text color, and water blue for links only, from one data module of [light, dark] pairs.",
       "Eight area colors (seven land-cover classes and ink for Start here) that fill cells, chips, and rules, never text.",
       "An ink edge on each area fill, so that pale fills stay visible on the ground.",
       "Archivo (a variable face with a width axis) for headings, labels, and numerals; the system sans for body text.",
       "Square corners, hairline rules, and no elevation.",
+      "The parcel field: the faint, still ink boundaries of made-up field parcels under the legend rail on a wide screen and under the masthead on a phone. The content column stays plain.",
       "The estate strip as the signature: a picture on a phone, a row of links on a wider page, an upright legend in the legend rail on a wide screen."
     ],
     "rules": [
@@ -711,6 +750,11 @@
         "section": "colors"
       },
       {
+        "name": "The Faint Field Rule",
+        "body": "The parcel field at full mask has a contrast of 1.25:1 or less with the ground, so it stays in the background. Each text color has a contrast of 4.5:1 or more on the field, because the title and the estate strip lie on it. The ink share is above 0 and at most 100. `check-site-colors.mjs` enforces these rules in CI, in light and in dark mode. Today the field is 1.2489:1 (light) and 1.2480:1 (dark) to the ground. The weakest text on the field is best-guess at 4.64:1 and muted at 4.66:1, both in light mode. Change the strength of the field only in `PARCEL_FIELD_INK_SHARE`.",
+        "section": "colors"
+      },
+      {
         "name": "The Two Voices Rule",
         "body": "Archivo sets headings, labels, and numerals. The system sans sets the body text. Monospace sets code and commit ids only.",
         "section": "typography"
@@ -727,7 +771,7 @@
       },
       {
         "name": "The Flat Map Rule",
-        "body": "Surfaces are flat at all times. Use tone (the surface) and hairlines for structure. Use no drop shadow and no gradient.",
+        "body": "Surfaces are flat at all times. Use tone (the surface) and hairlines for structure. Use no drop shadow and no gradient. The parcel field is a flat ink layer behind the page, not a surface above it.",
         "section": "elevation"
       }
     ],
@@ -736,7 +780,9 @@
       "Do define every custom property that a page uses. `build-landing.mjs` fails when the page uses a custom property that nothing defines.",
       "Do give an element its area color with `--area: var(--c-<color>)`, from the `\"color\"` of its area in `estate.json`.",
       "Do put the ink edge (1px inset, 25% ink) on every area fill.",
-      "Do keep text at 4.5:1 or more on the ground and on the surface in both schemes, and let `check-site-colors.mjs` prove it.",
+      "Do keep text at 4.5:1 or more on the ground, on the surface, and on the parcel field in both schemes, and let `check-site-colors.mjs` prove it. Text may sit on the parcel field.",
+      "Do change the strength of the parcel field only in `PARCEL_FIELD_INK_SHARE`, and keep the field at 1.25:1 or less with the ground.",
+      "Do hide the parcel field and the rail-edge hairline in forced colors, with `prefers-contrast: more`, and in print.",
       "Do set headings, labels, and numerals in Archivo, and body text in the system sans.",
       "Do keep a strip cell at 24px or more wherever it is a link.",
       "Do turn off motion under `prefers-reduced-motion: reduce`."
@@ -748,7 +794,11 @@
       "Don't use a drop shadow, a gradient, a rounded corner, or leaf art.",
       "Don't add a Greenstand logo or Greenstand brand colors. The site has no binding Greenstand brand, and it shows no Greenstand logo until Greenstand approves one (PRODUCT.md).",
       "Don't load a font or another asset from a third-party host; vendor it and pin its hash.",
-      "Don't take a value from `BASE_STYLE`; it is the former look."
+      "Don't take a value from `BASE_STYLE`; it is the former look.",
+      "Don't put the parcel field under the content column. It belongs to the legend rail and the masthead only.",
+      "Don't animate the parcel field.",
+      "Don't add fills or a hatch to the parcel field. A hatch is the mark of a best guess.",
+      "Don't show a real place or a capture in the parcel field, and do not call the field a map, a wallpaper, or a background illustration. It is decoration, not data."
     ]
   }
 }

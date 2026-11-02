@@ -47,9 +47,11 @@ name: Estate index
 # today" flag is not open, or an image is not the file of its source. Fix the entry that the
 # error names.
 # Also fails when a color of the site look (.github/scripts/site-colors.mjs) is missing or not
-# readable: a text color has a contrast below 4.5:1 on a background, an area color is near a state
-# color, or two area colors look alike, also for readers with red-green color blindness. Fix: run
-# `node .github/scripts/check-site-colors.mjs` and change the color that the error names.
+# readable: a text color has a contrast below 4.5:1 on a background or on the parcel field, an
+# area color is near a state color, two area colors look alike, also for readers with red-green
+# color blindness, or the parcel field is stronger than 1.25:1 to the ground or has no ink. Fix:
+# run `node .github/scripts/check-site-colors.mjs` and change the color or the ink share that the
+# error names.
 # No path filter: a path-filtered check stays pending forever if it is ever made required.
 
 on:

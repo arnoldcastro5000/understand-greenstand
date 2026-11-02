@@ -43,3 +43,9 @@ export const AREA_COLORS = {
   "mixed-forest": ["#b1bd97", "#b1b38e"],
   "bare-ground": ["#7c796e", "#858377"],
 };
+
+// The ink share of the parcel field (DESIGN.md): the percent of the ink color in the color of its
+// boundaries and rows, [light, dark]. The field lies on the ground, under the title and the estate
+// strip. check-site-colors.mjs keeps the field at a contrast of 1.25:1 or less with the ground, and
+// each text color at 4.5:1 or more on the field.
+export const PARCEL_FIELD_INK_SHARE = [11.5, 9.1];
