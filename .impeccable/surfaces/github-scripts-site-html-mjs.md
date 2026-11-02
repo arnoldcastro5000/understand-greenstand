@@ -1,0 +1,81 @@
+---
+version: 1
+slug: "github-scripts-site-html-mjs"
+primary_target: ".github/scripts/site-html.mjs"
+related_targets: [".github/scripts/build-landing.mjs",".github/scripts/render-md.mjs",".github/scripts/capture-journey-page.mjs",".github/scripts/build-moved.mjs"]
+---
+
+# Surface brief: the built pages of the Pages site
+
+Scope: the landing page, the markdown pages (`render-md.mjs`), the capture journey page, and the
+moved pages. Not the knowledge-graph viewer (third-party; keeps its theme). Mode: Read.
+
+Audience and job: new volunteer developers find the right repo, its viewer, and its onboarding
+guide, and understand how the repos work together. Second: maintainers. The words, links, data,
+and reading order stay; the look and the layout may change (decided 2026-11-02). The fail
+case: too gray and flat.
+
+Memorable moment: the estate strip at the top of the landing page, one cell per repo in its area
+color; each cell links to its repo entry and shows the repo name on hover or keyboard focus. No
+due mark (the pages have no drift data; decided 2026-11-02).
+
+Decided 2026-11-02, after a look at prototypes of the layouts: the layout is the **legend
+rail**; the area colors are the **tuned set** (same classes; readable with red-green color
+blindness); the heading font is **Archivo** (Latin letters, OFL, self-hosted); the diagrams
+show **area nodes on a surface plate**; the capture journey page takes the **Land-cover palette**
+(ink track, ochre best guess, rose not working; its green accent goes). Area-to-class map: Core
+API evergreen, Wallet cropland, Admin shrub, Web map wetland, Mobile deciduous, Data ingest mixed
+forest, Infrastructure bare ground, Start here ink. The direction and the layout were confirmed by
+eye on rendered prototypes of the landing page and the ecosystem maps page.
+
+Built 2026-11-02 (the shared look and the landing page): the colors live once in
+`site-colors.mjs` (`check-site-colors.mjs` checks them in CI); each area names its area color in
+`estate.json` (`"color"`). Archivo comes from the npm package `@fontsource-variable/archivo` 5.3.0
+(`archivo-latin-wdth-normal.woff2`, 90 KB, weight and width axes), pinned by its hash in the deploy
+workflow. On a phone the estate strip is a picture (the estate mark): a strip cell there is below
+the 24 px target size of WCAG 2.2 (decided 2026-11-02). The cells are links from the strip width
+where each cell can be 24 px wide; the script computes that width from the repo counts.
+
+## Direction contract
+
+THESIS: The site reads as a land-cover classification map of the code estate: areas are classes,
+the snapshot is the scene date, drift is change detection. It refuses the GitHub-clone docs look
+and the stock eco template.
+
+OWN-WORLD: Mineral ground (#f3f5f0 light, #131915 dark), evergreen-black ink, water blue for links
+only. Seven muted class fills mark areas only, never text, with an ink outline. Light: evergreen
+#35614e, cropland #92600d, shrub #bba25b, wetland #6f9db3, deciduous #6c8951, mixed forest
+#b1bd97, bare ground #7c796e. Dark: evergreen #33634d, cropland #916618, shrub #b49e56, wetland
+#7fb0c6, deciduous #49854f, mixed forest #b1b38e, bare ground #858377. Weakest pair 11.0 (light)
+and 10.3 (dark), CIEDE2000, with simulated protanopia and deuteranopia. States carry a mark and a color: best
+guess = ochre hatch, not working or gone = rose cross. One sans family; monospace only for commit
+ids and code; Archivo for headings and labels, the system sans for body text (decided 2026-11-02).
+Hairline rules; ink rules for page headings; legend chips; diagram nodes of a repo filled with
+a 30% tint of its area class and a full-strength border, each diagram on a surface plate; no
+shadows, gradients, or leaf art.
+
+STORY: The newcomer sees the whole estate in one strip, learns the area key, follows the numbered
+start path, then finds a repo and trusts each fact by its proof link and snapshot.
+
+FIRST VIEWPORT: Wide screens (64rem and more): the legend rail at the left, sticky: the title, then
+the estate strip turned upright (one row per repo: its area color block and its name; the area
+name over each group; each row a link to the repo entry; the row of the address target gets an
+ink outline). Beside it: the lede and the volunteer line in a 42rem column, then Start here on a
+surface field with its 4 entries as numbered steps in a margin number column; one column of
+repos below. Phones: the title, then the strip across the page as a picture (no links); from the
+width where each cell can be 24 px wide, the cells are links (names on hover or focus). Text
+pages: the rail holds the back link and the estate mark (the strip in small, no link, no words);
+the reading column is 44rem; diagrams use the full width beside the rail. No new words: no
+scene line, no hint sentence.
+
+FORM: Land-cover map, candidate 7 of 7 on the ordered list (1 survey map sheet, 2 herbarium
+voucher, 3 park wayfinding system, 4 soil color book, 5 field guide, 6 forestry field book,
+7 land-cover map). Raises: state is a mark, not a hue (film cutting bench); one color, one job
+(Bauhaus workshop); a strict margin number column (origami crane); a numbered newcomer path
+(zine); a dense repo register on wide screens (penny-press broadside; the legend rail layout
+keeps it to one column); one display
+family, Archivo in 2 widths (alphabet storm; body stays the system sans).
+seed:ede0d5f0e9fda336. Layout (surface round): legend rail, structure 3 of 6, the dealt
+lead; seed:b014ef57c29a8d2d.
+
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

@@ -23,6 +23,7 @@ on:
       - ".github/scripts/build-moved.mjs"
       - ".github/scripts/estate.mjs"
       - ".github/scripts/render-md.mjs"
+      - ".github/scripts/site-colors.mjs"
       - ".github/scripts/site-html.mjs"
       - ".github/scripts/slug.mjs"
       - ".github/workflows/deploy-viewers.yml"
@@ -45,6 +46,11 @@ env:
   # (`npm view mermaid@<version> dist.integrity` holds the same hash in base64).
   MERMAID_VERSION: 12.2.0
   MERMAID_SHA512: c3b9ebfd216b2ceec16954ecddd413bd8495ea7612063d18cbd0e3061b0826d01c1ea4735d2ab83e0df6ba31d9fc0756b0030d12fbe16e6e5db7d136b4e887cf
+  # Pin Archivo, the font of the headings and labels of the site look: the version and the SHA-512 of
+  # its npm tarball (Fontsource; `npm view @fontsource-variable/archivo@<version> dist.integrity`
+  # holds the same hash in base64).
+  ARCHIVO_VERSION: 5.3.0
+  ARCHIVO_SHA512: 1e880af0525e96b0f5a3b4e566590856d1e0736d1b3b93d945613b9947944dd30dd39e5a9739d057aff4d09d342017aef054001f8b37cd6f5424dbca1315dffa
 
 jobs:
   build:
@@ -105,6 +111,18 @@ jobs:
           tar -xzf "mermaid-${MERMAID_VERSION}.tgz" --exclude='*.map' \
             package/LICENSE package/dist/mermaid.esm.min.mjs package/dist/chunks/mermaid.esm.min
 
+      - name: Get Archivo (pinned)
+        # Check the tarball against the pinned hash. Keep the license (SIL Open Font License 1.1)
+        # and the variable font of the Latin letters, with its weight and width axes. npm pack runs
+        # no install scripts.
+        run: |
+          set -euo pipefail
+          mkdir _archivo && cd _archivo
+          npm pack "@fontsource-variable/archivo@${ARCHIVO_VERSION}" --silent
+          echo "${ARCHIVO_SHA512}  fontsource-variable-archivo-${ARCHIVO_VERSION}.tgz" | sha512sum --check --strict
+          tar -xzf "fontsource-variable-archivo-${ARCHIVO_VERSION}.tgz" \
+            package/LICENSE package/files/archivo-latin-wdth-normal.woff2
+
       - name: Assemble the Pages site
         run: |
           set -euo pipefail
@@ -116,6 +134,9 @@ jobs:
           mkdir -p "$OUT/vendor/mermaid"
           cp _mermaid/package/LICENSE _mermaid/package/dist/mermaid.esm.min.mjs "$OUT/vendor/mermaid/"
           cp -r _mermaid/package/dist/chunks "$OUT/vendor/mermaid/"
+          # Archivo, the font of the headings of the site look. build-landing.mjs fails without it.
+          mkdir -p "$OUT/vendor/archivo"
+          cp _archivo/package/LICENSE _archivo/package/files/archivo-latin-wdth-normal.woff2 "$OUT/vendor/archivo/"
           for dir in repos/*/; do
             repo="$(basename "$dir")"
             [ -f "$dir/knowledge-graph.json" ] || continue

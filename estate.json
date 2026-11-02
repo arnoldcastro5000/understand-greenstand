@@ -4,6 +4,7 @@
   "areas": [
     {
       "title": "Start here",
+      "color": "ink",
       "featured": true,
       "intro": "Learn the mission and the big picture of the platform before you read the code.",
       "repos": [
@@ -20,6 +21,7 @@
     },
     {
       "title": "Core API",
+      "color": "evergreen",
       "repos": [
         {
           "name": "treetracker-api",
@@ -37,6 +39,7 @@
     },
     {
       "title": "Wallet",
+      "color": "cropland",
       "repos": [
         {
           "name": "treetracker-wallet-api",
@@ -54,6 +57,7 @@
     },
     {
       "title": "Admin",
+      "color": "shrub",
       "repos": [
         {
           "name": "treetracker-admin-client",
@@ -67,6 +71,7 @@
     },
     {
       "title": "Web map",
+      "color": "wetland",
       "repos": [
         {
           "name": "treetracker-web-map-client",
@@ -81,6 +86,7 @@
     },
     {
       "title": "Mobile",
+      "color": "deciduous",
       "repos": [
         {
           "name": "treetracker-android",
@@ -90,6 +96,7 @@
     },
     {
       "title": "Data ingest",
+      "color": "mixed-forest",
       "repos": [
         {
           "name": "treetracker-field-data",
@@ -103,6 +110,7 @@
     },
     {
       "title": "Infrastructure",
+      "color": "bare-ground",
       "repos": [
         {
           "name": "treetracker-infrastructure",

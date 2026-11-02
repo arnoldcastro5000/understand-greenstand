@@ -1,5 +1,5 @@
 // Load the estate: estate.json (areas, descriptions, URLs) plus repos/*/meta.json (snapshots).
-// Each build and check script imports this module, so the outputs cannot drift apart:
+// These scripts import this module, so their outputs cannot drift apart:
 // build-index.mjs (the README.md index), build-landing.mjs (the Pages landing page),
 // build-moved.mjs (the moved pages of renamed repos), build-glossary.mjs,
 // build-repo-readmes.mjs, build-onboarding.mjs, build-ecosystem-maps.mjs,
@@ -18,6 +18,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { AREA_COLORS } from "./site-colors.mjs";
 
 export const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -135,6 +136,20 @@ export function loadEstate() {
   // featured.
   const featured = estate.areas.filter((a) => a.featured).length;
   if (featured !== 1) errors.push(`estate.json must have exactly one featured area (the "Start here" box of the landing page); it has ${featured}`);
+
+  // The site look fills the cells of an area in the estate strip with the color of the area: one
+  // of the area colors of site-colors.mjs. Two areas with one color would look like one area, so
+  // each area needs its own color.
+  const colorOf = new Map(); // an area color -> the title of its area
+  for (const { title, color } of estate.areas) {
+    if (typeof color !== "string" || !Object.hasOwn(AREA_COLORS, color)) {
+      errors.push(`estate.json: the color of the area ${JSON.stringify(title)} must be one of ${Object.keys(AREA_COLORS).join(", ")}`);
+    } else if (colorOf.has(color)) {
+      errors.push(`estate.json: the areas ${JSON.stringify(colorOf.get(color))} and ${JSON.stringify(title)} have the same color (${color}); each area needs its own color`);
+    } else {
+      colorOf.set(color, title);
+    }
+  }
 
   // Every repos/<name>/ directory needs exactly one entry, and every entry a directory.
   const dirs = readdirSync(join(root, "repos"), { withFileTypes: true })
