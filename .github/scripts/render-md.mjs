@@ -9,11 +9,18 @@
 // capture-journey.html); other relative links point to the file on GitHub at this commit.
 // A repo name in a heading moves to the next line as one piece (see keepRepoNamesWhole).
 // A Mermaid block becomes a diagram, as on GitHub. The page loads the copy of Mermaid that the
-// deploy workflow puts on the site. The script fails if that copy is missing.
+// deploy workflow puts on the site.
+// The page is in the site look (site-html.mjs): the masthead holds the estate mark and the back
+// links, in the legend rail on a wide screen; the text is in a reading column of 44rem; a diagram
+// lies on a plate in the surface color, and each repo node has the color of its area.
+// The script fails if the copy of Mermaid (for a page with a Mermaid block), the font, or the
+// parcel field is missing on the site, or if the page uses a custom property that nothing defines.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, posix } from "node:path";
 import { marked } from "marked";
 import { escapeRegExp, loadEstate } from "./estate.mjs";
+import { ARCHIVO, DISPLAY, DISPLAY_FACE, PARCEL_FIELD, WIDE, esc, estateMark, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
+import { BACKGROUNDS, DIAGRAM_NODE_TINT, LINES, TEXTS } from "./site-colors.mjs";
 import { slugger } from "./slug.mjs";
 
 const [, , inFile, outFile, title, backHref = "./", backLabel = "Viewer"] = process.argv;
@@ -38,6 +45,8 @@ function sitePath(path) {
 const from = posix.normalize(inFile);
 const here = sitePath(from);
 const atRoot = here !== null && !here.includes("/");
+// The path from the page to the root of the site: "." or "..".
+const toRoot = posix.relative(posix.dirname(here ?? ""), ".") || ".";
 const { GITHUB_REPOSITORY: repo, GITHUB_SHA: sha } = process.env;
 
 function rewrite(href) {
@@ -54,16 +63,17 @@ function rewrite(href) {
 const MERMAID_ENTRY = "vendor/mermaid/mermaid.esm.min.mjs";
 let hasMermaid = false;
 
+const { areas, repos, errors } = loadEstate();
+if (errors.length) {
+  for (const e of errors) console.error(`error: ${e}`);
+  process.exit(1);
+}
+
 // A repo name in a heading goes into a span with the style "display: inline-block". Thus the
 // name moves to the next line as one piece. A name that is wider than the line still breaks, so
 // the page does not get wider than the screen. Only a page with such a span gets its style.
 // A repo name that is a part of a longer word (tiles-1-docs, my-tiles-1, tiles-1.md) does not
 // count. The longest name comes first, so that a name inside a longer name does not count.
-const { repos, errors } = loadEstate();
-if (errors.length) {
-  for (const e of errors) console.error(`error: ${e}`);
-  process.exit(1);
-}
 const REPO_NAME = new RegExp(
   `(?<![\\w-])(?:${repos
     .map((r) => r.name)
@@ -104,12 +114,31 @@ marked.use({
     code(code, lang) {
       if (lang?.trim().split(/\s/)[0] !== "mermaid") return false;
       hasMermaid = true;
-      return `<pre class="mermaid">${esc(code)}\n</pre>\n`;
+      return `<pre class="mermaid">${escText(code)}\n</pre>\n`;
     },
   },
 });
-const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+// Escape text for HTML text (the source of a Mermaid block). esc (site-html.mjs) also escapes
+// quotes, for an attribute.
+const escText = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const body = marked.parse(readFileSync(inFile, "utf8"));
+
+// The files on the site that the page loads: the font and the parcel field of the site look, and
+// Mermaid for a page with a Mermaid block. The deploy workflow puts them on the site. The script
+// shows each missing file.
+const missing = [];
+for (const f of [ARCHIVO, PARCEL_FIELD]) {
+  const path = join(dirname(outFile), toRoot, f);
+  if (!existsSync(path)) missing.push(`${inFile} needs ${path}, but it is missing`);
+}
+const mermaidRel = posix.relative(posix.dirname(here ?? ""), MERMAID_ENTRY);
+if (hasMermaid && !existsSync(join(dirname(outFile), mermaidRel))) {
+  missing.push(`${inFile} has a Mermaid block, but ${join(dirname(outFile), mermaidRel)} is missing`);
+}
+if (missing.length) {
+  for (const e of missing) console.error(`error: ${e}`);
+  process.exit(1);
+}
 
 // The style of a repo name span. An inline-block does not get the underline of a link around
 // it, so the span takes the text decoration of its parent.
@@ -121,25 +150,41 @@ const repoNameStyle = hasRepoName ? "\n  .repo-name { display: inline-block; tex
 // stay readable on a phone. A wider diagram scrolls in its own box, and a shadow shows the side
 // with more of the diagram. The error image of a broken diagram keeps the size that Mermaid
 // gives it. When the color scheme changes, Mermaid draws the diagrams again.
+// The look of a diagram: a plate in the surface color; the nodes in the ground color with an ink
+// label in Archivo (Mermaid measures the labels, so the font loads first); the lines in muted. The
+// node of a repo has the color of its area: a fill at DIAGRAM_NODE_TINT on the ground and a border
+// in the area color. The error image of a broken diagram is in the not-working color. "look:
+// classic", because the default look of Mermaid draws node shadows. A broken diagram does not stop
+// the area colors and the sizes of the other diagrams: they are set in finally.
 let mermaidHead = "";
 let mermaidScript = "";
 if (hasMermaid) {
-  const rel = posix.relative(posix.dirname(here ?? ""), MERMAID_ENTRY);
-  const entryFile = join(dirname(outFile), rel);
-  if (!existsSync(entryFile)) {
-    console.error(`error: ${inFile} has a Mermaid block, but ${entryFile} is missing`);
-    process.exit(1);
-  }
   const shadows = (bg, shadow) => `linear-gradient(to right, ${bg} 30%, ${bg}00) left / 2rem 100% no-repeat local,
       linear-gradient(to left, ${bg} 30%, ${bg}00) right / 2rem 100% no-repeat local,
       radial-gradient(farthest-side at 0 50%, ${shadow}40, ${shadow}00) left / .75rem 100% no-repeat scroll,
       radial-gradient(farthest-side at 100% 50%, ${shadow}40, ${shadow}00) right / .75rem 100% no-repeat scroll`;
+  const plate = (i) => `${shadows(BACKGROUNDS.surface[i], TEXTS.ink[i])};
+    background-color: var(--surface);`;
+  const themeVariables = (i) => ({
+    primaryColor: BACKGROUNDS.ground[i], primaryBorderColor: TEXTS.muted[i], primaryTextColor: TEXTS.ink[i],
+    secondaryColor: BACKGROUNDS.ground[i], tertiaryColor: BACKGROUNDS.surface[i], lineColor: TEXTS.muted[i],
+    textColor: TEXTS.ink[i], edgeLabelBackground: BACKGROUNDS.surface[i], clusterBkg: BACKGROUNDS.ground[i],
+    clusterBorder: LINES.line[i], errorBkgColor: TEXTS["not-working"][i], errorTextColor: TEXTS["not-working"][i],
+    fontFamily: DISPLAY, ...(i ? { darkMode: true } : {}),
+  });
+  // The area color of each repo, by its name: the label of its node.
+  const colorOf = Object.fromEntries(areas.flatMap((a) => a.repos.map((r) => [r.name, a.color])));
   mermaidHead = `
 <style>
-  pre.mermaid { padding: 0; text-align: center;
-    background: ${shadows("#ffffff", "#1f2328")}; }
-  @media (prefers-color-scheme: dark) { pre.mermaid {
-    background: ${shadows("#0d1117", "#e6edf3")}; } }
+  main > pre.mermaid { max-width: 62rem; margin-block: 1.5rem; }
+  @media ${WIDE} { main > pre.mermaid { max-width: none; margin-block: 1.75rem; } }
+  main pre.mermaid { padding: 1.5rem 1rem; text-align: center;
+    background: ${plate(0)} }
+  @media (prefers-color-scheme: dark) { main pre.mermaid {
+    background: ${plate(1)} } }
+  pre.mermaid g.area-node :is(rect, path, polygon, circle) {
+    fill: color-mix(in srgb, var(--area) ${DIAGRAM_NODE_TINT}%, var(--ground)) !important; stroke: var(--area) !important;
+    stroke-width: 1.5px !important; }
   .mermaid-loading pre.mermaid { visibility: hidden; }
 </style>
 <script>if ("noModule" in HTMLScriptElement.prototype) document.documentElement.classList.add("mermaid-loading");</script>`;
@@ -148,7 +193,9 @@ if (hasMermaid) {
 const root = document.documentElement;
 const dark = matchMedia("(prefers-color-scheme: dark)");
 const blocks = [...document.querySelectorAll("pre.mermaid")].map((pre) => [pre, pre.textContent]);
-import(${JSON.stringify(rel.startsWith("../") ? rel : `./${rel}`)})
+const themes = ${JSON.stringify({ light: themeVariables(0), dark: themeVariables(1) })};
+const colorOf = ${JSON.stringify(colorOf)};
+import(${JSON.stringify(mermaidRel.startsWith("../") ? mermaidRel : `./${mermaidRel}`)})
   .then(({ default: mermaid }) => {
     const draw = () => {
       root.classList.add("mermaid-loading");
@@ -156,8 +203,15 @@ import(${JSON.stringify(rel.startsWith("../") ? rel : `./${rel}`)})
         pre.removeAttribute("data-processed");
         pre.textContent = source;
       }
-      mermaid.initialize({ startOnLoad: false, theme: dark.matches ? "dark" : "default" });
-      return mermaid.run().finally(() => {
+      mermaid.initialize({ startOnLoad: false, theme: "base", look: "classic", themeVariables: dark.matches ? themes.dark : themes.light });
+      return document.fonts.load('400 16px "${DISPLAY_FACE}"').then(() => mermaid.run()).finally(() => {
+        for (const g of root.querySelectorAll("pre.mermaid g.node")) {
+          const color = colorOf[g.textContent.trim()];
+          if (color) {
+            g.classList.add("area-node");
+            g.style.setProperty("--area", "var(--c-" + color + ")");
+          }
+        }
         for (const svg of root.querySelectorAll('pre.mermaid svg:not([aria-roledescription="error"])')) {
           svg.style.minWidth = Math.round(svg.viewBox.baseVal.width * 0.7) + "px";
         }
@@ -171,47 +225,79 @@ import(${JSON.stringify(rel.startsWith("../") ? rel : `./${rel}`)})
 </script>`;
 }
 
+// The layout. On a narrow screen: the masthead at the top (the estate mark over the back links),
+// then the reading column, 44rem at most, in the middle. A diagram can be wider than the reading
+// column. On a wide screen (64rem and more): the legend rail at the left holds the estate mark and
+// the back links, one under the other, and stays in view while the page scrolls; the reading
+// column starts beside the rail, and a diagram uses the width of the content column (64rem at
+// most).
 const html = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
+${siteHead(toRoot)}
 <style>
-  :root { color-scheme: light dark; }
-  body { font: 16px/1.6 -apple-system, system-ui, "Segoe UI", sans-serif;
-    max-width: 52rem; margin: 0 auto; padding: 1.5rem 1.25rem 4rem;
-    color: #1f2328; background: #fff; overflow-wrap: break-word; }
-  @media (prefers-color-scheme: dark) { body { color: #e6edf3; background: #0d1117; } }
-  nav { display: flex; gap: 1rem; padding-bottom: 1rem; margin-bottom: 1.5rem;
-    border-bottom: 1px solid #d0d7de; font-size: .9rem; }
-  @media (prefers-color-scheme: dark) { nav { border-color: #30363d; } }
-  a { color: #0969da; text-decoration: none; }
-  @media (prefers-color-scheme: dark) { a { color: #58a6ff; } }
-  a:hover { text-decoration: underline; }
-  h1, h2, h3 { line-height: 1.25; margin-top: 1.8rem; }
-  h1 { font-size: 1.8rem; } h2 { font-size: 1.4rem;
-    border-bottom: 1px solid #d0d7de; padding-bottom: .3rem; }
-  @media (prefers-color-scheme: dark) { h2 { border-color: #30363d; } }
-  code { background: rgba(175,184,193,.2); padding: .15em .35em; border-radius: 5px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .88em; }
-  pre { background: #f6f8fa; padding: 1rem; border-radius: 8px; overflow: auto; }
-  @media (prefers-color-scheme: dark) { pre { background: #161b22; } }
-  pre code { background: none; padding: 0; }
-  table { border-collapse: collapse; width: 100%; margin: 1rem 0; display: block; overflow: auto; }
-  th, td { border: 1px solid #d0d7de; padding: .5rem .75rem; text-align: left; }
-  @media (prefers-color-scheme: dark) { th, td { border-color: #30363d; } }
-  th { background: rgba(175,184,193,.15); }
-  blockquote { margin: 1rem 0; padding: 0 1rem; color: #656d76; border-left: .25rem solid #d0d7de; }
-  @media (prefers-color-scheme: dark) { blockquote { color: #8b949e; border-color: #30363d; } }${repoNameStyle}
+${siteStyle(toRoot)}
+  .masthead { padding: 1.25rem max(1.25rem, calc((100% - 44rem) / 2)); border-bottom: 1px solid var(--line); }
+  .mark { display: flex; gap: 3px; width: 8.5rem; height: .55rem; margin-bottom: .75rem; }
+  .mark .group { display: flex; flex: var(--n) 1 0; gap: 1px; min-width: 0; }
+  .mark i { flex: 1 1 0; min-width: 0; background: var(--area); box-shadow: inset 0 0 0 1px var(--edge); }
+  .masthead nav { display: flex; flex-wrap: wrap; gap: .25rem 1.5rem; font: 500 .98rem/1.3 var(--display);
+    font-stretch: 87.5%; }
+  .masthead nav a { display: inline-block; padding-block: .15rem; color: var(--ink); text-decoration: none; }
+  .masthead nav a:hover { text-decoration: underline; text-decoration-color: var(--line); }
+  main { padding: 1.5rem 1.25rem 5rem; }
+  h1 { margin-block: 1.5rem 1.1rem; font-size: clamp(1.9rem, 1.5rem + 1.8vw, 2.6rem); font-weight: 720;
+    letter-spacing: -.02em; }
+  h2 { margin-block: 2.9rem .8rem; padding-top: .75rem; border-top: 2px solid var(--ink); font-size: 1.5rem;
+    font-weight: 660; }
+  h3 { margin-block: 2rem .5rem; font-size: 1.16rem; font-weight: 640; }
+  h4 { margin-block: 1.5rem .4rem; font: 640 1rem/1.3 var(--display); text-wrap: balance; }
+  h1, h2, h3, h4 { scroll-margin-top: 1.5rem; }
+  p, ul, ol, dl, table, pre, blockquote { margin-block: 0 1rem; }
+  li { margin-block: .3rem; }
+  li > :is(ul, ol) { margin-block: .3rem 0; }
+  li::marker { color: var(--muted); }
+  code { padding: .1em .35em; background: var(--surface); }
+  pre { padding: 1rem; overflow: auto; background: var(--surface); }
+  pre code { padding: 0; background: none; }
+  table { display: block; width: 100%; overflow: auto; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th { font: 600 .92rem/1.3 var(--display); font-stretch: 87.5%; text-align: left; background: var(--surface); }
+  th, td { padding: .55rem .8rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  blockquote { margin-inline: 0; padding: .75rem 1rem; color: var(--muted); background: var(--surface); }
+  blockquote > :last-child { margin-bottom: 0; }
+  hr { height: 0; margin-block: 2rem; border: 0; border-top: 1px solid var(--line); }
+  img { max-width: 100%; }
+  main > * { box-sizing: border-box; max-width: 44rem; margin-inline: auto; }
+  @media ${WIDE} {
+    body { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); align-items: start; }
+    .masthead { position: sticky; top: 0; padding: 2.4rem 1.5rem 2rem 2rem; border-bottom: 0; }
+    .mark { width: 100%; max-width: 13.5rem; height: .75rem; margin-bottom: 1.4rem; }
+    .masthead nav { flex-direction: column; align-items: start; }
+    main { max-width: 64rem; padding: 1.25rem clamp(1.5rem, 4vw, 4.5rem) 5rem; }
+    main > * { margin-inline: 0; }
+  }${repoNameStyle}
 </style>${mermaidHead}
 </head>
 <body>
+<header class="masthead">
+${estateMark(areas)}
 <nav><a href="${esc(backHref)}">&larr; ${esc(backLabel)}</a>${atRoot ? "" : '<a href="../">All viewers</a>'}</nav>
-${body}${mermaidScript}
+</header>
+<main>
+${body}</main>${mermaidScript}
 </body>
 </html>
 `;
+
+// Each custom property that the page uses must have a definition in the page.
+const undefinedNames = undefinedProperties(html);
+if (undefinedNames.length) {
+  for (const n of undefinedNames) console.error(`error: the page of ${inFile} uses var(--${n}), but nothing defines --${n}`);
+  process.exit(1);
+}
 
 writeFileSync(outFile, html);
 console.log("rendered", inFile, "->", outFile);

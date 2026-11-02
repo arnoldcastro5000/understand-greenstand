@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-02T15:45:30.000Z",
+  "generatedAt": "2026-11-02T18:00:00.000Z",
   "title": "Design System: understand-greenstand site look",
   "extensions": {
     "colorMeta": {
@@ -588,11 +588,31 @@
       },
       "label-nav": {
         "displayName": "Label (jump links)",
-        "purpose": "The jump links to the areas."
+        "purpose": "The jump links to the areas, and the back links of a text page."
       },
       "mono": {
         "displayName": "Mono",
-        "purpose": "Commit ids and code only."
+        "purpose": "Commit ids and code only: inline code and code blocks on a text page."
+      },
+      "display-text": {
+        "displayName": "Display (text page)",
+        "purpose": "The h1 of a text page."
+      },
+      "headline-text": {
+        "displayName": "Headline (text page)",
+        "purpose": "The h2 of a text page, under a 2px ink rule."
+      },
+      "title-text": {
+        "displayName": "Title (text page)",
+        "purpose": "The h3 of a text page."
+      },
+      "title-small": {
+        "displayName": "Title small",
+        "purpose": "The h4 of a text page, with text-wrap: balance."
+      },
+      "label-table": {
+        "displayName": "Label (table)",
+        "purpose": "The table heads of a text page, on the surface."
       }
     },
     "shadows": [
@@ -600,6 +620,11 @@
         "name": "ink-edge",
         "value": "inset 0 0 0 1px color-mix(in srgb, var(--ink) 25%, transparent)",
         "purpose": "The 1px ink outline on every area fill (strip cells, mark cells, chips). An outline, not an elevation."
+      },
+      {
+        "name": "diagram-scroll-shadows",
+        "value": "linear-gradient(to right, <surface> 30%, <surface>00) left / 2rem 100% no-repeat local, linear-gradient(to left, <surface> 30%, <surface>00) right / 2rem 100% no-repeat local, radial-gradient(farthest-side at 0 50%, <ink>40, <ink>00) left / .75rem 100% no-repeat scroll, radial-gradient(farthest-side at 100% 50%, <ink>40, <ink>00) right / .75rem 100% no-repeat scroll",
+        "purpose": "The one exception to the Flat Map Rule: the cue that a wide diagram scrolls. The surface and the ink come from site-colors.mjs, light and dark. A .75rem shade of 25% ink shows only on a side with more of the diagram."
       }
     ],
     "motion": [
@@ -633,7 +658,12 @@
       {
         "name": "legend-rail",
         "value": "min-width: 64rem",
-        "purpose": "The sticky 17.5rem legend rail (`--rail`) with the upright estate strip. The rail always shows the links and never the estate mark. The parcel field lies under the rail, with the rail-edge hairline at its edge. `WIDE` in site-html.mjs; `NARROW` (`not all and (min-width: 64rem)`) is its exact opposite and puts the parcel field under the masthead."
+        "purpose": "The sticky 17.5rem legend rail (`--rail`) with the upright estate strip. The rail always shows the links and never the estate mark. The parcel field lies under the rail, with the rail-edge hairline at its edge. `WIDE` in site-html.mjs; `NARROW` (`not all and (min-width: 64rem)`) is its exact opposite and puts the parcel field under the masthead. On a text page the legend rail is sticky, holds the estate mark (up to 13.5rem x .75rem) over the back links, and main is at most 64rem with the reading column at the left."
+      },
+      {
+        "name": "text-page-band",
+        "value": "not all and (min-width: 64rem)",
+        "purpose": "`NARROW` on a text page: the masthead is a band at the top with a hairline below, the estate mark is 8.5rem x .55rem, and the reading column (44rem) is in the center."
       }
     ]
   },
@@ -709,11 +739,27 @@
       "description": "The still background of the site look: the boundaries of made-up field parcels and some planting rows, in parcel ink, under the legend rail on a wide screen (with the rail-edge hairline) and under the masthead on a phone. Never under the content column. Hidden in forced colors, with more contrast, and in print.",
       "html": "<div class=\"ds-rail\"><svg class=\"ds-field\" viewBox=\"0 0 280 200\" preserveAspectRatio=\"xMidYMid slice\" aria-hidden=\"true\"><path fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.1\" stroke-linejoin=\"round\" d=\"M-5 -5L120 -5L110 70L-5 80ZM120 -5L285 -5L285 60L110 70ZM-5 80L110 70L125 140L-5 150ZM110 70L285 60L285 130L125 140ZM-5 150L125 140L120 205L-5 205ZM125 140L285 130L285 205L120 205Z\"/><path stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-opacity=\".8\" d=\"M140 84h0M149 84h0M158 84h0M167 84h0M176 84h0M185 84h0M194 84h0M203 84h0M212 84h0M221 84h0M230 84h0M239 84h0M248 84h0M257 84h0M266 84h0M140 93h0M149 93h0M158 93h0M167 93h0M176 93h0M185 93h0M194 93h0M203 93h0M212 93h0M221 93h0M230 93h0M239 93h0M248 93h0M257 93h0M266 93h0M140 102h0M149 102h0M158 102h0M167 102h0M176 102h0M185 102h0M194 102h0M203 102h0M212 102h0M221 102h0M230 102h0M239 102h0M248 102h0M257 102h0M266 102h0M140 111h0M149 111h0M158 111h0M167 111h0M176 111h0M185 111h0M194 111h0M203 111h0M212 111h0M221 111h0M230 111h0M239 111h0M248 111h0M257 111h0M266 111h0M140 120h0M149 120h0M158 120h0M167 120h0M176 120h0M185 120h0M194 120h0M203 120h0M212 120h0M221 120h0M230 120h0M239 120h0M248 120h0M257 120h0M266 120h0\"/></svg><p class=\"ds-title\">understand-greenstand</p></div>",
       "css": ":host { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; --link: #2c5d84; --line: #c5cec3; --edge: color-mix(in srgb, #1b2420 25%, transparent); --display: \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; --c-ink: #1b2420; --c-evergreen: #35614e; --c-cropland: #92600d; --c-shrub: #bba25b; --c-wetland: #6f9db3; --c-deciduous: #6c8951; --c-mixed-forest: #b1bd97; --c-bare-ground: #7c796e; --parcel-ink-share: 11.5%; } @media (prefers-color-scheme: dark) { :host { --ground: #131915; --surface: #1b231e; --ink: #e2e8e0; --muted: #9aa79e; --link: #8fb9d9; --line: #2e3a33; --edge: color-mix(in srgb, #e2e8e0 25%, transparent); --c-ink: #e2e8e0; --c-evergreen: #33634d; --c-cropland: #916618; --c-shrub: #b49e56; --c-wetland: #7fb0c6; --c-deciduous: #49854f; --c-mixed-forest: #b1b38e; --c-bare-ground: #858377; --parcel-ink-share: 9.1%; } } .ds-rail { position: relative; width: 17.5rem; height: 12.5rem; overflow: hidden; background: var(--ground); color: var(--ink); border-right: 1px solid var(--line); } .ds-field { position: absolute; inset: 0; width: 100%; height: 100%; color: color-mix(in srgb, var(--ink) var(--parcel-ink-share), transparent); } .ds-title { position: relative; margin: 0; padding: 2rem 1.5rem 0 2rem; font: 720 1.95rem/1.02 var(--display); letter-spacing: -.025em; } @media (forced-colors: active), (prefers-contrast: more), print { .ds-field { display: none; } .ds-rail { border-right: 0; } }"
+    },
+    {
+      "name": "Text-Page Masthead",
+      "kind": "nav",
+      "refersTo": "back-link",
+      "description": "The estate mark in small over the back links: a band at the top on a narrow screen, the legend rail on a wide screen.",
+      "html": "<header class=\"ds-tmast\"><div class=\"ds-tmark\" aria-hidden=\"true\"><span class=\"ds-tgroup\" style=\"--area: var(--c-evergreen); --n: 3\"><i></i><i></i><i></i></span><span class=\"ds-tgroup\" style=\"--area: var(--c-cropland); --n: 3\"><i></i><i></i><i></i></span><span class=\"ds-tgroup\" style=\"--area: var(--c-shrub); --n: 2\"><i></i><i></i></span><span class=\"ds-tgroup\" style=\"--area: var(--c-wetland); --n: 2\"><i></i><i></i></span><span class=\"ds-tgroup\" style=\"--area: var(--c-mixed-forest); --n: 2\"><i></i><i></i></span><span class=\"ds-tgroup\" style=\"--area: var(--c-ink); --n: 1\"><i></i></span></div><nav class=\"ds-tnav\"><a href=\"#\">&larr; Viewer</a><a href=\"#\">All viewers</a></nav></header>",
+      "css": ":host { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; --link: #2c5d84; --line: #c5cec3; --edge: color-mix(in srgb, #1b2420 25%, transparent); --display: \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; --c-ink: #1b2420; --c-evergreen: #35614e; --c-cropland: #92600d; --c-shrub: #bba25b; --c-wetland: #6f9db3; --c-deciduous: #6c8951; --c-mixed-forest: #b1bd97; --c-bare-ground: #7c796e; } @media (prefers-color-scheme: dark) { :host { --ground: #131915; --surface: #1b231e; --ink: #e2e8e0; --muted: #9aa79e; --link: #8fb9d9; --line: #2e3a33; --edge: color-mix(in srgb, #e2e8e0 25%, transparent); --c-ink: #e2e8e0; --c-evergreen: #33634d; --c-cropland: #916618; --c-shrub: #b49e56; --c-wetland: #7fb0c6; --c-deciduous: #49854f; --c-mixed-forest: #b1b38e; --c-bare-ground: #858377; } } .ds-tmast { padding: 1.25rem; background: var(--ground); border-bottom: 1px solid var(--line); } .ds-tmark { display: flex; gap: 3px; width: 8.5rem; height: .55rem; margin-bottom: .75rem; } .ds-tgroup { display: flex; flex: var(--n) 1 0; gap: 1px; min-width: 0; } .ds-tmark i { flex: 1 1 0; min-width: 0; background: var(--area); box-shadow: inset 0 0 0 1px var(--edge); } .ds-tnav { display: flex; flex-wrap: wrap; gap: .25rem 1.5rem; font: 500 .98rem/1.3 var(--display); font-stretch: 87.5%; } .ds-tnav a { display: inline-block; padding-block: .15rem; color: var(--ink); text-decoration: none; } .ds-tnav a:hover { text-decoration: underline; text-decoration-color: var(--line); } .ds-tnav a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }"
+    },
+    {
+      "name": "Diagram Plate",
+      "kind": "card",
+      "refersTo": "diagram-plate",
+      "description": "A Mermaid diagram on a surface plate: nodes on the ground with a muted border and ink labels in Archivo; a repo node in a 30% tint of its area color with a 1.5px border in the area color.",
+      "html": "<div class=\"ds-plate\"><svg viewBox=\"0 0 300 60\" width=\"300\" height=\"60\" role=\"img\" aria-label=\"Diagram\"><g class=\"ds-node\"><rect x=\"1\" y=\"14\" width=\"110\" height=\"32\"/><text x=\"56\" y=\"35\">client app</text></g><path class=\"ds-edge\" d=\"M111 30 H189\"/><g class=\"ds-node ds-area-node\" style=\"--area: var(--c-evergreen)\"><rect x=\"189\" y=\"14\" width=\"110\" height=\"32\"/><text x=\"244\" y=\"35\">treetracker-api</text></g></svg></div>",
+      "css": ":host { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; --link: #2c5d84; --line: #c5cec3; --edge: color-mix(in srgb, #1b2420 25%, transparent); --display: \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; --c-ink: #1b2420; --c-evergreen: #35614e; --c-cropland: #92600d; --c-shrub: #bba25b; --c-wetland: #6f9db3; --c-deciduous: #6c8951; --c-mixed-forest: #b1bd97; --c-bare-ground: #7c796e; } @media (prefers-color-scheme: dark) { :host { --ground: #131915; --surface: #1b231e; --ink: #e2e8e0; --muted: #9aa79e; --link: #8fb9d9; --line: #2e3a33; --edge: color-mix(in srgb, #e2e8e0 25%, transparent); --c-ink: #e2e8e0; --c-evergreen: #33634d; --c-cropland: #916618; --c-shrub: #b49e56; --c-wetland: #7fb0c6; --c-deciduous: #49854f; --c-mixed-forest: #b1b38e; --c-bare-ground: #858377; } } .ds-plate { padding: 1.5rem 1rem; text-align: center; background: var(--surface); } .ds-node rect { fill: var(--ground); stroke: var(--muted); stroke-width: 1px; } .ds-node text { fill: var(--ink); font: 400 13px var(--display); text-anchor: middle; } .ds-edge { stroke: var(--muted); stroke-width: 1.5px; fill: none; } .ds-area-node rect { fill: color-mix(in srgb, var(--area) 30%, var(--ground)); stroke: var(--area); stroke-width: 1.5px; }"
     }
   ],
   "narrative": {
     "northStar": "The Land-Cover Map",
-    "overview": "The site reads as a land-cover classification map of the code estate. Each area of repos is a land-cover class. Each class has one flat, muted area color. The snapshot commit is the scene date. The reader sees the whole estate in one estate strip, learns the area key, follows the numbered Start here path, and then finds a repo entry with its proof links.\n\nThe site look is calm and dense. The page is a mineral ground with evergreen-black ink. Hairline rules divide the content. The parcel field, the faint ink boundaries of made-up field parcels, lies behind the legend rail. It is decoration, not data. Apart from the link blue, the area colors are the only saturated colors on the page, and they fill shapes only. The pages follow the color scheme of the reader, so each color is a pair: one value for light, one value for dark (the `-dark` tokens). The site look refuses the GitHub-clone docs look (the former look) and the stock eco template: no leaf art, no gradients, no drop shadows, no Greenstand logo.\n\nScope of this record: the build moves only the landing page and the shared base to the site look. The shared base is the colors in `.github/scripts/site-colors.mjs`, `siteStyle` and `siteHead` in `.github/scripts/site-html.mjs`, and the parcel field (`.github/scripts/build-parcel-field.mjs` writes `art/parcel-field.svg`). Only the landing page shows the parcel field today. The text pages (`render-md.mjs`), the capture journey page (`capture-journey-page.mjs`), and the moved pages (`build-moved.mjs`) still show the former look (`BASE_STYLE`). Later work moves them, and a later pass brings this file up to date. `BASE_STYLE` is not a rule source.",
+    "overview": "The site reads as a land-cover classification map of the code estate. Each area of repos is a land-cover class. Each class has one flat, muted area color. The snapshot commit is the scene date. The reader sees the whole estate in one estate strip, learns the area key, follows the numbered Start here path, and then finds a repo entry with its proof links.\n\nThe site look is calm and dense. The page is a mineral ground with evergreen-black ink. Hairline rules divide the content. The parcel field, the faint ink boundaries of made-up field parcels, lies behind the legend rail. It is decoration, not data. Apart from the link blue, the area colors are the only saturated colors on the page, and they fill shapes only. The pages follow the color scheme of the reader, so each color is a pair: one value for light, one value for dark (the `-dark` tokens). The site look refuses the GitHub-clone docs look (the former look) and the stock eco template: no leaf art, no gradients, no drop shadows, no Greenstand logo.\n\nScope of this record: the landing page, the text pages, and the shared base are in the site look. The shared base is the colors in `.github/scripts/site-colors.mjs`, `siteStyle`, `siteHead`, and the estate mark (`estateMark`, `areaGroup`, `areaStyle`) in `.github/scripts/site-html.mjs`, and the parcel field (`.github/scripts/build-parcel-field.mjs` writes `art/parcel-field.svg`). `build-landing.mjs` writes the landing page. `render-md.mjs` writes the text pages: the ecosystem maps, the shared-resource page, the estate glossary, the volunteer guide, and the onboarding guide, the README, and the glossary of each repo. The landing page and the text pages show the parcel field. The capture journey page (`capture-journey-page.mjs`) and the moved pages (`build-moved.mjs`) still show the former look (`BASE_STYLE`). Later work moves them, and a later pass brings this file up to date. `BASE_STYLE` is not a rule source.",
     "keyCharacteristics": [
       "A mineral ground, an ink text color, and water blue for links only, from one data module of [light, dark] pairs.",
       "Eight area colors (seven land-cover classes and ink for Organization) that fill cells, chips, and rules, never text.",
@@ -721,7 +767,8 @@
       "Archivo (a variable face with a width axis) for headings, labels, and numerals; the system sans for body text.",
       "Square corners, hairline rules, and no elevation.",
       "The parcel field: the faint, still ink boundaries of made-up field parcels under the legend rail on a wide screen and under the masthead on a phone. The content column stays plain.",
-      "The estate strip as the signature: a picture on a phone, a row of links on a wider page, an upright legend in the legend rail on a wide screen."
+      "The estate strip as the signature: a picture on a phone, a row of links on a wider page, an upright legend in the legend rail on a wide screen. A text page shows it small, as the estate mark over the back links.",
+      "Diagrams on a plate in the surface color, with each repo node in a tint of its area color."
     ],
     "rules": [
       {
@@ -755,6 +802,11 @@
         "section": "colors"
       },
       {
+        "name": "The Node Tint Rule",
+        "body": "The node of a repo in a diagram has a fill of its area color at `DIAGRAM_NODE_TINT` (30%) mixed with the ground. The ink labels have a contrast of 4.5:1 or more on the node tint of each area color, in light and in dark mode. The tint is a percent above 0 and at most 100. `check-site-colors.mjs` enforces these rules in CI. Today the weakest label is ink on the ink tint (Organization): 7.76:1 in light mode and 5.93:1 in dark mode. Change the tint only in `DIAGRAM_NODE_TINT`.",
+        "section": "colors"
+      },
+      {
         "name": "The Two Voices Rule",
         "body": "Archivo sets headings, labels, and numerals. The system sans sets the body text. Monospace sets code and commit ids only.",
         "section": "typography"
@@ -765,19 +817,27 @@
         "section": "typography"
       },
       {
+        "name": "The No Lone Word Rule",
+        "body": "`siteStyle` sets `text-wrap: pretty` on paragraphs, list items, `dd`, and quotes, on every page in the site look. Thus the browser avoids one word alone on the last line of a paragraph.",
+        "section": "typography"
+      },
+      {
         "name": "The 24 px Target Rule",
         "body": "A strip cell is a link only where it can be 24px wide. Below that width, the strip is the estate mark: a picture with no links and no words, hidden from screen readers. Do not hard-code the width; compute it from the repo counts and test it on the masthead container, not on the page. In the legend rail each row is at least `max(1.5rem, 24px)` high, so the rail always has links.",
         "section": "layout"
       },
       {
         "name": "The Flat Map Rule",
-        "body": "Surfaces are flat at all times. Use tone (the surface) and hairlines for structure. Use no drop shadow and no gradient. The parcel field is a flat ink layer behind the page, not a surface above it.",
+        "body": "Surfaces are flat at all times. Use tone (the surface) and hairlines for structure. Use no drop shadow and no gradient. The one exception is the scroll shadows of a wide diagram: they are the cue that a diagram scrolls, and they show nowhere else. The parcel field is a flat ink layer behind the page, not a surface above it.",
         "section": "elevation"
       }
     ],
     "dos": [
       "Do take every color from `BACKGROUNDS`, `TEXTS`, `STATES`, `LINES`, and `AREA_COLORS` in `site-colors.mjs`, as a [light, dark] pair, through the CSS custom properties of `siteStyle`.",
-      "Do define every custom property that a page uses. `build-landing.mjs` fails when the page uses a custom property that nothing defines.",
+      "Do define every custom property that a page uses. `build-landing.mjs` and `render-md.mjs` fail when a page uses a custom property that nothing defines (`undefinedProperties` in `site-html.mjs`; the check skips scripts).",
+      "Do let a page build fail when a file that the page loads is missing. `render-md.mjs` shows every missing file at once: the font, the parcel field, and (for a page with a diagram) Mermaid.",
+      "Do write the estate mark with `estateMark`, `areaGroup`, and `areaStyle` from `site-html.mjs`, and give it its size in the page style.",
+      "Do take the diagram colors from `site-colors.mjs` through the Mermaid `themeVariables`, and change the tint of a repo node only in `DIAGRAM_NODE_TINT`.",
       "Do give an element its area color with `--area: var(--c-<color>)`, from the `\"color\"` of its area in `estate.json`.",
       "Do put the ink edge (1px inset, 25% ink) on every area fill.",
       "Do keep text at 4.5:1 or more on the ground, on the surface, and on the parcel field in both schemes, and let `check-site-colors.mjs` prove it. Text may sit on the parcel field.",
@@ -791,7 +851,8 @@
       "Don't color text with an area color.",
       "Don't show a state by its state color alone.",
       "Don't use water blue for anything but links and the focus ring.",
-      "Don't use a drop shadow, a gradient, a rounded corner, or leaf art.",
+      "Don't use a drop shadow, a gradient, a rounded corner, or leaf art. The one exception is the scroll shadows of a wide diagram (see the Flat Map Rule).",
+      "Don't use the default look of Mermaid; it draws node shadows. Use the \"classic\" look.",
       "Don't add a Greenstand logo or Greenstand brand colors. The site has no binding Greenstand brand, and it shows no Greenstand logo until Greenstand approves one (PRODUCT.md).",
       "Don't load a font or another asset from a third-party host; vendor it and pin its hash.",
       "Don't take a value from `BASE_STYLE`; it is the former look.",

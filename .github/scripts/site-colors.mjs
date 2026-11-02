@@ -50,3 +50,8 @@ export const AREA_COLORS = {
 // strip. check-site-colors.mjs keeps the field at a contrast of 1.25:1 or less with the ground, and
 // each text color at 4.5:1 or more on the field.
 export const PARCEL_FIELD_INK_SHARE = [11.5, 9.1];
+
+// The diagram node tint (DESIGN.md): the percent of the area color in the fill of a repo node of a
+// Mermaid diagram, mixed with the ground. The node labels are ink. check-site-colors.mjs keeps the
+// ink at 4.5:1 or more on the tint of each area color.
+export const DIAGRAM_NODE_TINT = 30;

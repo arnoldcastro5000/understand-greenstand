@@ -14,7 +14,7 @@
 import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { formerNamesText, loadEstate } from "./estate.mjs";
-import { ARCHIVO, PARCEL_FIELD, WIDE, esc, siteHead, siteStyle } from "./site-html.mjs";
+import { ARCHIVO, PARCEL_FIELD, WIDE, areaGroup, areaStyle, esc, estateMark, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
 import { startPath } from "./start-path.mjs";
 
 const site = process.argv[2];
@@ -41,9 +41,6 @@ const link = (href, text) => `<a href="${esc(href)}">${text}</a>`;
 const anchor = (title) => title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 // The id of the entry of a repo: the cell of the repo in the estate strip links to it.
 const repoId = (name) => `repo-${name}`;
-// The style that gives an element the color of an area (estate.mjs checks the color). The
-// featured area has no color.
-const areaStyle = (area) => `--area: var(--c-${area.color})`;
 // A chip: a small square in the color of the area, with no words.
 const CHIP = '<i class="chip" aria-hidden="true"></i>';
 
@@ -106,10 +103,9 @@ if (errors.length) {
 }
 
 // The gaps of the estate strip and the estate mark (px): between the cells of an area, and between
-// two areas. The width of a group follows its count of repos (--n).
+// two areas.
 const CELL_GAP = 2;
 const AREA_GAP = 6;
-const group = (area, cells) => `<span class="group" style="${areaStyle(area)}; --n: ${area.repos.length}">${cells}</span>`;
 
 // The featured area ("Start here") goes first, in a box, with the steps of the path. The other
 // areas have the repos: the estate strip, the estate mark, and the jump links show them.
@@ -121,7 +117,7 @@ const others = areas.filter((a) => !a.featured);
 // key) shows only in the legend rail.
 const strip = [
   '<nav class="strip" aria-label="Repos by area">',
-  ...others.map((area) => group(area, `<span class="key">${esc(area.title)}</span>` +
+  ...others.map((area) => areaGroup(area, `<span class="key">${esc(area.title)}</span>` +
     area.repos.map(({ name }) => `<a class="cell" href="#${esc(repoId(name))}"><span class="label">${esc(name)}</span></a>`).join(""))),
   "</nav>",
 ].join("\n");
@@ -137,11 +133,7 @@ const mostRepos = Math.max(...others.map((a) => a.repos.length));
 const linksFrom = Math.ceil(
   repos.length * (MIN_TARGET + (CELL_GAP * (mostRepos - 1)) / mostRepos) + AREA_GAP * (others.length - 1),
 );
-const mark = [
-  '<div class="mark" aria-hidden="true">',
-  ...others.map((area) => group(area, "<i></i>".repeat(area.repos.length))),
-  "</div>",
-].join("\n");
+const mark = estateMark(areas);
 
 // "You are here": the cell of the repo entry that the address points to (for example after a click
 // on the cell) gets an ink outline.
@@ -267,10 +259,8 @@ ${others.map((area) => section(area)).join("\n")}
 </html>
 `;
 
-// Each custom property that the page uses must have a definition in the page. Without one (for
-// example a color that site-colors.mjs lost), a part of the page would have no color.
-const defined = new Set([...html.matchAll(/--([\w-]+):/g)].map((m) => m[1]));
-const undefinedNames = [...new Set([...html.matchAll(/var\(--([\w-]+)/g)].map((m) => m[1]))].filter((n) => !defined.has(n));
+// Each custom property that the page uses must have a definition in the page.
+const undefinedNames = undefinedProperties(html);
 if (undefinedNames.length) {
   for (const n of undefinedNames) console.error(`error: the landing page uses var(--${n}), but nothing defines --${n}`);
   process.exit(1);

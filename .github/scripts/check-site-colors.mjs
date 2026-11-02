@@ -8,6 +8,8 @@
 //   1.25:1 or less with the ground, so the field stays in the background. Each text color has a
 //   contrast of 4.5:1 or more on the field, because the title and the estate strip lie on it. The
 //   ink share is more than 0, so the field shows.
+// - The ink labels of the diagram nodes have a contrast of 4.5:1 or more on the node of each area
+//   color: the area color at DIAGRAM_NODE_TINT on the ground.
 // - Each area color is 10 or more (CIE76) from each state color. Thus an area color does not
 //   look like the color of a state.
 // - Each two area colors are 10 or more apart (CIEDE2000) for normal vision, and for simulated
@@ -15,7 +17,7 @@
 //   readers with red-green color blindness can tell the areas apart too.
 // It shows every error at once.
 // Usage: node check-site-colors.mjs   exit 1 and show each error (CI)
-import { AREA_COLORS, BACKGROUNDS, LINES, PARCEL_FIELD_INK_SHARE, STATES, TEXTS } from "./site-colors.mjs";
+import { AREA_COLORS, BACKGROUNDS, DIAGRAM_NODE_TINT, LINES, PARCEL_FIELD_INK_SHARE, STATES, TEXTS } from "./site-colors.mjs";
 
 const SCHEMES = ["light", "dark"];
 const MIN_CONTRAST = 4.5;
@@ -61,6 +63,12 @@ if (!Array.isArray(PARCEL_FIELD_INK_SHARE) || PARCEL_FIELD_INK_SHARE.length !== 
     if (typeof p === "number" && p > 0 && p <= 100) inkShare[i] = p;
     else errors.push(`the ink share of the parcel field (${scheme}) must be a percent above 0 and at most 100; it is ${typeof p === "number" ? p : JSON.stringify(p)}`);
   });
+}
+
+// The diagram node tint: a percent above 0 and at most 100.
+const nodeTint = typeof DIAGRAM_NODE_TINT === "number" && DIAGRAM_NODE_TINT > 0 && DIAGRAM_NODE_TINT <= 100 ? DIAGRAM_NODE_TINT : undefined;
+if (nodeTint === undefined) {
+  errors.push(`the diagram node tint must be a percent above 0 and at most 100; it is ${typeof DIAGRAM_NODE_TINT === "number" ? DIAGRAM_NODE_TINT : JSON.stringify(DIAGRAM_NODE_TINT)}`);
 }
 
 // The red, green, and blue channels of a hex color (sRGB, 0 to 1), and their linear values.
@@ -132,8 +140,9 @@ const seen = (rgb, matrix) => {
 // minimum; 1.2501 shows as 1.26, not as 1.25, above a maximum.
 const roundDown = (value, digits) => (Math.floor(value * 10 ** digits) / 10 ** digits).toFixed(digits);
 const roundUp = (value, digits) => (Math.ceil(value * 10 ** digits) / 10 ** digits).toFixed(digits);
-// color-mix(in srgb, <color> <share>, transparent) over a background: a mix of the sRGB channels.
-// site-html.mjs paints the parcel field with this mix.
+// color-mix(in srgb, <color> <share>, transparent) over a background, or color-mix(in srgb,
+// <color> <share>, <background>): a mix of the sRGB channels. site-html.mjs paints the parcel field
+// with this mix, and render-md.mjs the diagram nodes.
 const mix = (color, background, share) => color.map((c, k) => c * share + background[k] * (1 - share));
 
 const texts = valid.get("text color");
@@ -164,6 +173,16 @@ SCHEMES.forEach((scheme, i) => {
       }
     }
   }
+  // A repo node of a diagram: the area color at the node tint on the ground, with an ink label.
+  if (nodeTint !== undefined && ink && ground) {
+    for (const [area, pair] of areas) {
+      const node = mix(channels(pair[i]), channels(ground[i]), nodeTint / 100);
+      const ratio = contrast(channels(ink[i]), node);
+      if (ratio < MIN_CONTRAST) {
+        errors.push(`the ink labels (${scheme}, ${ink[i]}) have a contrast of ${roundDown(ratio, 2)}:1 on the diagram node of the area color ${area} (${nodeTint}% ${pair[i]} on the ground ${ground[i]}); they need ${MIN_CONTRAST}:1 or more`);
+      }
+    }
+  }
   for (const [area, pair] of areas) {
     for (const state of STATES.filter((s) => texts.has(s))) {
       const d = cie76(channels(pair[i]), channels(texts.get(state)[i]));
@@ -190,4 +209,4 @@ if (errors.length) {
   process.exit(1);
 }
 const count = (colors) => Object.keys(colors).length;
-console.log(`the colors of the site look pass: ${count(TEXTS)} text colors on ${count(BACKGROUNDS)} backgrounds and on the parcel field, and ${count(AREA_COLORS)} area colors, light and dark`);
+console.log(`the colors of the site look pass: ${count(TEXTS)} text colors on ${count(BACKGROUNDS)} backgrounds and on the parcel field, the ink labels on the ${DIAGRAM_NODE_TINT}% diagram node tints, and ${count(AREA_COLORS)} area colors, light and dark`);
