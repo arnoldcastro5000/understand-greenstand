@@ -1,23 +1,10 @@
-// The shared parts of the generated HTML pages of the Pages site: the landing page
-// (build-landing.mjs), the text pages (render-md.mjs), the moved pages (build-moved.mjs), and the
-// page of the capture journey (build-capture-journey.mjs).
+// The shared parts of the generated HTML pages of the Pages site, all in the site look (DESIGN.md):
+// the landing page (build-landing.mjs), the text pages (render-md.mjs), the moved pages
+// (build-moved.mjs), and the page of the capture journey (capture-journey-page.mjs).
 import { AREA_COLORS, BACKGROUNDS, LINES, PARCEL_FIELD_INK_SHARE, TEXTS } from "./site-colors.mjs";
 
 // Escape text for HTML text and for a double-quoted attribute.
 export const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
-// The base style of the former look: the colors in light and dark mode, the body, and the links.
-// The moved pages and the page of the capture journey use it until they move to the site look.
-// Each page adds its own rules after it.
-export const BASE_STYLE = `  :root { color-scheme: light dark; --fg: #1f2328; --bg: #fff; --muted: #656d76;
-    --line: #d0d7de; --link: #0969da; }
-  @media (prefers-color-scheme: dark) { :root { --fg: #e6edf3; --bg: #0d1117;
-    --muted: #8b949e; --line: #30363d; --link: #58a6ff; } }
-  body { font: 16px/1.6 -apple-system, system-ui, "Segoe UI", sans-serif;
-    max-width: 48rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem;
-    color: var(--fg); background: var(--bg); }
-  a { color: var(--link); text-decoration: none; }
-  a:hover { text-decoration: underline; }`;
 
 // The font of the headings and the labels: Archivo (SIL Open Font License 1.1), a variable font
 // with a weight axis and a width axis, Latin letters. The text stays in the system font. The
@@ -28,6 +15,15 @@ export const ARCHIVO = "vendor/archivo/archivo-latin-wdth-normal.woff2";
 // The parcel field, the still drawing in the legend rail (DESIGN.md): an SVG mask at this path of
 // the site. The deploy workflow writes it with build-parcel-field.mjs.
 export const PARCEL_FIELD = "art/parcel-field.svg";
+
+// The files of the site that each page in the site look loads: the font and the parcel field. The
+// deploy puts them on the site before the page scripts run. A page script fails when one of them
+// is missing.
+export const SITE_LOOK_FILES = [ARCHIVO, PARCEL_FIELD];
+
+// The width of the reading column (DESIGN.md): the column of running text on a text page, on a
+// moved page, and on the capture journey page.
+export const READING_COLUMN = "44rem";
 
 // The media queries of the legend rail: a wide screen (64rem and more) shows the legend rail; a
 // narrow screen shows the masthead as a band at the top. "not all and" makes the narrow
@@ -54,10 +50,14 @@ const colorLines = (i) =>
   ].map((kind) => `    ${kind.map(([name, pair]) => `--${name}: ${pair[i]};`).join(" ")}`).join("\n");
 
 // The head lines of a page in the site look: the color of the browser bar, and an early request
-// for the font. toRoot is the path from the page to the root of the site ("." or "..").
-export const siteHead = (toRoot) => `<meta name="theme-color" content="${BACKGROUNDS.ground[0]}" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="${BACKGROUNDS.ground[1]}" media="(prefers-color-scheme: dark)">
-<link rel="preload" href="${toRoot}/${ARCHIVO}" as="font" type="font/woff2" crossorigin>`;
+// for the font. toRoot is the path from the page to the root of the site ("." or ".."). A page that
+// shows no text in the font (a moved page) sets preloadFont to false: the browser warns about a
+// preload that the page does not use.
+export const siteHead = (toRoot, { preloadFont = true } = {}) => [
+  `<meta name="theme-color" content="${BACKGROUNDS.ground[0]}" media="(prefers-color-scheme: light)">`,
+  `<meta name="theme-color" content="${BACKGROUNDS.ground[1]}" media="(prefers-color-scheme: dark)">`,
+  ...(preloadFont ? [`<link rel="preload" href="${toRoot}/${ARCHIVO}" as="font" type="font/woff2" crossorigin>`] : []),
+].join("\n");
 
 // The style of the site look: the font, the colors in light and dark mode, the page, the
 // selection, the links, the headings, code, and the parcel field. --edge is the ink outline of an
@@ -88,7 +88,7 @@ ${colorLines(0)}
 ${colorLines(1)}
     --parcel-ink-share: ${PARCEL_FIELD_INK_SHARE[1]}%; } }
   html { background: var(--ground); scrollbar-color: var(--line) var(--ground); }
-  body { margin: 0; color: var(--ink); background: transparent; font: 16.5px/1.62 ${SANS};
+  body { margin: 0; color: var(--ink); background: transparent; font: 1.03125rem/1.62 ${SANS};
     overflow-wrap: break-word; }
   @media ${WIDE} {
     body::before { content: ""; position: fixed; top: 0; left: 0; width: var(--rail); height: 100vh; height: 100lvh;
@@ -127,6 +127,39 @@ export const estateMark = (areas) => [
   ...areas.filter((a) => !a.featured).map((area) => areaGroup(area, "<i></i>".repeat(area.repos.length))),
   "</div>",
 ].join("\n");
+
+// The masthead of a page in the site look other than the landing page (the landing page has its
+// own): the estate mark over the parts of the page (for example the back links). siteStyle paints
+// the parcel field under it.
+export const masthead = (areas, parts = "") => ['<header class="masthead">', estateMark(areas), ...(parts ? [parts] : []), "</header>"].join("\n");
+
+// The style of the masthead and of the page grid. column is the width of the content column of
+// the page.
+// - A narrow screen: the masthead is the band at the top. Its content aligns with the content
+//   column, which is in the middle. The estate mark is 8.5rem x .55rem. The back links are under
+//   it, in one row that wraps.
+// - A wide screen: the body is a grid of two columns. The first column is the legend rail: the
+//   masthead, which is sticky. The second column is the content column. The estate mark is 100% of
+//   the rail wide (13.5rem at most) and .75rem high. The back links are under it, one under the
+//   other.
+// The page sets the layout of its content column. The cells of the estate mark keep their colors
+// in print.
+export const mastheadStyle = (column) => `  .masthead { padding: 1.25rem max(1.25rem, calc((100% - ${column}) / 2)); border-bottom: 1px solid var(--line); }
+  .mark { display: flex; gap: 3px; width: 8.5rem; height: .55rem; margin-bottom: .75rem; }
+  .mark .group { display: flex; flex: var(--n) 1 0; gap: 1px; min-width: 0; }
+  .mark i { flex: 1 1 0; min-width: 0; background: var(--area); box-shadow: inset 0 0 0 1px var(--edge);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .masthead nav { display: flex; flex-wrap: wrap; gap: .25rem 1.5rem; font: 500 .98rem/1.3 var(--display);
+    font-stretch: 87.5%; }
+  .masthead nav a { display: inline-block; padding-block: .15rem; color: var(--ink); text-decoration: none; }
+  .masthead nav a:hover { text-decoration: underline; text-decoration-color: var(--line); }
+  @media ${WIDE} {
+    body { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); align-items: start; }
+    .masthead { position: sticky; top: 0; padding: 2.4rem 1.5rem 2rem 2rem; border-bottom: 0; }
+    .mark { width: 100%; max-width: 13.5rem; height: .75rem; margin-bottom: 1.4rem; }
+    .masthead nav { flex-direction: column; align-items: start; }
+  }
+  .masthead > .mark:last-child { margin-bottom: 0; }`;
 
 // The custom properties that a page uses (var(--name)) and that nothing in the page defines.
 // Without a definition (for example a color that site-colors.mjs lost), a part of the page would

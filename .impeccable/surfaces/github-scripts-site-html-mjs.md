@@ -61,6 +61,18 @@ sets `text-wrap: pretty` on running text for all pages. `render-md.mjs` fails wh
 parcel field, or Mermaid is missing, or when a page uses an undefined custom property. The
 capture journey page and the moved pages still show the former look.
 
+Built 2026-11-02 (ticket 06): the capture journey page and the moved pages are in the site look,
+so every page that the site scripts make is in it, and the former look (`BASE_STYLE`) is gone.
+`site-html.mjs` shares the masthead (`masthead`, `mastheadStyle`), the reading column
+(`READING_COLUMN`), and the list of the files that each page loads (`SITE_LOOK_FILES`). The
+capture journey page: the chapter line moved into the masthead (it was an eyebrow above the
+title); an ink track with square stations; the state marks (a hatch for a best guess, a cross for
+not working) in the state colors, also in forced colors and in print; the images on the surface
+plate; the stage layout follows the width of `main` (container queries). The moved pages: the
+estate mark in the masthead, the text in the reading column, no font preload. The body text is
+1.03125rem, so it follows the default font size of the reader. The four drawings of the capture
+journey keep their own former colors (the images did not change).
+
 ## Direction contract
 
 THESIS: The site reads as a land-cover classification map of the code estate: areas are classes,
