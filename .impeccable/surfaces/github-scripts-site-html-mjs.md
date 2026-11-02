@@ -49,6 +49,18 @@ it with the ink color at `--parcel-ink-share` (`PARCEL_FIELD_INK_SHARE` in `site
 `WIDE` and `NARROW`. In CI, `check-site-colors.mjs` keeps the field at 1.25:1 or less with the
 ground and each text color at 4.5:1 or more on the field.
 
+Built 2026-11-02 (ticket 05): `render-md.mjs` writes the text pages in the site look, with
+`siteHead`, `siteStyle`, and the parcel field. The masthead holds the estate mark (now shared:
+`estateMark`, `areaGroup`, and `areaStyle` in `site-html.mjs`) over the back links. On a narrow
+screen it is a band at the top; on a wide screen it is the sticky legend rail. Each child of
+`main` is at most 44rem wide. A diagram lies on a surface plate. A repo node has a fill of its
+area color at `DIAGRAM_NODE_TINT` (30%) on the ground and a 1.5px border in the area color.
+`check-site-colors.mjs` keeps the ink labels at 4.5:1 or more on each node tint, light and dark.
+The scroll shadows of a wide diagram are the one exception to the no-gradient rule. `siteStyle`
+sets `text-wrap: pretty` on running text for all pages. `render-md.mjs` fails when the font, the
+parcel field, or Mermaid is missing, or when a page uses an undefined custom property. The
+capture journey page and the moved pages still show the former look.
+
 ## Direction contract
 
 THESIS: The site reads as a land-cover classification map of the code estate: areas are classes,

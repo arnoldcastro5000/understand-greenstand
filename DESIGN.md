@@ -66,6 +66,27 @@ typography:
     fontSize: "1.12rem"
     fontWeight: 640
     lineHeight: 1.3
+  display-text:
+    fontFamily: "Archivo, system-ui, sans-serif"
+    fontSize: "clamp(1.9rem, 1.5rem + 1.8vw, 2.6rem)"
+    fontWeight: 720
+    lineHeight: 1.15
+    letterSpacing: "-0.02em"
+  headline-text:
+    fontFamily: "Archivo, system-ui, sans-serif"
+    fontSize: "1.5rem"
+    fontWeight: 660
+    lineHeight: 1.15
+  title-text:
+    fontFamily: "Archivo, system-ui, sans-serif"
+    fontSize: "1.16rem"
+    fontWeight: 640
+    lineHeight: 1.15
+  title-small:
+    fontFamily: "Archivo, system-ui, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 640
+    lineHeight: 1.3
   numeral:
     fontFamily: "Archivo, system-ui, sans-serif"
     fontSize: "1.7rem"
@@ -101,6 +122,12 @@ typography:
     fontWeight: 500
     lineHeight: 1.3
     fontVariation: "\"wdth\" 87.5"
+  label-table:
+    fontFamily: "Archivo, system-ui, sans-serif"
+    fontSize: "0.92rem"
+    fontWeight: 600
+    lineHeight: 1.3
+    fontVariation: "\"wdth\" 87.5"
   mono:
     fontFamily: "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace"
     fontSize: "0.86em"
@@ -114,6 +141,9 @@ spacing:
   number-column: "2.75rem"
   section: "3rem"
   rail: "17.5rem"
+  reading-column: "44rem"
+  text-content: "64rem"
+  diagram-plate: "62rem"
 components:
   estate-cell:
     backgroundColor: "{colors.evergreen}"
@@ -146,6 +176,47 @@ components:
   parcel-field:
     backgroundColor: "{colors.parcel-field}"
     width: "{spacing.rail}"
+  estate-mark-small:
+    backgroundColor: "{colors.evergreen}"
+    rounded: "{rounded.none}"
+    width: "8.5rem"
+    height: "0.55rem"
+  estate-mark-rail:
+    backgroundColor: "{colors.evergreen}"
+    rounded: "{rounded.none}"
+    width: "min(100%, 13.5rem)"
+    height: "0.75rem"
+  back-link:
+    textColor: "{colors.ink}"
+    typography: "{typography.label-nav}"
+    padding: "0.15rem 0"
+  code-inline:
+    backgroundColor: "{colors.surface}"
+    typography: "{typography.mono}"
+    rounded: "{rounded.none}"
+    padding: "0.1em 0.35em"
+  code-block:
+    backgroundColor: "{colors.surface}"
+    typography: "{typography.mono}"
+    rounded: "{rounded.none}"
+    padding: "1rem"
+  table-head:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    typography: "{typography.label-table}"
+    padding: "0.55rem 0.8rem"
+  quote:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.muted}"
+    rounded: "{rounded.none}"
+    padding: "0.75rem 1rem"
+  diagram-plate:
+    backgroundColor: "{colors.surface}"
+    rounded: "{rounded.none}"
+    padding: "1.5rem 1rem"
+  diagram-node:
+    backgroundColor: "{colors.ground}"
+    textColor: "{colors.ink}"
 ---
 
 # Design System: understand-greenstand site look
@@ -158,7 +229,7 @@ The site reads as a land-cover classification map of the code estate. Each area 
 
 The site look is calm and dense. The page is a mineral ground with evergreen-black ink. Hairline rules divide the content. The parcel field, the faint ink boundaries of made-up field parcels, lies behind the legend rail. It is decoration, not data. Apart from the link blue, the area colors are the only saturated colors on the page, and they fill shapes only. The pages follow the color scheme of the reader, so each color is a pair: one value for light, one value for dark (the `-dark` tokens). The site look refuses the GitHub-clone docs look (the former look) and the stock eco template: no leaf art, no gradients, no drop shadows, no Greenstand logo.
 
-Scope of this record: the build moves only the landing page and the shared base to the site look. The shared base is the colors in `.github/scripts/site-colors.mjs`, `siteStyle` and `siteHead` in `.github/scripts/site-html.mjs`, and the parcel field (`.github/scripts/build-parcel-field.mjs` writes `art/parcel-field.svg`). Only the landing page shows the parcel field today. The text pages (`render-md.mjs`), the capture journey page (`capture-journey-page.mjs`), and the moved pages (`build-moved.mjs`) still show the former look (`BASE_STYLE`). Later work moves them, and a later pass brings this file up to date. `BASE_STYLE` is not a rule source.
+Scope of this record: the landing page, the text pages, and the shared base are in the site look. The shared base is the colors in `.github/scripts/site-colors.mjs`, `siteStyle`, `siteHead`, and the estate mark (`estateMark`, `areaGroup`, `areaStyle`) in `.github/scripts/site-html.mjs`, and the parcel field (`.github/scripts/build-parcel-field.mjs` writes `art/parcel-field.svg`). `build-landing.mjs` writes the landing page. `render-md.mjs` writes the text pages: the ecosystem maps, the shared-resource page, the estate glossary, the volunteer guide, and the onboarding guide, the README, and the glossary of each repo. The landing page and the text pages show the parcel field. The capture journey page (`capture-journey-page.mjs`) and the moved pages (`build-moved.mjs`) still show the former look (`BASE_STYLE`). Later work moves them, and a later pass brings this file up to date. `BASE_STYLE` is not a rule source.
 
 **Key Characteristics:**
 - A mineral ground, an ink text color, and water blue for links only, from one data module of [light, dark] pairs.
@@ -167,7 +238,8 @@ Scope of this record: the build moves only the landing page and the shared base 
 - Archivo (a variable face with a width axis) for headings, labels, and numerals; the system sans for body text.
 - Square corners, hairline rules, and no elevation.
 - The parcel field: the faint, still ink boundaries of made-up field parcels under the legend rail on a wide screen and under the masthead on a phone. The content column stays plain.
-- The estate strip as the signature: a picture on a phone, a row of links on a wider page, an upright legend in the legend rail on a wide screen.
+- The estate strip as the signature: a picture on a phone, a row of links on a wider page, an upright legend in the legend rail on a wide screen. A text page shows it small, as the estate mark over the back links.
+- Diagrams on a plate in the surface color, with each repo node in a tint of its area color.
 
 ## Colors
 
@@ -187,21 +259,21 @@ The area colors. `estate.json` gives each area a `"color"` (the area color name)
 - **Bare Ground Taupe** (`bare-ground`): Infrastructure.
 - **Ink** (the `ink` text color, `--c-ink`): Organization, the area of Greenstand's own documents, not code. It is the same value as the text ink. Start here has no repos, so it has no area color.
 
-Area colors fill the estate strip cells, the estate mark cells, the area chips, the 3px top rule of each area section, and the 14% tint of a target repo entry. Readers with red-green color blindness can tell the area colors apart (see the Color-Blind Key Rule).
+Area colors fill the estate strip cells, the estate mark cells, the area chips, the 3px top rule of each area section, and the 14% tint of a target repo entry. In a diagram, the node of a repo has a fill of its area color at the node tint (`DIAGRAM_NODE_TINT`, 30%) mixed with the ground, and a 1.5px border in its area color. Readers with red-green color blindness can tell the area colors apart (see the Color-Blind Key Rule).
 
 ### Tertiary
 The state colors (`STATES`). A state color is the color of a state. The state colors are text colors, and each one is for its state only.
 - **Best-Guess Ochre** (`best-guess`): the state color of a best guess.
 - **Not-Working Rose** (`not-working`): the state color of a part that does not work or is gone.
 
-A state never shows by its state color alone: a best guess also has a hatch, and a part that does not work also has a cross. These tokens exist in the build, and CI checks them. No built page in the site look shows a state yet.
+A state never shows by its state color alone: a best guess also has a hatch, and a part that does not work also has a cross. These tokens exist in the build, and CI checks them. No built page in the site look shows a best guess or a part of the estate that does not work yet. The one use of a state color today is the error image of a broken diagram: Mermaid draws it in the not-working color (`errorBkgColor` and `errorTextColor`), with its own error text.
 
 ### Neutral
-- **Mineral Ground** (`ground`): the page background, the `html` background, the browser bar color (`theme-color`), and the scrollbar track.
-- **Field Surface** (`surface`): a field on the page. The Start here field uses it.
-- **Evergreen-Black Ink** (`ink`): body text, headings, the jump links, the rail names, and the "you are here" outline.
-- **Lichen Muted** (`muted`): secondary text: the Start here intro, the snapshot line, the "Go deeper" line, the path numerals, and the area keys in the legend rail.
-- **Hairline** (`line`): 1px rules between entries, the masthead rule on narrow pages, the jump-link border, the rail-edge hairline (a fixed 1px rule at the edge of the legend rail on a wide screen), and the scrollbar thumb.
+- **Mineral Ground** (`ground`): the page background, the `html` background, the browser bar color (`theme-color`), the scrollbar track, and the fill of the diagram nodes and clusters.
+- **Field Surface** (`surface`): a field on the page. The Start here field uses it. On a text page, the inline code, the code blocks, the table heads, the quotes, and the diagram plates use it. It is also the background of the edge labels in a diagram.
+- **Evergreen-Black Ink** (`ink`): body text, headings, the jump links, the back links, the rail names, the "you are here" outline, the 2px rule above a text-page h2, and the labels of the diagram nodes.
+- **Lichen Muted** (`muted`): secondary text: the Start here intro, the snapshot line, the "Go deeper" line, the path numerals, the area keys in the legend rail, the list markers, and the quote text. In a diagram, it is the color of the lines and of the node borders.
+- **Hairline** (`line`): 1px rules between entries, the masthead rule on narrow pages, the jump-link border, the rail-edge hairline (a fixed 1px rule at the edge of the legend rail on a wide screen), the table row rules, the `hr` rule, the hover underline of a back link, the cluster borders of a diagram, and the scrollbar thumb.
 - **Ink Edge** (`edge`): a 1px inset outline in 25% ink on each area fill.
 - **Ink Selection** (`selection`): the background of selected text, an 18% ink tint. Selected text stays ink.
 - **Parcel Ink** (`parcel-field`): the color of the parcel field and of nothing else. It is the ink at an ink share of 11.5% in light mode and 9.1% in dark mode (`PARCEL_FIELD_INK_SHARE`), mixed with transparent in sRGB. The mask of the field takes this color, so one file serves light and dark.
@@ -218,6 +290,8 @@ A state never shows by its state color alone: a best guess also has a hatch, and
 **The Ink Edge Rule.** Every area fill carries the ink edge (a 1px inset outline in 25% ink). Pale fills, for example Mixed Forest Sage, stay visible on the ground.
 
 **The Faint Field Rule.** The parcel field at full mask has a contrast of 1.25:1 or less with the ground, so it stays in the background. Each text color has a contrast of 4.5:1 or more on the field, because the title and the estate strip lie on it. The ink share is above 0 and at most 100. `check-site-colors.mjs` enforces these rules in CI, in light and in dark mode. Today the field is 1.2489:1 (light) and 1.2480:1 (dark) to the ground. The weakest text on the field is best-guess at 4.64:1 and muted at 4.66:1, both in light mode. Change the strength of the field only in `PARCEL_FIELD_INK_SHARE`.
+
+**The Node Tint Rule.** The node of a repo in a diagram has a fill of its area color at `DIAGRAM_NODE_TINT` (30%) mixed with the ground. The ink labels have a contrast of 4.5:1 or more on the node tint of each area color, in light and in dark mode. The tint is a percent above 0 and at most 100. `check-site-colors.mjs` enforces these rules in CI. Today the weakest label is ink on the ink tint (Organization): 7.76:1 in light mode and 5.93:1 in dark mode. Change the tint only in `DIAGRAM_NODE_TINT`.
 
 ## Typography
 
@@ -236,14 +310,28 @@ Archivo comes from the npm package `@fontsource-variable/archivo` 5.3.0, file `a
 - **Numeral** (600, 1.7rem, 1, width 75%, tabular figures, muted): the step number of the Start here path.
 - **Body** (400, 16.5px, 1.62): all running text. The lede and the volunteer line are 1.06rem in a 42rem column. Entry descriptions stop at 40rem. Small text (0.92rem) carries the entry links, the snapshot line, and the "Go deeper" line.
 - **Label** (600, 0.82rem, 1.2, width 87.5%): the area keys in the legend rail (muted) and the repo name that shows on hover or focus over a strip cell (ink). The rail names are 500 at 0.9rem; the jump links are 500 at 0.98rem; both have a width of 87.5%.
-- **Mono** (0.86em): commit ids and former repo names.
+- **Mono** (0.86em): commit ids and former repo names. On a text page, also inline code and code blocks.
+
+On a text page:
+- **Display (text page)** (720, `clamp(1.9rem, 1.5rem + 1.8vw, 2.6rem)`, 1.15, -0.02em): the h1 of the page.
+- **Headline (text page)** (660, 1.5rem, 1.15): the h2. A 2px ink rule is above it, with a padding of .75rem.
+- **Title (text page)** (640, 1.16rem, 1.15): the h3.
+- **Title small** (640, 1rem, 1.3): the h4, with `text-wrap: balance`.
+- **Label (table)** (600, .92rem, 1.3, width 87.5%): the table heads (`th`). Tables use tabular numbers.
+- **Label (back links)**: the back links use the jump-link style (500, .98rem, 1.3, width 87.5%).
+- A repo name in a heading moves to the next line as one piece (an inline-block span).
+- Diagram labels are in Archivo. Mermaid measures the labels, so the font loads before Mermaid draws.
 
 ### Named Rules
 **The Two Voices Rule.** Archivo sets headings, labels, and numerals. The system sans sets the body text. Monospace sets code and commit ids only.
 
 **The Narrow Label Rule.** Archivo labels use a width of 87.5%. Numerals use a width of 75%. The full width is for headings. Headings use `text-wrap: balance`.
 
+**The No Lone Word Rule.** `siteStyle` sets `text-wrap: pretty` on paragraphs, list items, `dd`, and quotes, on every page in the site look. Thus the browser avoids one word alone on the last line of a paragraph.
+
 ## Layout
+
+### Landing page
 
 The landing page has three layouts.
 
@@ -257,23 +345,34 @@ The content column holds, in order: the lede, the volunteer line, the Start here
 
 Difference from the direction contract: the contract FORM names a dense two-column repo register on wide screens; the build has one column of repos, because the legend rail layout keeps the register to one column (FIRST VIEWPORT and the surface brief). The build wins.
 
+### Text pages
+
+A text page has two layouts. Each child of `main` is border-box and at most 44rem wide (the reading column).
+
+- **Narrow screen (`NARROW`):** the masthead is a band at the top, over a 1px hairline. It holds the estate mark (8.5rem x .55rem) over the back links, in one row that wraps. Its padding is 1.25rem, and its side padding grows (`max(1.25rem, calc((100% - 44rem) / 2))`), so the estate mark and the back links align with the reading column. The parcel field lies under the masthead only. `main` has a padding of 1.5rem 1.25rem 5rem, and the reading column is in the center.
+- **Wide screen (`WIDE`):** the body is a grid of the legend rail (`var(--rail)`) and the content column. The legend rail is sticky at the top, with a padding of 2.4rem 1.5rem 2rem 2rem and no hairline below it. It holds the estate mark (100% of the rail up to 13.5rem, x .75rem) over the back links, one under the other. The parcel field lies under the legend rail. `main` is at most 64rem, with a padding of 1.25rem `clamp(1.5rem, 4vw, 4.5rem)` 5rem. The children of `main` start at the left.
+
+A diagram can be wider than the reading column. On a narrow screen its plate is up to 62rem wide, in the center. On a wide screen the plate takes the full width of `main`. Each diagram keeps at least 70% of its own width, so its labels stay readable on a phone. A wider diagram scrolls in its own box. A table also scrolls in its own box. The block rhythm: paragraphs, lists, tables, code blocks, and quotes have 1rem below them; list items are .3rem apart; headings have a scroll margin of 1.5rem.
+
 ### Named Rules
 **The 24 px Target Rule.** A strip cell is a link only where it can be 24px wide. Below that width, the strip is the estate mark: a picture with no links and no words, hidden from screen readers. Do not hard-code the width; compute it from the repo counts and test it on the masthead container, not on the page. In the legend rail each row is at least `max(1.5rem, 24px)` high, so the rail always has links.
 
 ## Elevation & Depth
 
-The site look is flat. It has no drop shadows, no gradients, and no layered cards. Depth comes from tone only: the surface field is one step darker than the ground in light mode (one step lighter in dark mode). The only `box-shadow` in the system is the 1px inset ink edge on area fills; it is an outline, not an elevation.
+The site look is flat. It has no drop shadows, no gradients, and no layered cards. Depth comes from tone only: the surface field is one step darker than the ground in light mode (one step lighter in dark mode). The only `box-shadow` in the system is the 1px inset ink edge on area fills; it is an outline, not an elevation. Diagrams use the "classic" look of Mermaid, because its default look draws node shadows.
+
+The one exception is the scroll shadows of a wide diagram. They show that the diagram scrolls. At each side of the plate, a 2rem gradient in the surface color moves with the diagram (`local`) and covers a .75rem radial shade of 25% ink that stays at the edge (`scroll`). Thus a shade shows only on a side with more of the diagram. The plate takes both values from `site-colors.mjs`, light and dark.
 
 The parcel field is not an elevation either. It is a still ink layer behind the page: it lies under the content (z-index -1), it takes no pointer events, and it has no shadow and no gradient. The ground is on `html`, and `body` has no background, so the field lies between the ground and the page.
 
 Motion is small and has one job: it shows which cell is under the pointer or the keyboard focus. The color block of a strip cell moves 4px up (3px right in the legend rail) in 0.25s with `cubic-bezier(.16, 1, .3, 1)`. The hover label fades in 0.15s. `prefers-reduced-motion: reduce` turns off both transitions. The parcel field has no motion. Its layer on a wide screen is 100lvh high (100vh where the browser does not know `lvh`), so the layer does not change its size when a browser shows or hides its toolbar.
 
 ### Named Rules
-**The Flat Map Rule.** Surfaces are flat at all times. Use tone (the surface) and hairlines for structure. Use no drop shadow and no gradient. The parcel field is a flat ink layer behind the page, not a surface above it.
+**The Flat Map Rule.** Surfaces are flat at all times. Use tone (the surface) and hairlines for structure. Use no drop shadow and no gradient. The one exception is the scroll shadows of a wide diagram: they are the cue that a diagram scrolls, and they show nowhere else. The parcel field is a flat ink layer behind the page, not a surface above it.
 
 ## Shapes
 
-All corners are square (radius 0). Area fills are plain rectangles: strip cells, mark cells, and chips (0.8em squares). Rules are straight: 1px hairlines between entries, around the jump links, and at the edge of the legend rail, and a 3px rule in the area color above each area section. The parcel field has two marks only: straight boundaries with round joins, and round points in rows. The Start here field has no border; its surface tone sets it apart.
+All corners are square (radius 0). Area fills are plain rectangles: strip cells, mark cells, and chips (0.8em squares). Rules are straight: 1px hairlines between entries, around the jump links, and at the edge of the legend rail, and a 3px rule in the area color above each area section. The parcel field has two marks only: straight boundaries with round joins, and round points in rows. The Start here field has no border; its surface tone sets it apart. On a text page, the code, the table heads, the quotes, and the diagram plates are square surface fields with no border. A quote has no rule at its side. The h2 has a 2px ink rule above it. Table rows and `hr` are 1px hairlines. A repo node of a diagram has a 1.5px border in its area color.
 
 ## Components
 
@@ -285,7 +384,30 @@ One cell per repo, grouped by area, in the area colors. Each group takes a width
 - **You are here:** the row or cell of the repo entry that the address points to gets a 2px ink outline with a 2px offset.
 
 ### Estate mark
-The estate strip as a picture: the same groups and cells, with no links and no words, and `aria-hidden`. Where the masthead is narrower than the links width, it replaces the estate strip. It never shows in the legend rail.
+The estate strip as a picture: the same groups and cells, with no links and no words, and `aria-hidden`. `estateMark(areas)` in `site-html.mjs` writes it, with `areaGroup` and `areaStyle`; the landing page and the text pages use the same markup, and each page gives it its own size.
+- **Landing page:** where the masthead is narrower than the links width, it replaces the estate strip. It never shows in the legend rail of the landing page.
+- **Text page:** it is small and always shows. The gap is 3px between areas and 1px between cells, and each cell has the ink edge. It is 8.5rem x .55rem on a narrow screen. On a wide screen it is 100% of the rail up to 13.5rem, x .75rem.
+
+### Text-page masthead
+The estate mark over the back links. On a narrow screen it is the band at the top; on a wide screen it is the legend rail (see Layout).
+- **Back links:** "← " and the back label (the viewer of the repo, or another page), and "All viewers" on a page in a repo folder. Archivo 500 .98rem/1.3, width 87.5%, in ink, with no underline. On hover a hairline underline in the line color shows. Each link has a padding of .15rem above and below, so it is 24px high or more.
+- **Gaps:** .25rem between rows and 1.5rem between links in the narrow band. In the legend rail the links are one under the other.
+
+### Text-page content
+- **Headings:** see Typography. The h2 has the 2px ink rule above it.
+- **Lists:** muted markers.
+- **Code:** inline code on the surface (padding .1em .35em); a code block on the surface (padding 1rem) that scrolls in its own box. Square corners.
+- **Tables:** the table scrolls in its own box. The heads are on the surface in the table label style. Cells have a padding of .55rem .8rem and a hairline below. Numbers are tabular.
+- **Quotes:** the surface, muted text, a padding of .75rem 1rem, and no rule at the side.
+- **Rules:** `hr` is a hairline, with 2rem above and below.
+
+### Diagrams
+Only a page with a Mermaid block loads Mermaid and gets the diagram style.
+- **Plate:** a surface plate with a padding of 1.5rem 1rem, square, with the diagram in the center (see Layout for its width). A wide diagram scrolls in the plate and shows the scroll shadows (see Elevation & Depth).
+- **Theme:** Mermaid theme "base" with `themeVariables` from `site-colors.mjs`, light and dark: nodes in the ground color with a muted border, ink labels, muted lines, the edge label background in the surface color, and clusters in the ground color with a line border. Look "classic". The labels are in Archivo. When the color scheme changes, Mermaid draws the diagrams again.
+- **Repo nodes:** a node whose label is exactly the name of a repo in `estate.json` gets the class `area-node` and `--area` (its area color). Its fill is the node tint (30%) of the area color on the ground, and its border is 1.5px in the area color. The ink labels stay (see the Node Tint Rule).
+- **Broken diagram:** the error image is in the not-working color. A broken diagram does not stop the area colors and the sizes of the other diagrams: the script sets them in a `finally`.
+- **Loading:** until Mermaid draws, the page hides the source text of the diagrams. A browser without modules shows the source text.
 
 ### Parcel field
 The background of the site look: the boundaries of made-up field parcels, seen from above, in parcel ink. About one parcel in five has rows of points (planting rows). The field is decoration, not data: no parcel is a real place or a capture.
@@ -316,19 +438,21 @@ The background of the site look: the boundaries of made-up field parcels, seen f
 
 ### Navigation
 - **Jump links:** one row between two hairlines, after the Start here field. A muted "Areas:" label, then one link per area: a chip and the area name in ink, Archivo 500 at width 87.5%, no underline. On hover a hairline underline shows.
+- **Back links (text pages):** in the masthead; see Text-page masthead.
 - **Text links:** water blue with a soft underline (see Colors). Focus: a 2px water-blue outline with a 2px offset on every focusable element.
 
 ### Decided, not built yet
-These parts are decided in the direction contract but are not in the build. They are not part of the system until a build ships them:
-- Diagram nodes of a repo in a 30% tint of its area color, with a full-strength border, on a surface plate.
-- The legend rail of the text pages, with the back link and a small estate mark.
+This part is decided in the direction contract but is not in the build. It is not part of the system until a build ships it:
 - The capture journey page in the land-cover palette: an ink track, ochre with a hatch for a best guess, rose with a cross for a part that does not work. The state colors already exist as tokens.
 
 ## Do's and Don'ts
 
 ### Do:
 - **Do** take every color from `BACKGROUNDS`, `TEXTS`, `STATES`, `LINES`, and `AREA_COLORS` in `site-colors.mjs`, as a [light, dark] pair, through the CSS custom properties of `siteStyle`.
-- **Do** define every custom property that a page uses. `build-landing.mjs` fails when the page uses a custom property that nothing defines.
+- **Do** define every custom property that a page uses. `build-landing.mjs` and `render-md.mjs` fail when a page uses a custom property that nothing defines (`undefinedProperties` in `site-html.mjs`; the check skips scripts).
+- **Do** let a page build fail when a file that the page loads is missing. `render-md.mjs` shows every missing file at once: the font, the parcel field, and (for a page with a diagram) Mermaid.
+- **Do** write the estate mark with `estateMark`, `areaGroup`, and `areaStyle` from `site-html.mjs`, and give it its size in the page style.
+- **Do** take the diagram colors from `site-colors.mjs` through the Mermaid `themeVariables`, and change the tint of a repo node only in `DIAGRAM_NODE_TINT`.
 - **Do** give an element its area color with `--area: var(--c-<color>)`, from the `"color"` of its area in `estate.json`.
 - **Do** put the ink edge (1px inset, 25% ink) on every area fill.
 - **Do** keep text at 4.5:1 or more on the ground, on the surface, and on the parcel field in both schemes, and let `check-site-colors.mjs` prove it. Text may sit on the parcel field.
@@ -342,7 +466,8 @@ These parts are decided in the direction contract but are not in the build. They
 - **Don't** color text with an area color.
 - **Don't** show a state by its state color alone.
 - **Don't** use water blue for anything but links and the focus ring.
-- **Don't** use a drop shadow, a gradient, a rounded corner, or leaf art.
+- **Don't** use a drop shadow, a gradient, a rounded corner, or leaf art. The one exception is the scroll shadows of a wide diagram (see the Flat Map Rule).
+- **Don't** use the default look of Mermaid; it draws node shadows. Use the "classic" look.
 - **Don't** add a Greenstand logo or Greenstand brand colors. The site has no binding Greenstand brand, and it shows no Greenstand logo until Greenstand approves one (PRODUCT.md).
 - **Don't** load a font or another asset from a third-party host; vendor it and pin its hash.
 - **Don't** take a value from `BASE_STYLE`; it is the former look.

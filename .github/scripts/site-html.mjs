@@ -1,6 +1,6 @@
 // The shared parts of the generated HTML pages of the Pages site: the landing page
-// (build-landing.mjs), the moved pages (build-moved.mjs), and the page of the capture journey
-// (build-capture-journey.mjs).
+// (build-landing.mjs), the text pages (render-md.mjs), the moved pages (build-moved.mjs), and the
+// page of the capture journey (build-capture-journey.mjs).
 import { AREA_COLORS, BACKGROUNDS, LINES, PARCEL_FIELD_INK_SHARE, TEXTS } from "./site-colors.mjs";
 
 // Escape text for HTML text and for a double-quoted attribute.
@@ -30,12 +30,16 @@ export const ARCHIVO = "vendor/archivo/archivo-latin-wdth-normal.woff2";
 export const PARCEL_FIELD = "art/parcel-field.svg";
 
 // The media queries of the legend rail: a wide screen (64rem and more) shows the legend rail; a
-// narrow screen shows the title band (the masthead) at the top. "not all and" makes the narrow
+// narrow screen shows the masthead as a band at the top. "not all and" makes the narrow
 // query the exact opposite of the wide one, so no width falls between them.
 export const WIDE = "(min-width: 64rem)";
 export const NARROW = `not all and ${WIDE}`;
 
 const SANS = `system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif`;
+// The font of the headings and the labels: the name of the face of ARCHIVO, and the font stack with
+// the system sans as the fallback.
+export const DISPLAY_FACE = "Archivo";
+export const DISPLAY = `"${DISPLAY_FACE}", ${SANS}`;
 const MONO = `ui-monospace, "SF Mono", Menlo, Consolas, monospace`;
 
 // The colors as CSS custom properties, for the scheme i (0 light, 1 dark), one line for each
@@ -58,8 +62,8 @@ export const siteHead = (toRoot) => `<meta name="theme-color" content="${BACKGRO
 // The style of the site look: the font, the colors in light and dark mode, the page, the
 // selection, the links, the headings, code, and the parcel field. --edge is the ink outline of an
 // area color. --rail is the width of the legend rail.
-// Each page in the site look has a legend rail, in its masthead (the title band, class
-// "masthead"). On a wide screen the masthead is the first column of the body, var(--rail) wide,
+// Each page in the site look has a legend rail, in its masthead (class "masthead"; on the landing
+// page it holds the title, on a text page the estate mark and the back links). On a wide screen the masthead is the first column of the body, var(--rail) wide,
 // and the parcel field lies under it, with a hairline at the edge of the rail. On a narrow screen
 // the masthead is the band at the top of the page, and the parcel field lies under it. The reading
 // column stays plain. The field is a still layer behind the page, out of the way of the pointer:
@@ -73,11 +77,11 @@ export const siteHead = (toRoot) => `<meta name="theme-color" content="${BACKGRO
 const fieldMask = (toRoot) => `url("${toRoot}/${PARCEL_FIELD}") center / cover no-repeat`;
 const fieldPaint = (toRoot) => `background-color: color-mix(in srgb, var(--ink) var(--parcel-ink-share), transparent);
       -webkit-mask: ${fieldMask(toRoot)}; mask: ${fieldMask(toRoot)};`;
-export const siteStyle = (toRoot) => `  @font-face { font-family: "Archivo"; src: url("${toRoot}/${ARCHIVO}") format("woff2");
+export const siteStyle = (toRoot) => `  @font-face { font-family: "${DISPLAY_FACE}"; src: url("${toRoot}/${ARCHIVO}") format("woff2");
     font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
   :root { color-scheme: light dark;
 ${colorLines(0)}
-    --display: "Archivo", ${SANS};
+    --display: ${DISPLAY};
     --edge: color-mix(in srgb, var(--ink) 25%, transparent);
     --rail: 17.5rem; --parcel-ink-share: ${PARCEL_FIELD_INK_SHARE[0]}%; }
   @media (prefers-color-scheme: dark) { :root {
@@ -104,4 +108,31 @@ ${colorLines(1)}
   a:hover { text-decoration-color: currentColor; }
   :focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
   h1, h2, h3 { font-family: var(--display); line-height: 1.15; text-wrap: balance; }
+  p, li, dd, blockquote { text-wrap: pretty; }
   code { font-family: ${MONO}; font-size: .86em; }`;
+
+// The style that gives an element the color of an area: the "color" of the area in estate.json
+// (estate.mjs checks it).
+export const areaStyle = (area) => `--area: var(--c-${area.color})`;
+
+// A group of the estate strip or of the estate mark: the cells of the repos of one area. The width
+// of a group follows its count of repos (--n).
+export const areaGroup = (area, cells) => `<span class="group" style="${areaStyle(area)}; --n: ${area.repos.length}">${cells}</span>`;
+
+// The estate mark: the estate strip as a picture, with no links and no words, hidden from screen
+// readers. One cell (<i>) for each repo, in a group for each area with repos (not the featured
+// area). Each page gives it its own size.
+export const estateMark = (areas) => [
+  '<div class="mark" aria-hidden="true">',
+  ...areas.filter((a) => !a.featured).map((area) => areaGroup(area, "<i></i>".repeat(area.repos.length))),
+  "</div>",
+].join("\n");
+
+// The custom properties that a page uses (var(--name)) and that nothing in the page defines.
+// Without a definition (for example a color that site-colors.mjs lost), a part of the page would
+// have no color. The scripts do not count: a script can make a name from data at run time.
+export function undefinedProperties(page) {
+  const html = page.replace(/<script\b[^]*?<\/script>/g, "");
+  const defined = new Set([...html.matchAll(/--([\w-]+):/g)].map((m) => m[1]));
+  return [...new Set([...html.matchAll(/var\(--([\w-]+)/g)].map((m) => m[1]))].filter((n) => !defined.has(n));
+}
