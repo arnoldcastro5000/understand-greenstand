@@ -46,6 +46,7 @@ the data file, then run `node .github/scripts/build-capture-journey.mjs`.
    node .github/scripts/build-onboarding.mjs --check
    node .github/scripts/check-former-names.mjs
    node .github/scripts/check-graphs.mjs
+   node .github/scripts/check-site-colors.mjs
    ```
 
    If you change `shared-resources.json`, also run

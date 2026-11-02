@@ -1,0 +1,754 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-02T05:01:30.379Z",
+  "title": "Design System: understand-greenstand site look",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Mineral Ground",
+        "canonical": "#f3f5f0",
+        "tonalRamp": [
+          "#0b0b0a",
+          "#252524",
+          "#414240",
+          "#60625e",
+          "#81837f",
+          "#a4a5a2",
+          "#c8c9c7",
+          "#eeefed"
+        ]
+      },
+      "ground-dark": {
+        "role": "neutral",
+        "displayName": "Mineral Ground (dark)",
+        "canonical": "#131915",
+        "tonalRamp": [
+          "#0a0c0b",
+          "#232624",
+          "#3f4340",
+          "#5d635f",
+          "#7d8480",
+          "#a1a7a3",
+          "#c6cac7",
+          "#edefed"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Field Surface",
+        "canonical": "#e8ece5",
+        "tonalRamp": [
+          "#0b0b0a",
+          "#242623",
+          "#41433f",
+          "#5f625d",
+          "#80837e",
+          "#a3a6a1",
+          "#c8cac6",
+          "#eeefed"
+        ]
+      },
+      "surface-dark": {
+        "role": "neutral",
+        "displayName": "Field Surface (dark)",
+        "canonical": "#1b231e",
+        "tonalRamp": [
+          "#0a0c0a",
+          "#222624",
+          "#3e4440",
+          "#5b645e",
+          "#7c857f",
+          "#a0a7a2",
+          "#c5cbc7",
+          "#ecefed"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Evergreen-Black Ink",
+        "canonical": "#1b2420",
+        "tonalRamp": [
+          "#0a0c0b",
+          "#222624",
+          "#3d4441",
+          "#5a645f",
+          "#7b8580",
+          "#9fa7a3",
+          "#c5cbc8",
+          "#ecefee"
+        ]
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "Evergreen-Black Ink (dark)",
+        "canonical": "#e2e8e0",
+        "tonalRamp": [
+          "#0a0b0a",
+          "#242623",
+          "#40433f",
+          "#5e635d",
+          "#7f847e",
+          "#a2a6a1",
+          "#c7cac6",
+          "#edefed"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Lichen Muted",
+        "canonical": "#56625a",
+        "tonalRamp": [
+          "#090c0a",
+          "#222623",
+          "#3c443f",
+          "#5a645d",
+          "#7a867e",
+          "#9fa8a2",
+          "#c4cbc7",
+          "#ecefed"
+        ]
+      },
+      "muted-dark": {
+        "role": "neutral",
+        "displayName": "Lichen Muted (dark)",
+        "canonical": "#9aa79e",
+        "tonalRamp": [
+          "#090c0a",
+          "#222623",
+          "#3d443f",
+          "#5a645d",
+          "#7a867e",
+          "#9fa8a1",
+          "#c5cbc6",
+          "#ecefed"
+        ]
+      },
+      "link": {
+        "role": "primary",
+        "displayName": "Water Blue",
+        "canonical": "#2c5d84",
+        "tonalRamp": [
+          "#040c14",
+          "#132737",
+          "#26455e",
+          "#3b6589",
+          "#5b87ac",
+          "#87a9c7",
+          "#b4cde2",
+          "#e2f1fd"
+        ]
+      },
+      "link-dark": {
+        "role": "primary",
+        "displayName": "Water Blue (dark)",
+        "canonical": "#8fb9d9",
+        "tonalRamp": [
+          "#050c12",
+          "#172733",
+          "#2c4558",
+          "#43667f",
+          "#6387a2",
+          "#8da9bf",
+          "#b8ccdc",
+          "#e5f0f9"
+        ]
+      },
+      "best-guess": {
+        "role": "tertiary",
+        "displayName": "Best-Guess Ochre",
+        "canonical": "#7a5a12",
+        "tonalRamp": [
+          "#100a01",
+          "#302308",
+          "#533e14",
+          "#795c22",
+          "#9b7d45",
+          "#b9a277",
+          "#d8c7a9",
+          "#f7eddc"
+        ]
+      },
+      "best-guess-dark": {
+        "role": "tertiary",
+        "displayName": "Best-Guess Ochre (dark)",
+        "canonical": "#d9b25c",
+        "tonalRamp": [
+          "#110a00",
+          "#312302",
+          "#543e05",
+          "#7a5c0b",
+          "#9e7d30",
+          "#bca26b",
+          "#dac7a1",
+          "#f8edd8"
+        ]
+      },
+      "not-working": {
+        "role": "tertiary",
+        "displayName": "Not-Working Rose",
+        "canonical": "#9e3f4b",
+        "tonalRamp": [
+          "#170507",
+          "#3d171b",
+          "#682c33",
+          "#97424c",
+          "#bc646c",
+          "#d68f93",
+          "#eebabc",
+          "#fee8e9"
+        ]
+      },
+      "not-working-dark": {
+        "role": "tertiary",
+        "displayName": "Not-Working Rose (dark)",
+        "canonical": "#e08a93",
+        "tonalRamp": [
+          "#150608",
+          "#3a1a1e",
+          "#633037",
+          "#8f4951",
+          "#b36a72",
+          "#ce9398",
+          "#e8bcc0",
+          "#ffe8ea"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#c5cec3",
+        "tonalRamp": [
+          "#0a0c0a",
+          "#232622",
+          "#3f443d",
+          "#5d645b",
+          "#7d857c",
+          "#a1a7a0",
+          "#c6cbc5",
+          "#edefec"
+        ]
+      },
+      "line-dark": {
+        "role": "neutral",
+        "displayName": "Hairline (dark)",
+        "canonical": "#2e3a33",
+        "tonalRamp": [
+          "#090c0a",
+          "#212723",
+          "#3c443f",
+          "#59655e",
+          "#7a867e",
+          "#9ea8a2",
+          "#c4cbc7",
+          "#ebf0ed"
+        ]
+      },
+      "evergreen": {
+        "role": "secondary",
+        "displayName": "Evergreen",
+        "canonical": "#35614e",
+        "tonalRamp": [
+          "#050d09",
+          "#182921",
+          "#2d493c",
+          "#446b59",
+          "#658d7a",
+          "#8ead9e",
+          "#b9cfc4",
+          "#e5f2ec"
+        ]
+      },
+      "evergreen-dark": {
+        "role": "secondary",
+        "displayName": "Evergreen (dark)",
+        "canonical": "#33634d",
+        "tonalRamp": [
+          "#050d09",
+          "#162a21",
+          "#2b493b",
+          "#426c58",
+          "#628e78",
+          "#8dae9d",
+          "#b8d0c3",
+          "#e5f2eb"
+        ]
+      },
+      "cropland": {
+        "role": "secondary",
+        "displayName": "Cropland Ochre",
+        "canonical": "#92600d",
+        "tonalRamp": [
+          "#130901",
+          "#342003",
+          "#5a3b09",
+          "#835712",
+          "#a6783a",
+          "#c29e70",
+          "#dfc4a4",
+          "#fbecd9"
+        ]
+      },
+      "cropland-dark": {
+        "role": "secondary",
+        "displayName": "Cropland Ochre (dark)",
+        "canonical": "#916618",
+        "tonalRamp": [
+          "#120901",
+          "#332104",
+          "#573c0c",
+          "#7f5916",
+          "#a27b3c",
+          "#bfa072",
+          "#dcc6a5",
+          "#faedda"
+        ]
+      },
+      "shrub": {
+        "role": "secondary",
+        "displayName": "Shrub Khaki",
+        "canonical": "#bba25b",
+        "tonalRamp": [
+          "#0f0b01",
+          "#2e2407",
+          "#4f4012",
+          "#745f1f",
+          "#968042",
+          "#b5a475",
+          "#d4c9a8",
+          "#f5eedb"
+        ]
+      },
+      "shrub-dark": {
+        "role": "secondary",
+        "displayName": "Shrub Khaki (dark)",
+        "canonical": "#b49e56",
+        "tonalRamp": [
+          "#0f0b01",
+          "#2d2407",
+          "#4e4112",
+          "#72601f",
+          "#948142",
+          "#b3a575",
+          "#d3c9a8",
+          "#f4eedb"
+        ]
+      },
+      "wetland": {
+        "role": "secondary",
+        "displayName": "Wetland Blue-Gray",
+        "canonical": "#6f9db3",
+        "tonalRamp": [
+          "#050c11",
+          "#162830",
+          "#2a4653",
+          "#40677a",
+          "#61899c",
+          "#8baaba",
+          "#b7cdd8",
+          "#e4f1f7"
+        ]
+      },
+      "wetland-dark": {
+        "role": "secondary",
+        "displayName": "Wetland Blue-Gray (dark)",
+        "canonical": "#7fb0c6",
+        "tonalRamp": [
+          "#040d11",
+          "#152830",
+          "#294754",
+          "#3e687a",
+          "#5f899c",
+          "#8aabba",
+          "#b6cdd8",
+          "#e4f1f7"
+        ]
+      },
+      "deciduous": {
+        "role": "secondary",
+        "displayName": "Deciduous Green",
+        "canonical": "#6c8951",
+        "tonalRamp": [
+          "#080d04",
+          "#1e2913",
+          "#374926",
+          "#526a3a",
+          "#728c5a",
+          "#98ad86",
+          "#c0cfb3",
+          "#e9f2e2"
+        ]
+      },
+      "deciduous-dark": {
+        "role": "secondary",
+        "displayName": "Deciduous Green (dark)",
+        "canonical": "#49854f",
+        "tonalRamp": [
+          "#040e05",
+          "#132b16",
+          "#264c2a",
+          "#3b6f40",
+          "#5c9160",
+          "#88b28b",
+          "#b5d2b6",
+          "#e3f4e4"
+        ]
+      },
+      "mixed-forest": {
+        "role": "secondary",
+        "displayName": "Mixed Forest Sage",
+        "canonical": "#b1bd97",
+        "tonalRamp": [
+          "#0a0c06",
+          "#232719",
+          "#3f452f",
+          "#5c6647",
+          "#7d8767",
+          "#a1a990",
+          "#c6ccba",
+          "#edf0e5"
+        ]
+      },
+      "mixed-forest-dark": {
+        "role": "secondary",
+        "displayName": "Mixed Forest Sage (dark)",
+        "canonical": "#b1b38e",
+        "tonalRamp": [
+          "#0b0c06",
+          "#262618",
+          "#43442e",
+          "#626445",
+          "#848566",
+          "#a6a78e",
+          "#cacbb9",
+          "#efefe5"
+        ]
+      },
+      "bare-ground": {
+        "role": "secondary",
+        "displayName": "Bare Ground Taupe",
+        "canonical": "#7c796e",
+        "tonalRamp": [
+          "#0c0b09",
+          "#262521",
+          "#44423b",
+          "#646158",
+          "#858278",
+          "#a7a59d",
+          "#cbc9c3",
+          "#efeeeb"
+        ]
+      },
+      "bare-ground-dark": {
+        "role": "secondary",
+        "displayName": "Bare Ground Taupe (dark)",
+        "canonical": "#858377",
+        "tonalRamp": [
+          "#0c0b09",
+          "#262520",
+          "#43423b",
+          "#636257",
+          "#848378",
+          "#a7a59d",
+          "#cac9c3",
+          "#efeeeb"
+        ]
+      },
+      "edge": {
+        "role": "neutral",
+        "displayName": "Ink Edge",
+        "canonical": "color-mix(in srgb, #1b2420 25%, transparent)",
+        "tonalRamp": [
+          "#0a0c0b",
+          "#222624",
+          "#3d4441",
+          "#5a645f",
+          "#7b8580",
+          "#9fa7a3",
+          "#c5cbc8",
+          "#ecefee"
+        ]
+      },
+      "selection": {
+        "role": "neutral",
+        "displayName": "Ink Selection",
+        "canonical": "color-mix(in srgb, #1b2420 18%, transparent)",
+        "tonalRamp": [
+          "#0a0c0b",
+          "#222624",
+          "#3d4441",
+          "#5a645f",
+          "#7b8580",
+          "#9fa7a3",
+          "#c5cbc8",
+          "#ecefee"
+        ]
+      },
+      "selection-dark": {
+        "role": "neutral",
+        "displayName": "Ink Selection (dark)",
+        "canonical": "color-mix(in srgb, #e2e8e0 18%, transparent)",
+        "tonalRamp": [
+          "#0a0b0a",
+          "#242623",
+          "#40433f",
+          "#5e635d",
+          "#7f847e",
+          "#a2a6a1",
+          "#c7cac6",
+          "#edefed"
+        ]
+      },
+      "edge-dark": {
+        "role": "neutral",
+        "displayName": "Ink Edge (dark)",
+        "canonical": "color-mix(in srgb, #e2e8e0 25%, transparent)",
+        "tonalRamp": [
+          "#0a0b0a",
+          "#242623",
+          "#40433f",
+          "#5e635d",
+          "#7f847e",
+          "#a2a6a1",
+          "#c7cac6",
+          "#edefed"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The site title in the masthead."
+      },
+      "display-rail": {
+        "displayName": "Display (legend rail)",
+        "purpose": "The site title in the legend rail at 64rem and more."
+      },
+      "headline-featured": {
+        "displayName": "Headline (Start here)",
+        "purpose": "The Start here heading."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The heading of an area section."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "The name link of a repo entry (1.18rem in the Start here path)."
+      },
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "The step numbers of the Start here path, muted, in the margin number column."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All running text, in the system sans."
+      },
+      "body-small": {
+        "displayName": "Body small",
+        "purpose": "Entry links, the snapshot line, and the Go deeper line."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Area keys in the legend rail and the hover name of a strip cell."
+      },
+      "label-rail": {
+        "displayName": "Label (rail name)",
+        "purpose": "The repo names in the upright estate strip."
+      },
+      "label-nav": {
+        "displayName": "Label (jump links)",
+        "purpose": "The jump links to the areas."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Commit ids and code only."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ink-edge",
+        "value": "inset 0 0 0 1px color-mix(in srgb, var(--ink) 25%, transparent)",
+        "purpose": "The 1px ink outline on every area fill (strip cells, mark cells, chips). An outline, not an elevation."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-cell",
+        "value": "cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "The move of a strip cell color block on hover or focus."
+      },
+      {
+        "name": "duration-cell",
+        "value": ".25s",
+        "purpose": "The move of a strip cell color block: 4px up, or 3px right in the legend rail."
+      },
+      {
+        "name": "duration-label",
+        "value": ".15s",
+        "purpose": "The fade of the repo name under the strip."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone-title",
+        "value": "max-width: 30rem",
+        "purpose": "The display title takes a width of 78%."
+      },
+      {
+        "name": "strip-links",
+        "value": "@container masthead (min-width: 422px)",
+        "purpose": "A container query on the masthead, computed by build-landing.mjs from the repo counts (CELL_GAP 2px, AREA_GAP 6px): the estate strip (links) replaces the estate mark where each cell can be 24px wide. 422px of strip today (a 462px page at a 16px default font size). It changes with the repo counts."
+      },
+      {
+        "name": "legend-rail",
+        "value": "min-width: 64rem",
+        "purpose": "The sticky 17.5rem legend rail with the upright estate strip. The rail always shows the links and never the estate mark."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Estate Strip",
+      "kind": "custom",
+      "refersTo": "estate-cell",
+      "description": "One cell per repo, grouped by area, in the area colors; each cell links to its repo entry and shows its name on hover or focus. Shown from the masthead width where each cell can be 24px wide.",
+      "html": "<nav class=\"ds-strip\" aria-label=\"Repos by area\"><span class=\"ds-group\" style=\"--area: var(--c-ink); --n: 1\"><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-1-1</span></a></span><span class=\"ds-group\" style=\"--area: var(--c-evergreen); --n: 3\"><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-2-1</span></a><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-2-2</span></a><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-2-3</span></a></span><span class=\"ds-group\" style=\"--area: var(--c-cropland); --n: 3\"><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-3-1</span></a><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-3-2</span></a><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-3-3</span></a></span><span class=\"ds-group\" style=\"--area: var(--c-shrub); --n: 2\"><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-4-1</span></a><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-4-2</span></a></span><span class=\"ds-group\" style=\"--area: var(--c-wetland); --n: 2\"><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-5-1</span></a><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-5-2</span></a></span><span class=\"ds-group\" style=\"--area: var(--c-deciduous); --n: 1\"><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-6-1</span></a></span><span class=\"ds-group\" style=\"--area: var(--c-mixed-forest); --n: 2\"><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-7-1</span></a><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-7-2</span></a></span><span class=\"ds-group\" style=\"--area: var(--c-bare-ground); --n: 1\"><a class=\"ds-cell\" href=\"#\"><span class=\"ds-label\">repo-8-1</span></a></span></nav>",
+      "css": ":host { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; --link: #2c5d84; --line: #c5cec3; --edge: color-mix(in srgb, #1b2420 25%, transparent); --display: \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; --c-ink: #1b2420; --c-evergreen: #35614e; --c-cropland: #92600d; --c-shrub: #bba25b; --c-wetland: #6f9db3; --c-deciduous: #6c8951; --c-mixed-forest: #b1bd97; --c-bare-ground: #7c796e; } @media (prefers-color-scheme: dark) { :host { --ground: #131915; --surface: #1b231e; --ink: #e2e8e0; --muted: #9aa79e; --link: #8fb9d9; --line: #2e3a33; --edge: color-mix(in srgb, #e2e8e0 25%, transparent); --c-ink: #e2e8e0; --c-evergreen: #33634d; --c-cropland: #916618; --c-shrub: #b49e56; --c-wetland: #7fb0c6; --c-deciduous: #49854f; --c-mixed-forest: #b1b38e; --c-bare-ground: #858377; } } .ds-strip { display: flex; position: relative; gap: 6px; padding-bottom: 1.9rem; background: var(--ground); } .ds-group { display: flex; flex: var(--n) 1 0; gap: 2px; min-width: 0; } .ds-cell { display: block; flex: 1 1 0; min-width: 0; height: clamp(2rem, 1.3rem + 2.4vw, 3.25rem); text-decoration: none; } .ds-cell::before { content: \"\"; display: block; height: 100%; background: var(--area); box-shadow: inset 0 0 0 1px var(--edge); transition: transform .25s cubic-bezier(.16, 1, .3, 1); } .ds-cell:hover::before, .ds-cell:focus-visible::before { transform: translateY(-4px); } .ds-cell:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; } .ds-label { position: absolute; left: 0; bottom: 0; font: 600 .82rem/1.2 var(--display); font-stretch: 87.5%; color: var(--ink); opacity: 0; pointer-events: none; transition: opacity .15s; } .ds-cell:hover .ds-label, .ds-cell:focus-visible .ds-label { opacity: 1; } @media (prefers-reduced-motion: reduce) { .ds-cell::before, .ds-label { transition: none; } }"
+    },
+    {
+      "name": "Estate Strip in the Legend Rail",
+      "kind": "nav",
+      "refersTo": "estate-cell-rail",
+      "description": "The estate strip upright in the sticky legend rail on wide screens: the area key over each group, one row per repo with its color block and name. The target row gets the ink outline.",
+      "html": "<nav class=\"ds-rail\" aria-label=\"Repos by area\"><span class=\"ds-rgroup\" style=\"--area: var(--c-evergreen)\"><span class=\"ds-key\">Core API</span><a class=\"ds-row\" href=\"#\">treetracker-api</a><a class=\"ds-row ds-here\" href=\"#\">treetracker-query-api</a><a class=\"ds-row\" href=\"#\">images-api</a></span><span class=\"ds-rgroup\" style=\"--area: var(--c-cropland)\"><span class=\"ds-key\">Wallet</span><a class=\"ds-row\" href=\"#\">treetracker-wallet-api</a></span></nav>",
+      "css": ":host { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; --link: #2c5d84; --line: #c5cec3; --edge: color-mix(in srgb, #1b2420 25%, transparent); --display: \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; --c-ink: #1b2420; --c-evergreen: #35614e; --c-cropland: #92600d; --c-shrub: #bba25b; --c-wetland: #6f9db3; --c-deciduous: #6c8951; --c-mixed-forest: #b1bd97; --c-bare-ground: #7c796e; } @media (prefers-color-scheme: dark) { :host { --ground: #131915; --surface: #1b231e; --ink: #e2e8e0; --muted: #9aa79e; --link: #8fb9d9; --line: #2e3a33; --edge: color-mix(in srgb, #e2e8e0 25%, transparent); --c-ink: #e2e8e0; --c-evergreen: #33634d; --c-cropland: #916618; --c-shrub: #b49e56; --c-wetland: #7fb0c6; --c-deciduous: #49854f; --c-mixed-forest: #b1b38e; --c-bare-ground: #858377; } } .ds-rail { display: flex; flex-direction: column; gap: .75rem; width: 14rem; padding: 1rem; background: var(--ground); } .ds-rgroup { display: grid; gap: 2px; } .ds-key { margin: 0 0 .3rem; font: 600 .82rem/1.2 var(--display); font-stretch: 87.5%; color: var(--muted); } .ds-row { display: grid; grid-template-columns: 1rem minmax(0, 1fr); align-items: center; gap: .65rem; min-height: max(1.5rem, 24px); color: var(--ink); text-decoration: none; font: 500 .9rem/1.25 var(--display); font-stretch: 87.5%; overflow-wrap: anywhere; } .ds-row::before { content: \"\"; align-self: stretch; background: var(--area); box-shadow: inset 0 0 0 1px var(--edge); transition: transform .25s cubic-bezier(.16, 1, .3, 1); } .ds-row:hover::before, .ds-row:focus-visible::before { transform: translateX(3px); } .ds-row:hover { text-decoration: underline; text-decoration-color: var(--line); } .ds-row:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; } .ds-here { outline: 2px solid var(--ink); outline-offset: 2px; }"
+    },
+    {
+      "name": "Estate Mark",
+      "kind": "custom",
+      "refersTo": "estate-cell",
+      "description": "The estate strip as a picture: no links, no words, hidden from screen readers. It replaces the strip where the masthead is narrower than the links width; never in the legend rail.",
+      "html": "<div class=\"ds-mark\" aria-hidden=\"true\"><span class=\"ds-group\" style=\"--area: var(--c-ink); --n: 1\"><i></i></span><span class=\"ds-group\" style=\"--area: var(--c-evergreen); --n: 3\"><i></i><i></i><i></i></span><span class=\"ds-group\" style=\"--area: var(--c-cropland); --n: 3\"><i></i><i></i><i></i></span><span class=\"ds-group\" style=\"--area: var(--c-shrub); --n: 2\"><i></i><i></i></span><span class=\"ds-group\" style=\"--area: var(--c-wetland); --n: 2\"><i></i><i></i></span><span class=\"ds-group\" style=\"--area: var(--c-deciduous); --n: 1\"><i></i></span><span class=\"ds-group\" style=\"--area: var(--c-mixed-forest); --n: 2\"><i></i><i></i></span><span class=\"ds-group\" style=\"--area: var(--c-bare-ground); --n: 1\"><i></i></span></div>",
+      "css": ":host { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; --link: #2c5d84; --line: #c5cec3; --edge: color-mix(in srgb, #1b2420 25%, transparent); --display: \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; --c-ink: #1b2420; --c-evergreen: #35614e; --c-cropland: #92600d; --c-shrub: #bba25b; --c-wetland: #6f9db3; --c-deciduous: #6c8951; --c-mixed-forest: #b1bd97; --c-bare-ground: #7c796e; } @media (prefers-color-scheme: dark) { :host { --ground: #131915; --surface: #1b231e; --ink: #e2e8e0; --muted: #9aa79e; --link: #8fb9d9; --line: #2e3a33; --edge: color-mix(in srgb, #e2e8e0 25%, transparent); --c-ink: #e2e8e0; --c-evergreen: #33634d; --c-cropland: #916618; --c-shrub: #b49e56; --c-wetland: #7fb0c6; --c-deciduous: #49854f; --c-mixed-forest: #b1b38e; --c-bare-ground: #858377; } } .ds-mark { display: flex; gap: 6px; width: 350px; background: var(--ground); } .ds-group { display: flex; flex: var(--n) 1 0; gap: 2px; min-width: 0; } .ds-mark i { display: block; flex: 1 1 0; min-width: 0; height: 2rem; background: var(--area); box-shadow: inset 0 0 0 1px var(--edge); }"
+    },
+    {
+      "name": "Area Chip and Heading",
+      "kind": "chip",
+      "refersTo": "area-chip",
+      "description": "The 3px area-color rule, the chip, and the heading that open an area section.",
+      "html": "<section class=\"ds-area\" style=\"--area: var(--c-shrub)\"><h2><i class=\"ds-chip\" aria-hidden=\"true\"></i>Admin</h2></section>",
+      "css": ":host { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; --link: #2c5d84; --line: #c5cec3; --edge: color-mix(in srgb, #1b2420 25%, transparent); --display: \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; --c-ink: #1b2420; --c-evergreen: #35614e; --c-cropland: #92600d; --c-shrub: #bba25b; --c-wetland: #6f9db3; --c-deciduous: #6c8951; --c-mixed-forest: #b1bd97; --c-bare-ground: #7c796e; } @media (prefers-color-scheme: dark) { :host { --ground: #131915; --surface: #1b231e; --ink: #e2e8e0; --muted: #9aa79e; --link: #8fb9d9; --line: #2e3a33; --edge: color-mix(in srgb, #e2e8e0 25%, transparent); --c-ink: #e2e8e0; --c-evergreen: #33634d; --c-cropland: #916618; --c-shrub: #b49e56; --c-wetland: #7fb0c6; --c-deciduous: #49854f; --c-mixed-forest: #b1b38e; --c-bare-ground: #858377; } } .ds-area { padding-top: .9rem; border-top: 3px solid var(--area); background: var(--ground); color: var(--ink); } .ds-area h2 { margin: 0; font: 660 1.45rem/1.15 var(--display); } .ds-chip { display: inline-block; width: .8em; height: .8em; margin-right: .45em; vertical-align: -.02em; background: var(--area); box-shadow: inset 0 0 0 1px var(--edge); }"
+    },
+    {
+      "name": "Start Here Field",
+      "kind": "card",
+      "refersTo": "start-here-field",
+      "description": "The numbered newcomer path on the surface, with muted Archivo numerals in a margin number column.",
+      "html": "<section class=\"ds-start\"><h2>Start here</h2><p class=\"ds-intro\">Learn the mission and the big picture of the platform before you read the code.</p><ol class=\"ds-path\"><li><a class=\"ds-name\" href=\"#\">Greenstand-Overview</a><p>The org overview and onboarding repo.</p></li><li><a class=\"ds-name\" href=\"#\">Ecosystem maps</a><p>How the code repos work together at run time.</p></li></ol></section>",
+      "css": ":host { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; --link: #2c5d84; --line: #c5cec3; --edge: color-mix(in srgb, #1b2420 25%, transparent); --display: \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; --c-ink: #1b2420; --c-evergreen: #35614e; --c-cropland: #92600d; --c-shrub: #bba25b; --c-wetland: #6f9db3; --c-deciduous: #6c8951; --c-mixed-forest: #b1bd97; --c-bare-ground: #7c796e; } @media (prefers-color-scheme: dark) { :host { --ground: #131915; --surface: #1b231e; --ink: #e2e8e0; --muted: #9aa79e; --link: #8fb9d9; --line: #2e3a33; --edge: color-mix(in srgb, #e2e8e0 25%, transparent); --c-ink: #e2e8e0; --c-evergreen: #33634d; --c-cropland: #916618; --c-shrub: #b49e56; --c-wetland: #7fb0c6; --c-deciduous: #49854f; --c-mixed-forest: #b1b38e; --c-bare-ground: #858377; } } .ds-start { padding: 1.6rem 1.75rem 1.4rem; background: var(--surface); color: var(--ink); font: 16.5px/1.62 system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; } .ds-start h2 { margin: 0 0 .35rem; font: 680 1.55rem/1.15 var(--display); } .ds-intro { margin: 0 0 1rem; color: var(--muted); } .ds-path { margin: 0; padding: 0; list-style: none; counter-reset: step; } .ds-path > li { display: grid; grid-template-columns: 2.75rem minmax(0, 1fr); padding: .85rem 0 .9rem; border-top: 1px solid var(--line); counter-increment: step; } .ds-path > li::before { content: counter(step); grid-row: span 2; padding-top: .1rem; font: 600 1.7rem/1 var(--display); font-stretch: 75%; font-variant-numeric: tabular-nums; color: var(--muted); } .ds-path p { margin: .2rem 0 0; } .ds-name { font: 640 1.18rem/1.3 var(--display); color: var(--link); text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: color-mix(in srgb, var(--link) 35%, transparent); text-underline-offset: .2em; } .ds-name:hover { text-decoration-color: currentColor; } .ds-name:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }"
+    },
+    {
+      "name": "Register Entry",
+      "kind": "card",
+      "refersTo": "register-entry",
+      "description": "A repo entry: name link, description, page links, and the snapshot with its commit id. The target entry gets a 14% tint of its area color.",
+      "html": "<ul class=\"ds-register\" style=\"--area: var(--c-cropland)\"><li class=\"ds-target\"><a class=\"ds-name\" href=\"#\">treetracker-wallet-api</a><p class=\"ds-desc\">The wallet service: wallets, trust relationships, and token transfers.</p><p class=\"ds-links\"><span><a href=\"#\">Viewer</a> · <a href=\"#\">Onboarding</a> · <a href=\"#\">Source</a></span><span class=\"ds-snap\">Snapshot 2026-09-03 at <a href=\"#\"><code>e95c15a</code></a></span></p></li><li><a class=\"ds-name\" href=\"#\">treetracker-wallet-app</a><p class=\"ds-desc\">The wallet app monorepo.</p></li></ul>",
+      "css": ":host { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; --link: #2c5d84; --line: #c5cec3; --edge: color-mix(in srgb, #1b2420 25%, transparent); --display: \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; --c-ink: #1b2420; --c-evergreen: #35614e; --c-cropland: #92600d; --c-shrub: #bba25b; --c-wetland: #6f9db3; --c-deciduous: #6c8951; --c-mixed-forest: #b1bd97; --c-bare-ground: #7c796e; } @media (prefers-color-scheme: dark) { :host { --ground: #131915; --surface: #1b231e; --ink: #e2e8e0; --muted: #9aa79e; --link: #8fb9d9; --line: #2e3a33; --edge: color-mix(in srgb, #e2e8e0 25%, transparent); --c-ink: #e2e8e0; --c-evergreen: #33634d; --c-cropland: #916618; --c-shrub: #b49e56; --c-wetland: #7fb0c6; --c-deciduous: #49854f; --c-mixed-forest: #b1b38e; --c-bare-ground: #858377; } } .ds-register { margin: 0; padding: 0 1rem; list-style: none; background: var(--ground); color: var(--ink); font: 16.5px/1.62 system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; } .ds-register > li { padding: .85rem 0 1.1rem; border-top: 1px solid var(--line); } .ds-register > li.ds-target { margin-inline: -1rem; padding-inline: 1rem; background: color-mix(in srgb, var(--area) 14%, transparent); } .ds-register p { margin: 0; } .ds-desc { max-width: 40rem; margin: .2rem 0 .45rem !important; } .ds-links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem 1.25rem; font-size: .92rem; } .ds-snap { color: var(--muted); font-variant-numeric: tabular-nums; } .ds-register code { font-family: ui-monospace, \"SF Mono\", Menlo, Consolas, monospace; font-size: .86em; } .ds-register a { color: var(--link); text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: color-mix(in srgb, var(--link) 35%, transparent); text-underline-offset: .2em; } .ds-register a:hover { text-decoration-color: currentColor; } .ds-register a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; } .ds-register .ds-name { font: 640 1.12rem/1.3 var(--display); }"
+    },
+    {
+      "name": "Jump Links",
+      "kind": "nav",
+      "refersTo": "jump-link",
+      "description": "One row of area links between two hairlines: a chip and the area name in ink.",
+      "html": "<nav class=\"ds-jump\" aria-label=\"Areas\"><span>Areas:</span><a href=\"#\" style=\"--area: var(--c-evergreen)\"><i class=\"ds-chip\" aria-hidden=\"true\"></i>Core API</a><a href=\"#\" style=\"--area: var(--c-cropland)\"><i class=\"ds-chip\" aria-hidden=\"true\"></i>Wallet</a><a href=\"#\" style=\"--area: var(--c-wetland)\"><i class=\"ds-chip\" aria-hidden=\"true\"></i>Web map</a></nav>",
+      "css": ":host { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; --link: #2c5d84; --line: #c5cec3; --edge: color-mix(in srgb, #1b2420 25%, transparent); --display: \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; --c-ink: #1b2420; --c-evergreen: #35614e; --c-cropland: #92600d; --c-shrub: #bba25b; --c-wetland: #6f9db3; --c-deciduous: #6c8951; --c-mixed-forest: #b1bd97; --c-bare-ground: #7c796e; } @media (prefers-color-scheme: dark) { :host { --ground: #131915; --surface: #1b231e; --ink: #e2e8e0; --muted: #9aa79e; --link: #8fb9d9; --line: #2e3a33; --edge: color-mix(in srgb, #e2e8e0 25%, transparent); --c-ink: #e2e8e0; --c-evergreen: #33634d; --c-cropland: #916618; --c-shrub: #b49e56; --c-wetland: #7fb0c6; --c-deciduous: #49854f; --c-mixed-forest: #b1b38e; --c-bare-ground: #858377; } } .ds-jump { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1.4rem; padding: .9rem 0; border-block: 1px solid var(--line); background: var(--ground); font: 500 .98rem/1.3 var(--display); font-stretch: 87.5%; } .ds-jump > span { color: var(--muted); } .ds-jump a { color: var(--ink); text-decoration: none; } .ds-jump a:hover { text-decoration: underline; text-decoration-color: var(--line); } .ds-jump a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; } .ds-chip { display: inline-block; width: .8em; height: .8em; margin-right: .45em; vertical-align: -.02em; background: var(--area); box-shadow: inset 0 0 0 1px var(--edge); }"
+    },
+    {
+      "name": "Text Link",
+      "kind": "button",
+      "refersTo": "text-link",
+      "description": "A link in running text: water blue with a soft 1px underline that takes the full color on hover.",
+      "html": "<p class=\"ds-p\">The <a class=\"ds-link\" href=\"#\">estate glossary</a> lists the business terms of all repos.</p>",
+      "css": ":host { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; --link: #2c5d84; --line: #c5cec3; --edge: color-mix(in srgb, #1b2420 25%, transparent); --display: \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; --c-ink: #1b2420; --c-evergreen: #35614e; --c-cropland: #92600d; --c-shrub: #bba25b; --c-wetland: #6f9db3; --c-deciduous: #6c8951; --c-mixed-forest: #b1bd97; --c-bare-ground: #7c796e; } @media (prefers-color-scheme: dark) { :host { --ground: #131915; --surface: #1b231e; --ink: #e2e8e0; --muted: #9aa79e; --link: #8fb9d9; --line: #2e3a33; --edge: color-mix(in srgb, #e2e8e0 25%, transparent); --c-ink: #e2e8e0; --c-evergreen: #33634d; --c-cropland: #916618; --c-shrub: #b49e56; --c-wetland: #7fb0c6; --c-deciduous: #49854f; --c-mixed-forest: #b1b38e; --c-bare-ground: #858377; } } .ds-p { margin: 0; color: var(--ink); background: var(--ground); font: 16.5px/1.62 system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif; } .ds-link { color: var(--link); text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: color-mix(in srgb, var(--link) 35%, transparent); text-underline-offset: .2em; } .ds-link:hover { text-decoration-color: currentColor; } .ds-link:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Land-Cover Map",
+    "overview": "The site reads as a land-cover classification map of the code estate. Each area of repos is a land-cover class. Each class has one flat, muted area color. The snapshot commit is the scene date. The reader sees the whole estate in one estate strip, learns the area key, follows the numbered Start here path, and then finds a repo entry with its proof links.\n\nThe site look is calm and dense. The page is a mineral ground with evergreen-black ink. Hairline rules divide the content. Apart from the link blue, the area colors are the only saturated colors on the page, and they fill shapes only. The pages follow the color scheme of the reader, so each color is a pair: one value for light, one value for dark (the `-dark` tokens). The site look refuses the GitHub-clone docs look (the former look) and the stock eco template: no leaf art, no gradients, no drop shadows, no Greenstand logo.\n\nScope of this record: the build moves only the landing page and the shared base to the site look. The shared base is the colors in `.github/scripts/site-colors.mjs` and `siteStyle` and `siteHead` in `.github/scripts/site-html.mjs`. The text pages (`render-md.mjs`), the capture journey page (`capture-journey-page.mjs`), and the moved pages (`build-moved.mjs`) still show the former look (`BASE_STYLE`). Later work moves them, and a later pass brings this file up to date. `BASE_STYLE` is not a rule source.",
+    "keyCharacteristics": [
+      "A mineral ground, an ink text color, and water blue for links only, from one data module of [light, dark] pairs.",
+      "Eight area colors (seven land-cover classes and ink for Start here) that fill cells, chips, and rules, never text.",
+      "An ink edge on each area fill, so that pale fills stay visible on the ground.",
+      "Archivo (a variable face with a width axis) for headings, labels, and numerals; the system sans for body text.",
+      "Square corners, hairline rules, and no elevation.",
+      "The estate strip as the signature: a picture on a phone, a row of links on a wider page, an upright legend in the legend rail on a wide screen."
+    ],
+    "rules": [
+      {
+        "name": "The One Color, One Job Rule",
+        "body": "An area color marks its area and nothing else. It fills cells, chips, rules, and tints. It never colors text. Water blue is for links only. The state colors are for states only.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Backgrounds Rule",
+        "body": "Each text color has a contrast of 4.5:1 or more on each background (the ground and the surface), in light and in dark mode. `.github/scripts/check-site-colors.mjs` enforces it in CI. Add a new text color to `TEXTS` in `site-colors.mjs`, so that CI checks it.",
+        "section": "colors"
+      },
+      {
+        "name": "The State Apart Rule",
+        "body": "Each area color is 10 or more (CIE76) from each state color, in both schemes. CI enforces it. Thus an area color does not look like a state.",
+        "section": "colors"
+      },
+      {
+        "name": "The Color-Blind Key Rule",
+        "body": "Each two area colors are 10 or more apart (CIEDE2000), in both schemes, for normal vision and for simulated protanopia and deuteranopia (Machado 2009, severity 1). CI enforces it. A new area color must pass this check before a page uses it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink Edge Rule",
+        "body": "Every area fill carries the ink edge (a 1px inset outline in 25% ink). Pale fills, for example Mixed Forest Sage, stay visible on the ground.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Voices Rule",
+        "body": "Archivo sets headings, labels, and numerals. The system sans sets the body text. Monospace sets code and commit ids only.",
+        "section": "typography"
+      },
+      {
+        "name": "The Narrow Label Rule",
+        "body": "Archivo labels use a width of 87.5%. Numerals use a width of 75%. The full width is for headings. Headings use `text-wrap: balance`.",
+        "section": "typography"
+      },
+      {
+        "name": "The 24 px Target Rule",
+        "body": "A strip cell is a link only where it can be 24px wide. Below that width, the strip is the estate mark: a picture with no links and no words, hidden from screen readers. Do not hard-code the width; compute it from the repo counts and test it on the masthead container, not on the page. In the legend rail each row is at least `max(1.5rem, 24px)` high, so the rail always has links.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Map Rule",
+        "body": "Surfaces are flat at all times. Use tone (the surface) and hairlines for structure. Use no drop shadow and no gradient.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do take every color from `BACKGROUNDS`, `TEXTS`, `STATES`, `LINES`, and `AREA_COLORS` in `site-colors.mjs`, as a [light, dark] pair, through the CSS custom properties of `siteStyle`.",
+      "Do define every custom property that a page uses. `build-landing.mjs` fails when the page uses a custom property that nothing defines.",
+      "Do give an element its area color with `--area: var(--c-<color>)`, from the `\"color\"` of its area in `estate.json`.",
+      "Do put the ink edge (1px inset, 25% ink) on every area fill.",
+      "Do keep text at 4.5:1 or more on the ground and on the surface in both schemes, and let `check-site-colors.mjs` prove it.",
+      "Do set headings, labels, and numerals in Archivo, and body text in the system sans.",
+      "Do keep a strip cell at 24px or more wherever it is a link.",
+      "Do turn off motion under `prefers-reduced-motion: reduce`."
+    ],
+    "donts": [
+      "Don't color text with an area color.",
+      "Don't show a state by its state color alone.",
+      "Don't use water blue for anything but links and the focus ring.",
+      "Don't use a drop shadow, a gradient, a rounded corner, or leaf art.",
+      "Don't add a Greenstand logo or Greenstand brand colors. The site has no binding Greenstand brand, and it shows no Greenstand logo until Greenstand approves one (PRODUCT.md).",
+      "Don't load a font or another asset from a third-party host; vendor it and pin its hash.",
+      "Don't take a value from `BASE_STYLE`; it is the former look."
+    ]
+  }
+}
