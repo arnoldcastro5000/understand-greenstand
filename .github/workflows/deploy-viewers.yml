@@ -136,12 +136,12 @@ jobs:
           mkdir -p "$OUT/vendor/mermaid"
           cp _mermaid/package/LICENSE _mermaid/package/dist/mermaid.esm.min.mjs "$OUT/vendor/mermaid/"
           cp -r _mermaid/package/dist/chunks "$OUT/vendor/mermaid/"
-          # Archivo, the font of the headings of the site look. build-landing.mjs and render-md.mjs fail
-          # without it.
+          # Archivo, the font of the headings of the site look. The page scripts (render-md.mjs,
+          # build-capture-journey.mjs, build-moved.mjs, build-landing.mjs) fail without it.
           mkdir -p "$OUT/vendor/archivo"
           cp _archivo/package/LICENSE _archivo/package/files/archivo-latin-wdth-normal.woff2 "$OUT/vendor/archivo/"
-          # The parcel field, the drawing in the legend rail of the site look. build-landing.mjs and
-          # render-md.mjs fail without it.
+          # The parcel field, the drawing in the legend rail of the site look. The page scripts fail
+          # without it.
           node .github/scripts/build-parcel-field.mjs "$OUT"
           for dir in repos/*/; do
             repo="$(basename "$dir")"

@@ -15,12 +15,14 @@
 //          It reads each repo, cited file, issue, and image source through the GitHub API
 //          (GITHUB_TOKEN, if set). CI runs it only when the data, the images, or the code changes.
 //        node build-capture-journey.mjs --site <dir>     write <dir>/capture-journey.html and copy the
-//          images into <dir>/capture-journey/ (the deploy)
+//          images into <dir>/capture-journey/ (the deploy). The page is in the site look: <dir> must
+//          hold the font and the parcel field.
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { CAPTURE_JOURNEY_COPY as COPY, CAPTURE_JOURNEY_DATA as DATA, CAPTURE_JOURNEY_IMAGES as IMAGES, EM_DASH, answerStatus, citedLines, githubApi, isObject, isRepoPath, lineAnchor, loadEstate, missingNames, parseJson, parseLines, plural, readDocsFile, root, urlPath } from "./estate.mjs";
 import { FLAGS, ICONS, NO_ISSUE, creditText, pageHtml } from "./capture-journey-page.mjs";
+import { SITE_LOOK_FILES, undefinedProperties } from "./site-html.mjs";
 
 const SCRIPT = ".github/scripts/build-capture-journey.mjs";
 const PAGE = "capture-journey.html";
@@ -35,9 +37,13 @@ else if (args.length) {
   console.error(`error: ${USAGE}`);
   process.exit(2);
 }
-// Every error at once: the estate, the directory of --site, then the data file.
+// Every error at once: the estate, the directory of --site and the files of the site look that the
+// page loads (the font and the parcel field), then the data file.
 const { estate, repos, errors } = loadEstate();
 if (mode === "site" && !(existsSync(siteDir) && statSync(siteDir).isDirectory())) errors.push(`${siteDir} is not a directory`);
+else if (mode === "site") {
+  for (const f of SITE_LOOK_FILES) if (!existsSync(join(siteDir, f))) errors.push(`${PAGE} needs ${join(siteDir, f)}, but it is missing`);
+}
 const estateRepos = new Set(repos.map((r) => r.name));
 
 // The fields of each object of the data file, in the order of their checks. A flag has the fields
@@ -423,14 +429,17 @@ function copyText(view) {
   return out.join("\n");
 }
 
-// A guard of the page render: each link to an anchor has its id, each id is unique, and each image
-// of the page is an image of the data file. The data checks cannot see a defect of the render.
+// A guard of the page render: each link to an anchor has its id, each id is unique, each image of
+// the page is an image of the data file, and each custom property that the page uses has a
+// definition (undefinedProperties of site-html.mjs). The data checks cannot see a defect of the
+// render.
 function checkPage(html) {
   const where = `${PAGE} (built in memory)`;
   const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
   for (const id of new Set(ids.filter((id, i) => ids.indexOf(id) !== i))) errors.push(`${where}: the id ${id} is used twice`);
   for (const [, id] of html.matchAll(/href="#([^"]*)"/g)) if (!ids.includes(id)) errors.push(`${where}: a link to #${id}, but no id ${id}`);
   for (const [, src] of html.matchAll(/\ssrc="([^"]*)"/g)) if (!sizeOf.has(src.replace(`${imageDir}/`, ""))) errors.push(`${where}: an image ${src} that is not in ${DATA}`);
+  for (const n of undefinedProperties(html)) errors.push(`${where}: the page uses var(--${n}), but nothing defines --${n}`);
 }
 
 // ---------- The evidence (GitHub) ----------
@@ -523,7 +532,7 @@ if (mode === "evidence") {
 const view = viewOf();
 const copy = copyText(view);
 const { GITHUB_REPOSITORY: githubRepo, GITHUB_SHA: githubSha } = process.env;
-const page = pageHtml(view, githubRepo && githubSha ? `https://github.com/${githubRepo}/blob/${githubSha}/${COPY}` : null);
+const page = pageHtml(view, githubRepo && githubSha ? `https://github.com/${githubRepo}/blob/${githubSha}/${COPY}` : null, estate.areas);
 checkPage(page);
 exitOnErrors();
 

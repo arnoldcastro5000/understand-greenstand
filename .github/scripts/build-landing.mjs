@@ -14,7 +14,7 @@
 import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { formerNamesText, loadEstate } from "./estate.mjs";
-import { ARCHIVO, PARCEL_FIELD, WIDE, areaGroup, areaStyle, esc, estateMark, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
+import { SITE_LOOK_FILES, WIDE, areaGroup, areaStyle, esc, estateMark, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
 import { startPath } from "./start-path.mjs";
 
 const site = process.argv[2];
@@ -34,7 +34,7 @@ for (const { name } of repos) {
 // The deploy workflow writes these files at the site root: the pages of the estate glossary, the
 // volunteer guide, and the steps of the Start here path, and the font and the parcel field of the
 // site look.
-const ROOT_FILES = ["glossary.html", "contribute.html", ...steps.filter((s) => !s.links).map((s) => s.page), ARCHIVO, PARCEL_FIELD];
+const ROOT_FILES = ["glossary.html", "contribute.html", ...steps.filter((s) => !s.links).map((s) => s.page), ...SITE_LOOK_FILES];
 for (const f of ROOT_FILES) if (!existsSync(join(site, f))) errors.push(`${site}/${f} is missing`);
 
 const link = (href, text) => `<a href="${esc(href)}">${text}</a>`;

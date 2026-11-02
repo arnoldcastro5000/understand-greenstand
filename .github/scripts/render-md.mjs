@@ -19,7 +19,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, posix } from "node:path";
 import { marked } from "marked";
 import { escapeRegExp, loadEstate } from "./estate.mjs";
-import { ARCHIVO, DISPLAY, DISPLAY_FACE, PARCEL_FIELD, WIDE, esc, estateMark, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
+import { DISPLAY, DISPLAY_FACE, READING_COLUMN, SITE_LOOK_FILES, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
 import { BACKGROUNDS, DIAGRAM_NODE_TINT, LINES, TEXTS } from "./site-colors.mjs";
 import { slugger } from "./slug.mjs";
 
@@ -127,7 +127,7 @@ const body = marked.parse(readFileSync(inFile, "utf8"));
 // Mermaid for a page with a Mermaid block. The deploy workflow puts them on the site. The script
 // shows each missing file.
 const missing = [];
-for (const f of [ARCHIVO, PARCEL_FIELD]) {
+for (const f of SITE_LOOK_FILES) {
   const path = join(dirname(outFile), toRoot, f);
   if (!existsSync(path)) missing.push(`${inFile} needs ${path}, but it is missing`);
 }
@@ -240,14 +240,7 @@ const html = `<!doctype html>
 ${siteHead(toRoot)}
 <style>
 ${siteStyle(toRoot)}
-  .masthead { padding: 1.25rem max(1.25rem, calc((100% - 44rem) / 2)); border-bottom: 1px solid var(--line); }
-  .mark { display: flex; gap: 3px; width: 8.5rem; height: .55rem; margin-bottom: .75rem; }
-  .mark .group { display: flex; flex: var(--n) 1 0; gap: 1px; min-width: 0; }
-  .mark i { flex: 1 1 0; min-width: 0; background: var(--area); box-shadow: inset 0 0 0 1px var(--edge); }
-  .masthead nav { display: flex; flex-wrap: wrap; gap: .25rem 1.5rem; font: 500 .98rem/1.3 var(--display);
-    font-stretch: 87.5%; }
-  .masthead nav a { display: inline-block; padding-block: .15rem; color: var(--ink); text-decoration: none; }
-  .masthead nav a:hover { text-decoration: underline; text-decoration-color: var(--line); }
+${mastheadStyle(READING_COLUMN)}
   main { padding: 1.5rem 1.25rem 5rem; }
   h1 { margin-block: 1.5rem 1.1rem; font-size: clamp(1.9rem, 1.5rem + 1.8vw, 2.6rem); font-weight: 720;
     letter-spacing: -.02em; }
@@ -270,22 +263,15 @@ ${siteStyle(toRoot)}
   blockquote > :last-child { margin-bottom: 0; }
   hr { height: 0; margin-block: 2rem; border: 0; border-top: 1px solid var(--line); }
   img { max-width: 100%; }
-  main > * { box-sizing: border-box; max-width: 44rem; margin-inline: auto; }
+  main > * { box-sizing: border-box; max-width: ${READING_COLUMN}; margin-inline: auto; }
   @media ${WIDE} {
-    body { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); align-items: start; }
-    .masthead { position: sticky; top: 0; padding: 2.4rem 1.5rem 2rem 2rem; border-bottom: 0; }
-    .mark { width: 100%; max-width: 13.5rem; height: .75rem; margin-bottom: 1.4rem; }
-    .masthead nav { flex-direction: column; align-items: start; }
     main { max-width: 64rem; padding: 1.25rem clamp(1.5rem, 4vw, 4.5rem) 5rem; }
     main > * { margin-inline: 0; }
   }${repoNameStyle}
 </style>${mermaidHead}
 </head>
 <body>
-<header class="masthead">
-${estateMark(areas)}
-<nav><a href="${esc(backHref)}">&larr; ${esc(backLabel)}</a>${atRoot ? "" : '<a href="../">All viewers</a>'}</nav>
-</header>
+${masthead(areas, `<nav><a href="${esc(backHref)}">&larr; ${esc(backLabel)}</a>${atRoot ? "" : '<a href="../">All viewers</a>'}</nav>`)}
 <main>
 ${body}</main>${mermaidScript}
 </body>
