@@ -4,9 +4,9 @@
 // <inFile> is a path in the docs repo: repos/<name>/README.md, GLOSSARY.md or ARCHITECTURE.md
 // at the root, docs/contribute-to-greenstand.md, or docs/shared-resources.md.
 // Headings get GitHub's anchors, so "#anchor" links work as they do on GitHub. Relative links
-// to a page that the site renders point to that page (ONBOARDING.md -> onboarding.html, and
-// the top README.md -> the landing page); other relative links point to the file on GitHub at
-// this commit.
+// to a page that the site renders point to that page (ONBOARDING.md -> onboarding.html, the top
+// README.md -> the landing page, and the text copy docs/capture-journey.md -> the illustrated page
+// capture-journey.html); other relative links point to the file on GitHub at this commit.
 // A repo name in a heading moves to the next line as one piece (see keepRepoNamesWhole).
 // A Mermaid block becomes a diagram, as on GitHub. The page loads the copy of Mermaid that the
 // deploy workflow puts on the site. The script fails if that copy is missing.
@@ -27,6 +27,9 @@ function sitePath(path) {
   if (path === "ARCHITECTURE.md") return "architecture.html";
   if (path === "docs/contribute-to-greenstand.md") return "contribute.html";
   if (path === "docs/shared-resources.md") return "shared-resources.html";
+  // The text copy of the capture journey: on the site, a link to it opens the illustrated page,
+  // which build-capture-journey.mjs writes.
+  if (path === "docs/capture-journey.md") return "capture-journey.html";
   // The landing page shows the estate index of README.md.
   if (path === "README.md") return "index.html";
   return null;

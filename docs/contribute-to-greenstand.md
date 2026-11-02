@@ -29,6 +29,8 @@ The full steps are in [Join the team](https://github.com/Greenstand/Greenstand-O
 
 - Read [Greenstand-Overview](https://github.com/Greenstand/Greenstand-Overview): the mission,
   the big picture of the platform, and the roadmap.
+- Read [The journey of a capture](./capture-journey.md). It follows one capture, a tree photo with
+  its GPS point and its tree data, from the grower's phone to the grower's reward.
 - Open the [repository index](../README.md). It groups the main source repos by area: core API,
   wallet, admin, web map, mobile, data ingest, and infrastructure. Each repo has an interactive
   viewer with a guided tour, an onboarding guide, and a glossary.

@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 // Build the landing page of the Pages site (<site-dir>/index.html) from the estate
 // (estate.mjs), so it shows the same areas, repos, and links as the README.md index. Like the top
-// of README.md, it also links the estate glossary, the volunteer guide, the ecosystem maps, and the
-// shared-resource page.
+// of README.md, it also links the estate glossary, the volunteer guide, the capture journey, the
+// ecosystem maps, and the shared-resource page. The name of the capture journey entry is the title
+// in capture-journey.json.
 // The deploy workflow runs it after it assembles <site-dir>/<repo>/. It fails if a page
 // that the landing page links to is missing there.
 // Usage: node build-landing.mjs <site-dir>
 import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { formerNamesText, loadEstate } from "./estate.mjs";
+import { CAPTURE_JOURNEY_DATA, formerNamesText, isObject, loadEstate, parseJson, readDocsFile } from "./estate.mjs";
 import { BASE_STYLE, esc } from "./site-html.mjs";
 
 const site = process.argv[2];
@@ -24,9 +25,9 @@ const ASSEMBLED = ["index.html", "knowledge-graph.json", "onboarding.html", "rea
 for (const { name } of repos) {
   for (const f of ASSEMBLED) if (!existsSync(join(site, name, f))) errors.push(`${site}/${name}/${f} is missing`);
 }
-// The deploy workflow renders these pages at the site root: the estate glossary, the volunteer
-// guide, the ecosystem maps, and the shared-resource page.
-const ROOT_PAGES = ["glossary.html", "contribute.html", "architecture.html", "shared-resources.html"];
+// The deploy workflow writes these pages at the site root: the estate glossary, the volunteer
+// guide, the ecosystem maps, the shared-resource page, and the capture journey.
+const ROOT_PAGES = ["glossary.html", "contribute.html", "architecture.html", "shared-resources.html", "capture-journey.html"];
 for (const f of ROOT_PAGES) if (!existsSync(join(site, f))) errors.push(`${site}/${f} is missing`);
 
 const link = (href, text) => `<a href="${esc(href)}">${text}</a>`;
@@ -54,8 +55,25 @@ function item({ name, description, formerNames, sha, date, source }) {
   );
 }
 
-// The ecosystem maps show how the code repos work together. The shared-resource page shows what
-// the code repos share. The "Start here" box lists both below its repos.
+// The capture journey tells how one capture travels through the system. The ecosystem maps show
+// how the code repos work together. The shared-resource page shows what the code repos share. The
+// "Start here" box lists the three below its repos: the story first, for a new volunteer.
+// The script reads only the title of capture-journey.json; build-capture-journey.mjs checks the
+// rest of the file.
+const journeyTitle = readDocsFile(CAPTURE_JOURNEY_DATA, errors, (text) => {
+  const data = parseJson(text);
+  if (!isObject(data) || typeof data.title !== "string" || !data.title.trim()) {
+    throw new Error("must have a title (a text). Run: node .github/scripts/build-capture-journey.mjs --check");
+  }
+  return data.title;
+});
+// The entry of the capture journey. The page template calls it after the error exit, so the
+// title is set.
+const journeyItem = (title) => entry(
+  "./capture-journey.html",
+  esc(title),
+  "How one capture travels from the grower's phone to the grower's reward, step by step, with pictures.",
+);
 const MAPS_ITEM = entry(
   "./architecture.html",
   "Ecosystem maps",
@@ -130,7 +148,7 @@ the source commit that the docs describe. The ${link("./glossary.html", "estate 
 business terms of all repos and the shared resources.</p>
 <p class="welcome"><strong>New volunteer?</strong> Read ${link("./contribute.html", "How to contribute to Greenstand")}:
 how to join the community, pick a first task, and get help.</p>
-${section(start, [MAPS_ITEM, SHARED_RESOURCES_ITEM])}
+${section(start, [journeyItem(journeyTitle), MAPS_ITEM, SHARED_RESOURCES_ITEM])}
 <nav class="jump" aria-label="Areas">
 <span>Areas:</span>
 ${jump}
