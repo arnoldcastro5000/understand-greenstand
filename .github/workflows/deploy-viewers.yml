@@ -161,11 +161,13 @@ jobs:
           # guide, README.md, and each per-repo README.
           node .github/scripts/render-md.mjs docs/shared-resources.md "$OUT/shared-resources.html" "The shared resources of the code repos" "./" "All viewers"
           # The capture journey: the illustrated page (capture-journey-page.mjs) and its images,
-          # built from capture-journey.json.
+          # built from capture-journey.json. Linked from the landing page, the ecosystem maps, the
+          # volunteer guide, and README.md.
           node .github/scripts/build-capture-journey.mjs --site "$OUT"
           # Moved pages: the old subpath of a renamed repo sends readers to the new subpath.
           node .github/scripts/build-moved.mjs "$OUT"
-          # Landing index: the areas and links of estate.json, as in the README.md index.
+          # Landing index: the areas and links of estate.json, as in the README.md index, and the
+          # title of capture-journey.json for its capture journey entry.
           # It fails if a page that the landing page links to is missing.
           node .github/scripts/build-landing.mjs "$OUT"
 

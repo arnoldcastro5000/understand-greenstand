@@ -17,6 +17,9 @@ The [estate glossary](GLOSSARY.md) lists the business terms of all repos and the
 resources, A to Z. It links each term to the repos and domains that use it, and each shared
 resource to its section of the shared-resource page.
 
+[The journey of a capture](./docs/capture-journey.md) follows one capture from the grower's phone
+to the grower's reward, step by step, with pictures.
+
 The [ecosystem maps](./ARCHITECTURE.md) show how the code repos work together at run time:
 capture and verification, the web map, the wallet, the shared database, and the platform.
 
