@@ -126,14 +126,14 @@
       "title": "The reward: the grower earns money",
       "icon": "reward",
       "story": [
-        "In the code, one organization has a payment rule. Every day, an automatic job counts the approved trees of each of its growers. It pays in steps of 100 trees: 100 trees give 120,000 leones, and 1,000 trees or more give the maximum, 1,200,000 leones. The job writes an \"earning\" with the status \"calculated\".",
-        "An admin opens the Earnings page and downloads the list. A person then pays each grower outside the Greenstand system. The admin uploads the payment confirmations on the Payments page, and each earning becomes \"paid\". The app does not show earnings, so the grower learns about the money from the payment itself."
+        "In the code, one organization has a payment rule. Every day, an automatic job counts the approved captures of each of its growers. It pays in steps of 100 captures: 100 captures give 120,000 leones, and 1,000 captures or more give the maximum, 1,200,000 leones. The job writes an \"earning\" with the status \"calculated\".",
+        "Greenstand's guide to earnings and payments gives the next steps for a typical case. In that case, a funder does them. A funder is the person or the organization that pays for the captures. The funder opens the Earnings page of the admin panel and downloads the list. Then the funder pays each grower outside the Greenstand system. Last, the funder logs the payments. The funder logs one earning in its detail panel, or many earnings with a file upload on the Payments page. Each logged earning becomes \"paid\". The guide says that the growers can see the payment data. But the Treetracker app and the wallet app have no earnings screen. So the grower learns about the money from the payment itself."
       ],
       "flags": [
-        {"kind": "guess", "text": "The organization is FCC, which we think is Freetown City Council. The job and the payments still run today. (The code shows no change since 2023.)", "question": "Is FCC the Freetown City Council, does the daily FCC earnings job still run, and who pays the growers, and how?"},
+        {"kind": "guess", "text": "The organization is FCC, which we think is Freetown City Council. The job and the payments still run today. (The code shows no change since 2023.)", "question": "Is FCC the Freetown City Council, does the daily FCC earnings job still run, and do the funders still pay the growers and log the payments this way?"},
         {"kind": "broken", "text": "The wallet app tells each new user \"we will gift you 1 token\". The token does not arrive today.", "issue": {"repo": "treetracker-wallet-app", "number": 914}}
       ],
-      "note": "Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture into the wallet of an organization. Chapter 2 tells that story.",
+      "note": "Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture of an organization's growers into a wallet that the operator names. Chapter 2 tells that story.",
       "images": [
         {"file": "reward.svg", "alt": "A drawing of the reward steps", "caption": "A drawing of the reward steps"}
       ],
@@ -142,7 +142,9 @@
         {"repo": "treetracker-airflow-dags", "path": "lib/contracts_earnings_fcc.py", "lines": "71-133", "commit": "6ede7fe", "names": ["% 100", "maxPayout = 1200000", "'calculated'"], "what": "computes and writes the earnings"},
         {"repo": "treetracker-admin-client", "path": "src/components/EarningsTable/EarningsTable.js", "lines": "252-253", "commit": "c2076e4", "names": ["actionButtonType=\"export\"", "getEarningsReal"], "what": "the download of the Earnings page"},
         {"repo": "treetracker-admin-client", "path": "src/components/PaymentsTable/PaymentsTable.js", "lines": "163-180", "commit": "c2076e4", "names": ["uploadCsvFile", "batchPatchEarnings"], "what": "the upload of the Payments page"},
+        {"repo": "treetracker-admin-client", "path": "src/components/common/CustomTableItemDetails/CustomTableItemDetails.js", "lines": "121", "commit": "c2076e4", "names": ["LOG PAYMENT"], "what": "the payment log of the detail panel"},
         {"repo": "treetracker-earnings-api", "path": "server/models/Earnings.js", "lines": "238-283", "commit": "7b89333", "names": ["earnings.status !== 'calculated'", "status: 'paid'"], "what": "marks an earning as paid"},
+        {"repo": "greenstand-documentation", "path": "docs/user-guides/earningshow.md", "lines": "14", "commit": "6f415de", "names": ["Funders download", "upload payment data"], "what": "Greenstand's guide: the funder downloads the earnings, pays the growers, and logs the payments"},
         {"repo": "treetracker-wallet-app", "path": "apps/web/src/app/(protected)/wallet/page.tsx", "lines": "82", "commit": "2c11089", "names": ["we will gift you 1 token"], "what": "the gift message"}
       ]
     }

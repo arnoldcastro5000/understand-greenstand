@@ -1,10 +1,13 @@
 # How to contribute to Greenstand
 
 Welcome. Greenstand is a nonprofit organization. A remote community of volunteers builds its
-open-source platform, Treetracker. Growers use the Treetracker app to take geotagged photos of
-the trees that they plant and keep alive. Each photo, with its place and time, is a capture.
-Greenstand verifies the captures, shows the trees on a web map, and can turn each verified
-capture into a token.
+open-source platform, Treetracker. Greenstand does not compete with tree-planting projects. It
+is a technical service provider to them: the projects use Treetracker to verify their work (see
+[The Model](https://docs.greenstand.org/overview/introduction/the-model)). Growers use the
+Treetracker app to take geotagged photos of the trees that they plant and keep alive. Each
+photo, with its place and time, is a capture. Admins verify the captures in the admin panel.
+The web map shows the trees. Funders can pay the growers for the verified captures, and verified
+captures can become tokens.
 
 You do not need to be an expert. Greenstand needs developers, testers, writers, designers,
 translators, and organizers. The community helps newcomers start.

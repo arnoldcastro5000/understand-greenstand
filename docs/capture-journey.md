@@ -140,15 +140,15 @@ The admin approves the photo, with the type of planting, the age of the tree, an
 
 <p><img src="capture-journey/reward.svg" width="360" alt="A drawing of the reward steps"><br><sub>A drawing of the reward steps</sub></p>
 
-In the code, one organization has a payment rule. Every day, an automatic job counts the approved trees of each of its growers. It pays in steps of 100 trees: 100 trees give 120,000 leones, and 1,000 trees or more give the maximum, 1,200,000 leones. The job writes an "earning" with the status "calculated".
+In the code, one organization has a payment rule. Every day, an automatic job counts the approved captures of each of its growers. It pays in steps of 100 captures: 100 captures give 120,000 leones, and 1,000 captures or more give the maximum, 1,200,000 leones. The job writes an "earning" with the status "calculated".
 
-An admin opens the Earnings page and downloads the list. A person then pays each grower outside the Greenstand system. The admin uploads the payment confirmations on the Payments page, and each earning becomes "paid". The app does not show earnings, so the grower learns about the money from the payment itself.
+Greenstand's guide to earnings and payments gives the next steps for a typical case. In that case, a funder does them. A funder is the person or the organization that pays for the captures. The funder opens the Earnings page of the admin panel and downloads the list. Then the funder pays each grower outside the Greenstand system. Last, the funder logs the payments. The funder logs one earning in its detail panel, or many earnings with a file upload on the Payments page. Each logged earning becomes "paid". The guide says that the growers can see the payment data. But the Treetracker app and the wallet app have no earnings screen. So the grower learns about the money from the payment itself.
 
 > **Best guess:** The organization is FCC, which we think is Freetown City Council. The job and the payments still run today. (The code shows no change since 2023.)
 
 > **Not working today:** The wallet app tells each new user "we will gift you 1 token". The token does not arrive today. See [treetracker-wallet-app #914](https://github.com/Greenstand/treetracker-wallet-app/issues/914).
 
-Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture into the wallet of an organization. Chapter 2 tells that story.
+Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture of an organization's growers into a wallet that the operator names. Chapter 2 tells that story.
 
 <details>
 <summary>For developers</summary>
@@ -159,8 +159,11 @@ Tokens are not a grower reward today. An operator can start a job that puts one 
 - treetracker-admin-client ([viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-admin-client/), [onboarding guide](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-admin-client/onboarding.html))
   - [`EarningsTable.js` lines 252 to 253](https://github.com/Greenstand/treetracker-admin-client/blob/c2076e4/src/components/EarningsTable/EarningsTable.js#L252-L253): the download of the Earnings page
   - [`PaymentsTable.js` lines 163 to 180](https://github.com/Greenstand/treetracker-admin-client/blob/c2076e4/src/components/PaymentsTable/PaymentsTable.js#L163-L180): the upload of the Payments page
+  - [`CustomTableItemDetails.js` line 121](https://github.com/Greenstand/treetracker-admin-client/blob/c2076e4/src/components/common/CustomTableItemDetails/CustomTableItemDetails.js#L121): the payment log of the detail panel
 - [treetracker-earnings-api](https://github.com/Greenstand/treetracker-earnings-api) (outside the docs repo)
   - [`Earnings.js` lines 238 to 283](https://github.com/Greenstand/treetracker-earnings-api/blob/7b89333/server/models/Earnings.js#L238-L283): marks an earning as paid
+- [greenstand-documentation](https://github.com/Greenstand/greenstand-documentation) (outside the docs repo)
+  - [`earningshow.md` line 14](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/user-guides/earningshow.md#L14): Greenstand's guide: the funder downloads the earnings, pays the growers, and logs the payments
 - treetracker-wallet-app ([viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-wallet-app/), [onboarding guide](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-wallet-app/onboarding.html))
   - [`page.tsx` line 82](https://github.com/Greenstand/treetracker-wallet-app/blob/2c11089/apps/web/src/app/%28protected%29/wallet/page.tsx#L82): the gift message
 
