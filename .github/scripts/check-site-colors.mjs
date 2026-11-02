@@ -4,6 +4,10 @@
 // - Each color is a pair [light, dark] of 6-digit hex colors, because the pages use them as they
 //   are.
 // - Each text color has a contrast of 4.5:1 or more on each background (WCAG 2.2 AA).
+// - The parcel field (the ink color at PARCEL_FIELD_INK_SHARE on the ground) has a contrast of
+//   1.25:1 or less with the ground, so the field stays in the background. Each text color has a
+//   contrast of 4.5:1 or more on the field, because the title and the estate strip lie on it. The
+//   ink share is more than 0, so the field shows.
 // - Each area color is 10 or more (CIE76) from each state color. Thus an area color does not
 //   look like the color of a state.
 // - Each two area colors are 10 or more apart (CIEDE2000) for normal vision, and for simulated
@@ -11,10 +15,11 @@
 //   readers with red-green color blindness can tell the areas apart too.
 // It shows every error at once.
 // Usage: node check-site-colors.mjs   exit 1 and show each error (CI)
-import { AREA_COLORS, BACKGROUNDS, LINES, STATES, TEXTS } from "./site-colors.mjs";
+import { AREA_COLORS, BACKGROUNDS, LINES, PARCEL_FIELD_INK_SHARE, STATES, TEXTS } from "./site-colors.mjs";
 
 const SCHEMES = ["light", "dark"];
 const MIN_CONTRAST = 4.5;
+const MAX_FIELD_CONTRAST = 1.25;
 const MIN_STATE_DISTANCE = 10; // CIE76
 const MIN_AREA_DISTANCE = 10; // CIEDE2000
 
@@ -44,6 +49,18 @@ for (const [kind, colors, used] of KINDS) {
     }
     if (!wrong.length) valid.get(kind).set(name, pair);
   }
+}
+
+// The ink share of the parcel field, for each scheme: a percent above 0 and at most 100.
+const inkShare = [];
+if (!Array.isArray(PARCEL_FIELD_INK_SHARE) || PARCEL_FIELD_INK_SHARE.length !== 2) {
+  errors.push("the ink share of the parcel field must be a pair of percents: [light, dark]");
+} else {
+  SCHEMES.forEach((scheme, i) => {
+    const p = PARCEL_FIELD_INK_SHARE[i];
+    if (typeof p === "number" && p > 0 && p <= 100) inkShare[i] = p;
+    else errors.push(`the ink share of the parcel field (${scheme}) must be a percent above 0 and at most 100; it is ${typeof p === "number" ? p : JSON.stringify(p)}`);
+  });
 }
 
 // The red, green, and blue channels of a hex color (sRGB, 0 to 1), and their linear values.
@@ -111,8 +128,13 @@ const seen = (rgb, matrix) => {
   const lin = rgb.map(toLinear);
   return matrix.map((row) => fromLinear(Math.min(1, Math.max(0, row[0] * lin[0] + row[1] * lin[1] + row[2] * lin[2]))));
 };
-// A value next to its limit, rounded down: 4.4999 shows as 4.49, not as 4.50.
+// A value next to its limit, rounded away from it: 4.4999 shows as 4.49, not as 4.50, below a
+// minimum; 1.2501 shows as 1.26, not as 1.25, above a maximum.
 const roundDown = (value, digits) => (Math.floor(value * 10 ** digits) / 10 ** digits).toFixed(digits);
+const roundUp = (value, digits) => (Math.ceil(value * 10 ** digits) / 10 ** digits).toFixed(digits);
+// color-mix(in srgb, <color> <share>, transparent) over a background: a mix of the sRGB channels.
+// site-html.mjs paints the parcel field with this mix.
+const mix = (color, background, share) => color.map((c, k) => c * share + background[k] * (1 - share));
 
 const texts = valid.get("text color");
 const backgrounds = valid.get("background");
@@ -123,6 +145,22 @@ SCHEMES.forEach((scheme, i) => {
       const ratio = contrast(channels(pair[i]), channels(backgroundPair[i]));
       if (ratio < MIN_CONTRAST) {
         errors.push(`the text color ${text} (${scheme}, ${pair[i]}) has a contrast of ${roundDown(ratio, 2)}:1 on the ${background} (${backgroundPair[i]}); it needs ${MIN_CONTRAST}:1 or more`);
+      }
+    }
+  }
+  const ink = texts.get("ink");
+  const ground = backgrounds.get("ground");
+  // The color of the parcel field where it is strongest: a boundary or a row at full mask.
+  if (inkShare[i] !== undefined && ink && ground) {
+    const field = mix(channels(ink[i]), channels(ground[i]), inkShare[i] / 100);
+    const ratio = contrast(field, channels(ground[i]));
+    if (ratio > MAX_FIELD_CONTRAST) {
+      errors.push(`the parcel field (${scheme}, ${inkShare[i]}% ink) has a contrast of ${roundUp(ratio, 2)}:1 with the ground (${ground[i]}); it needs ${MAX_FIELD_CONTRAST}:1 or less`);
+    }
+    for (const [text, pair] of texts) {
+      const onField = contrast(channels(pair[i]), field);
+      if (onField < MIN_CONTRAST) {
+        errors.push(`the text color ${text} (${scheme}, ${pair[i]}) has a contrast of ${roundDown(onField, 2)}:1 on the parcel field (${inkShare[i]}% ink on the ground); it needs ${MIN_CONTRAST}:1 or more`);
       }
     }
   }
@@ -152,4 +190,4 @@ if (errors.length) {
   process.exit(1);
 }
 const count = (colors) => Object.keys(colors).length;
-console.log(`the colors of the site look pass: ${count(TEXTS)} text colors on ${count(BACKGROUNDS)} backgrounds and ${count(AREA_COLORS)} area colors, light and dark`);
+console.log(`the colors of the site look pass: ${count(TEXTS)} text colors on ${count(BACKGROUNDS)} backgrounds and on the parcel field, and ${count(AREA_COLORS)} area colors, light and dark`);

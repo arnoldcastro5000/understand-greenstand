@@ -36,6 +36,19 @@ workflow. On a phone the estate strip is a picture (the estate mark): a strip ce
 the 24 px target size of WCAG 2.2 (decided 2026-11-02). The cells are links from the strip width
 where each cell can be 24 px wide; the script computes that width from the repo counts.
 
+Decided 2026-11-02 (ticket 08): the background is the **parcel field**. It shows the boundaries
+of field parcels in ink, at a contrast of 1.25:1 with the ground. It is a still layer under the
+legend rail on wide screens and under the title band (the masthead) on phones. The reading column
+stays plain. The field does not show in forced colors, with more contrast, or in print.
+
+Built 2026-11-02 (ticket 09): `build-parcel-field.mjs` draws the field from its seed into
+`art/parcel-field.svg` of the site. The file is a mask, the same on each run. `siteStyle` paints
+it with the ink color at `--parcel-ink-share` (`PARCEL_FIELD_INK_SHARE` in `site-colors.mjs`:
+11.5% light, 9.1% dark). The prototype had 9.2% in dark, which gives 1.2515:1 with the ground.
+`siteStyle` also holds the rail width `--rail`, and `site-html.mjs` holds the rail media queries
+`WIDE` and `NARROW`. In CI, `check-site-colors.mjs` keeps the field at 1.25:1 or less with the
+ground and each text color at 4.5:1 or more on the field.
+
 ## Direction contract
 
 THESIS: The site reads as a land-cover classification map of the code estate: areas are classes,
