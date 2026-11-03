@@ -39,7 +39,9 @@ name: Estate index
 # evidence entry that the error names.
 # Also fails when the text copy of the capture journey (docs/capture-journey.md) is stale,
 # when capture-journey.json has an error, or when the image directory docs/capture-journey/ does not
-# hold exactly the images of the data file. Fix: run
+# hold exactly the images of the data file. Also fails when a drawing in the site look (an SVG of
+# docs/capture-journey/ with the site color block) has stale site colors, uses a color that is not
+# one of its 5 neutral colors, or has a character with no glyph in its drawing font. Fix: run
 # `node .github/scripts/build-capture-journey.mjs` and follow its errors.
 # When a push or a pull request changes capture-journey.json, its images, or the code that builds
 # and checks them, also fails when GitHub does not hold a capture journey fact: a name is not in

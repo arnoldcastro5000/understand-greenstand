@@ -9,8 +9,15 @@
 // lines of a file of a public Greenstand repo at a commit, with 1 to 3 names that the lines hold
 // (a Capture journey fact). A repo of estate.json links to its viewer and onboarding guide; a repo
 // outside the estate links to GitHub.
-// Usage: node build-capture-journey.mjs                  check the data, rewrite the copy
-//        node build-capture-journey.mjs --check          exit 1 on a data error or a stale copy (CI)
+// A drawing in the site look is an SVG of the image directory with the site color block (see
+// site-drawings.mjs). Its colors come from site-colors.mjs. The default mode writes the current
+// block into the drawing. --check fails when the block is stale. --site copies the drawing with the
+// current block. Each mode fails when such a drawing uses another color. Each mode also fails when
+// its drawing font has no glyph for a character of its text.
+// Usage: node build-capture-journey.mjs                  check the data, rewrite the copy, and
+//          write the current color block into each drawing in the site look
+//        node build-capture-journey.mjs --check          exit 1 on a data error, a stale copy, or a
+//          stale color block (CI)
 //        node build-capture-journey.mjs --evidence       exit 1 when GitHub does not hold a fact.
 //          It reads each repo, cited file, issue, and image source through the GitHub API
 //          (GITHUB_TOKEN, if set). CI runs it only when the data, the images, or the code changes.
@@ -23,6 +30,7 @@ import { join } from "node:path";
 import { CAPTURE_JOURNEY_COPY as COPY, CAPTURE_JOURNEY_DATA as DATA, CAPTURE_JOURNEY_IMAGES as IMAGES, EM_DASH, answerStatus, citedLines, githubApi, isObject, isRepoPath, lineAnchor, loadEstate, missingNames, parseJson, parseLines, plural, readDocsFile, root, urlPath } from "./estate.mjs";
 import { FLAGS, ICONS, NO_ISSUE, creditText, pageHtml } from "./capture-journey-page.mjs";
 import { SITE_LOOK_FILES, undefinedProperties } from "./site-html.mjs";
+import { checkSubsetScript, drawingCheck } from "./site-drawings.mjs";
 
 const SCRIPT = ".github/scripts/build-capture-journey.mjs";
 const PAGE = "capture-journey.html";
@@ -274,6 +282,25 @@ function validData(data) {
 
 const data = validData(readDocsFile(DATA, errors, parseJson));
 
+// The drawings in the site look: each SVG of the image directory with the site color block, its
+// text, and its text with the current color block. The check reads the directory, not the data, so
+// its errors show with the data errors.
+const drawings = [];
+if (existsSync(join(root, IMAGES)) && statSync(join(root, IMAGES)).isDirectory()) {
+  const svgs = readdirSync(join(root, IMAGES), { withFileTypes: true }).filter((f) => f.isFile() && f.name.endsWith(".svg")).map((f) => f.name).sort();
+  for (const file of svgs) {
+    const at = `${IMAGES}/${file}`;
+    const svg = readFileSync(join(root, at), "utf8");
+    const next = drawingCheck(at, svg, errors);
+    if (next !== null) drawings.push({ file, at, svg, next });
+  }
+}
+if (drawings.length) checkSubsetScript(errors);
+const stale = drawings.filter((d) => d.next !== d.svg);
+// --check: a stale color block is an error. It shows with the other errors; with none, it shows with
+// a stale copy (the copy needs valid data, so its check comes last).
+const staleErrors = mode === "check" ? stale.map((d) => `${d.at}: the site colors are stale. Run: node ${SCRIPT}`) : [];
+
 // ---------- The view: the data with its links, for both outputs ----------
 
 // The directory of the images, as a relative path from the copy and from the page.
@@ -518,6 +545,7 @@ async function checkEvidence() {
 
 function exitOnErrors() {
   if (!errors.length) return;
+  errors.push(...staleErrors.splice(0));
   for (const e of errors) console.error(`error: ${e}`);
   process.exit(1);
 }
@@ -539,17 +567,24 @@ exitOnErrors();
 const images = data.stages.flatMap((s) => s.images ?? []);
 const summary = `${plural(data.stages.length, "stage")}, ${plural(data.stages.flatMap((s) => s.evidence).length, "evidence entry", "evidence entries")}, ${plural(images.length, "image")}`;
 if (mode === "check") {
-  if (readDocsFile(COPY, []) !== copy) {
-    console.error(`error: ${COPY} is stale. Run: node ${SCRIPT}`);
+  const staleNow = [...(readDocsFile(COPY, []) !== copy ? [`${COPY} is stale. Run: node ${SCRIPT}`] : []), ...staleErrors];
+  if (staleNow.length) {
+    for (const s of staleNow) console.error(`error: ${s}`);
     process.exit(1);
   }
-  console.log(`${COPY} is current (${summary})`);
+  console.log(drawings.length ? `${COPY} and ${plural(drawings.length, "drawing")} are current (${summary})` : `${COPY} is current (${summary})`);
 } else if (mode === "site") {
   writeFileSync(join(siteDir, PAGE), page);
   mkdirSync(join(siteDir, imageDir), { recursive: true });
-  for (const image of images) copyFileSync(join(root, IMAGES, image.file), join(siteDir, imageDir, image.file));
+  const current = new Map(drawings.map((d) => [d.file, d.next]));
+  for (const image of images) {
+    const to = join(siteDir, imageDir, image.file);
+    if (current.has(image.file)) writeFileSync(to, current.get(image.file));
+    else copyFileSync(join(root, IMAGES, image.file), to);
+  }
   console.log(`wrote ${join(siteDir, PAGE)} and ${plural(images.length, "image")} (${summary})`);
 } else {
   writeFileSync(join(root, COPY), copy);
-  console.log(`wrote ${COPY} (${summary})`);
+  for (const d of stale) writeFileSync(join(root, d.at), d.next);
+  console.log(`wrote ${COPY}${stale.length ? ` and ${plural(stale.length, "drawing")}` : ""} (${summary})`);
 }

@@ -25,6 +25,7 @@ on:
       - ".github/scripts/estate.mjs"
       - ".github/scripts/render-md.mjs"
       - ".github/scripts/site-colors.mjs"
+      - ".github/scripts/site-drawings.mjs"
       - ".github/scripts/site-html.mjs"
       - ".github/scripts/slug.mjs"
       - ".github/scripts/start-path.mjs"

@@ -156,6 +156,19 @@ typography:
   mono:
     fontFamily: "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace"
     fontSize: "0.86em"
+  drawing-title:
+    fontFamily: "\"Archivo Drawing\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif"
+    fontSize: "18px"
+    fontWeight: 600
+  drawing-line:
+    fontFamily: "\"Archivo Drawing\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif"
+    fontSize: "15.5px"
+    fontWeight: 400
+  drawing-numeral:
+    fontFamily: "\"Archivo Drawing\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Noto Sans\", sans-serif"
+    fontSize: "17px"
+    fontWeight: 600
+    fontFeature: "\"tnum\""
 rounded:
   none: "0"
 spacing:
@@ -303,6 +316,20 @@ components:
     typography: "{typography.label-summary}"
     rounded: "{rounded.none}"
     padding: "0.25rem 0.9rem"
+  drawing:
+    backgroundColor: "{colors.surface}"
+    rounded: "{rounded.none}"
+  drawing-step:
+    backgroundColor: "{colors.ground}"
+    textColor: "{colors.ink}"
+    typography: "{typography.drawing-title}"
+    rounded: "{rounded.none}"
+  drawing-step-number:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.ground}"
+    typography: "{typography.drawing-numeral}"
+    rounded: "{rounded.none}"
+    size: "30px"
 ---
 
 # Design System: understand-greenstand site look
@@ -356,10 +383,10 @@ The state colors (`STATES`). A state color is the color of a state. The state co
 A state never shows by its state color alone: a best guess also has a hatch, and a part that does not work also has a cross. CI checks these tokens. The capture journey page shows both states: in a state tag, in a flag, and in the legend (see State marks). The error image of a broken diagram also uses a state color: Mermaid draws it in the not-working color (`errorBkgColor` and `errorTextColor`), with its own error text.
 
 ### Neutral
-- **Mineral Ground** (`ground`): the page background, the `html` background, the browser bar color (`theme-color`), the scrollbar track, and the fill of the diagram nodes and clusters. On the capture journey page, it is the fill of a station, the color of a station number and of a station icon on hover, and the background of the sticky bar.
-- **Field Surface** (`surface`): a field on the page. The Start here field uses it. On a text page, the inline code, the code blocks, the table heads, the quotes, and the diagram plates use it. It is also the background of the edge labels in a diagram. On the capture journey page, the image plate of a stage and the inline code use it. On a moved page, the inline code uses it.
-- **Evergreen-Black Ink** (`ink`): body text, headings, the jump links, the back links, the rail names, the "you are here" outline, the 2px rule above a text-page h2, and the labels of the diagram nodes. On the capture journey page: the track line, the station borders and icons, the station fill on hover, the fill of a station number, the 2px rule above a stage, the border of a bar dot, and the fill of the current bar dot.
-- **Lichen Muted** (`muted`): secondary text: the Start here intro, the snapshot line, the "Go deeper" line, the path numerals, the area keys in the legend rail, the list markers, and the quote text. In a diagram, it is the color of the lines and of the node borders. On the capture journey page: the chapter line, the subtitle, the legend, the stage numbers, the captions, the marker of a "For developers" box, the text "No public issue yet.", and the footer. Muted has a second job as a fill: the done dots of the sticky bar (fill and border).
+- **Mineral Ground** (`ground`): the page background, the `html` background, the browser bar color (`theme-color`), the scrollbar track, and the fill of the diagram nodes and clusters. On the capture journey page, it is the fill of a station, the color of a station number and of a station icon on hover, and the background of the sticky bar. In a drawing in the site look: the fill of a step box, of the cloud, and of the cylinder, and the color of a step numeral.
+- **Field Surface** (`surface`): a field on the page. The Start here field uses it. On a text page, the inline code, the code blocks, the table heads, the quotes, and the diagram plates use it. It is also the background of the edge labels in a diagram. On the capture journey page, the image plate of a stage and the inline code use it. On a moved page, the inline code uses it. It is the background of a drawing in the site look.
+- **Evergreen-Black Ink** (`ink`): body text, headings, the jump links, the back links, the rail names, the "you are here" outline, the 2px rule above a text-page h2, and the labels of the diagram nodes. On the capture journey page: the track line, the station borders and icons, the station fill on hover, the fill of a station number, the 2px rule above a stage, the border of a bar dot, and the fill of the current bar dot. In a drawing in the site look: the titles and the squares of the step numbers.
+- **Lichen Muted** (`muted`): secondary text: the Start here intro, the snapshot line, the "Go deeper" line, the path numerals, the area keys in the legend rail, the list markers, and the quote text. In a diagram, it is the color of the lines and of the node borders. On the capture journey page: the chapter line, the subtitle, the legend, the stage numbers, the captions, the marker of a "For developers" box, the text "No public issue yet.", and the footer. Muted has a second job as a fill: the done dots of the sticky bar (fill and border). In a drawing in the site look: the other lines of text, the borders of the boxes, the lines, and the arrow heads.
 - **Hairline** (`line`): 1px rules between entries, the masthead rule on narrow pages, the jump-link border, the rail-edge hairline (a fixed 1px rule at the edge of the legend rail on a wide screen), the table row rules, the `hr` rule, the hover underline of a back link, the cluster borders of a diagram, and the scrollbar thumb. On the capture journey page: the rule below the sticky bar, the hover underline of a station label, the border of a drawing, the border of a "For developers" box, and the rule above the footer.
 - **Ink Edge** (`edge`): a 1px inset outline in 25% ink on each area fill. It has a second job: a 1px inset outline (`outline-offset: -1px`) on a phone screenshot of the capture journey page.
 - **Ink Selection** (`selection`): the background of selected text, an 18% ink tint. Selected text stays ink.
@@ -380,15 +407,20 @@ A state never shows by its state color alone: a best guess also has a hatch, and
 
 **The Node Tint Rule.** The node of a repo in a diagram has a fill of its area color at `DIAGRAM_NODE_TINT` (30%) mixed with the ground. The ink labels have a contrast of 4.5:1 or more on the node tint of each area color, in light and in dark mode. The tint is a percent above 0 and at most 100. `check-site-colors.mjs` enforces these rules in CI. Today the weakest label is ink on the ink tint (Organization): 7.76:1 in light mode and 5.93:1 in dark mode. Change the tint only in `DIAGRAM_NODE_TINT`.
 
+**The Drawing Colors Rule.** A drawing in the site look holds the site color block: the 5 neutral colors (ground, surface, ink, muted, line) as CSS custom properties on `svg`, light and dark by `prefers-color-scheme`. An SVG in an `<img>` cannot read the custom properties of the page, so the drawing holds its own copy. `build-capture-journey.mjs` writes the block from `site-colors.mjs` (`DRAWING_COLORS` in `site-drawings.mjs`), and `--site` copies the drawing with the current block. `--check` (CI) fails on a stale block. Each mode fails on a `var(--x)` that is not one of the 5. Each mode also fails on any other color outside the block: a hex color, a color function, a named color, or `currentColor`. A drawing with no site color block fails when it uses `var(--x)` or the drawing font. Thus a drawing in the site look has no area color, no state color, and no link color (the One Color, One Job Rule). A drawing with no site color block keeps its own colors.
+
 ## Typography
 
 **Display Font:** Archivo (with the system sans as the fallback)
 **Body Font:** the system sans (`system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif`)
 **Label/Mono Font:** Archivo for labels; `ui-monospace, "SF Mono", Menlo, Consolas, monospace` for code and commit ids only
+**Drawing Font:** "Archivo Drawing", a subset of Archivo in each drawing in the site look (with the system sans as the fallback)
 
 **Character:** Archivo is a grotesque with a width axis. It gives the headings and the legend labels the compact voice of a map key. The system sans keeps the body text plain and fast to load.
 
 Archivo comes from the npm package `@fontsource-variable/archivo` 5.3.0, file `archivo-latin-wdth-normal.woff2` (weight 100 to 900, width 62% to 125%, SIL OFL 1.1). The deploy workflow pins the package by its SHA-512 and copies the file and its license to `vendor/archivo/`. Each page preloads it (`siteHead`), but a moved page does not: a moved page shows no Archivo text (`siteHead(toRoot, { preloadFont: false })`). `font-display: swap` applies.
+
+The drawing font comes from the same Archivo file. An SVG in an `<img>` cannot load the font of the page, so each drawing in the site look holds its own copy in the drawing font block. `subset-drawing-font.py` writes the block: 2 static faces at a width of 87.5% (weight 600 and weight 400), with only the characters of the drawing, as WOFF2 data URLs. The CSS family is "Archivo Drawing". The script checks the SHA-256 of the source file. Each face keeps the copyright and license lines of the font (OFL 1.1). `build-capture-journey.mjs` fails when a character of a drawing has no glyph in its drawing font.
 
 ### Hierarchy
 - **Display** (720, `clamp(2rem, 1.4rem + 2.6vw, 3.1rem)`, 1.15, -0.025em): the site title in the masthead. In the legend rail it is 1.95rem with a line height of 1.02. Below 30rem it takes a width of 78% and -0.02em.
@@ -422,12 +454,20 @@ On the capture journey page:
 - A long word breaks anywhere (`overflow-wrap: anywhere`), so no text makes the page wider than the screen. Code stays on one line, because a reader copies it.
 - In a title, "the", "a", or "an" stays on the line of the next word (a no-break space).
 
+In a drawing in the site look (all text in the drawing font, with `text-rendering: geometricPrecision`):
+- **Drawing title** (600, 18px, ink): the title of a step, and the name of the cloud, of the cylinder, and of a dashed box.
+- **Drawing line** (400, 15.5px, muted): the other lines. A repo name is a drawing line too, not monospace, as the repo nodes of the diagrams.
+- **Drawing numeral** (600, 17px, tabular, ground): the step number on its ink square.
+- The sizes are in drawing units. At a 390px screen, the page shows a drawing 310px wide, so a drawing line shows at 12px.
+
 ### Named Rules
 **The Two Voices Rule.** Archivo sets headings, labels, and numerals. The system sans sets the body text. Monospace sets code and commit ids only.
 
 **The Narrow Label Rule.** Archivo labels use a width of 87.5%. Numerals use a width of 75%. The full width is for headings. Headings use `text-wrap: balance`.
 
 **The No Lone Word Rule.** `siteStyle` sets `text-wrap: pretty` on paragraphs, list items, `dd`, and quotes, on every page in the site look. Thus the browser avoids one word alone on the last line of a paragraph.
+
+**The Drawing Font Rule.** All text of a drawing in the site look is in the drawing font. The system sans is only its fallback. When the words of a drawing change, run `subset-drawing-font.py`, so that the drawing font has each character.
 
 ## Layout
 
@@ -492,7 +532,7 @@ Motion is small and has one job: it shows which cell is under the pointer or the
 
 ## Shapes
 
-All corners are square (radius 0). Area fills are plain rectangles: strip cells, mark cells, and chips (0.8em squares). Rules are straight: 1px hairlines between entries, around the jump links, and at the edge of the legend rail, and a 3px rule in the area color above each area section. The parcel field has two marks only: straight boundaries with round joins, and round points in rows. The Start here field has no border; its surface tone sets it apart. On a text page, the code, the table heads, the quotes, and the diagram plates are square surface fields with no border. A quote has no rule at its side. The h2 has a 2px ink rule above it. Table rows and `hr` are 1px hairlines. A repo node of a diagram has a 1.5px border in its area color. On the capture journey page, the stations, the station numbers, the bar dots, the state marks, the flags, the image plates, and the "For developers" boxes are square. The track line and the station borders are 1.5px ink. A flag has a 1px border in its state color. A stage has a 2px ink rule above it, as the text-page h2.
+All corners are square (radius 0). Area fills are plain rectangles: strip cells, mark cells, and chips (0.8em squares). Rules are straight: 1px hairlines between entries, around the jump links, and at the edge of the legend rail, and a 3px rule in the area color above each area section. The parcel field has two marks only: straight boundaries with round joins, and round points in rows. The Start here field has no border; its surface tone sets it apart. On a text page, the code, the table heads, the quotes, and the diagram plates are square surface fields with no border. A quote has no rule at its side. The h2 has a 2px ink rule above it. Table rows and `hr` are 1px hairlines. A repo node of a diagram has a 1.5px border in its area color. On the capture journey page, the stations, the station numbers, the bar dots, the state marks, the flags, the image plates, and the "For developers" boxes are square. The track line and the station borders are 1.5px ink. A flag has a 1px border in its state color. A stage has a 2px ink rule above it, as the text-page h2. A drawing in the site look is square too. Its step boxes, its cloud, and its cylinder (a store of data) have a ground fill and a 1.5 muted border. Its lines and arrow heads are muted, at a width of 2. A dashed border (`stroke-dasharray: 6 5`) marks a step outside the Greenstand system or an older path.
 
 ## Components
 
@@ -598,7 +638,7 @@ A state shows by its mark, its label, and its state color together.
 - **Layout:** the images and the text side by side (1 : 1.2). The text is in the wider column. A flipped stage (each second stage) mirrors the columns. A stage with no images is one column. In a narrow `main` (46rem or less), each stage is one column.
 - **Stage number:** "Stage N of 6" after a small station icon (a 1.75rem square, 1.5px ink border, ink icon). Archivo 600 .82rem/1.2, width 87.5%, tabular, muted. It is a section number: the craft floor allows a number that carries the order.
 - **Heading:** the h2 in the text-page headline style (660, 1.5rem).
-- **Images:** the images lie on a plate in the surface color, with a padding of 1.25rem and a gap of 1rem, in the center. A phone screenshot is 150px wide, with a 1px inset outline in the ink edge color. A drawing is at most 26rem wide, with a hairline border. A caption is muted, .85rem/1.4, under its image, in the center. The four SVG drawings in `docs/capture-journey/` keep their own colors from before the site look (white or dark cards with green, blue, and amber marks). They are not a rule source.
+- **Images:** the images lie on a plate in the surface color, with a padding of 1.25rem and a gap of 1rem, in the center. A phone screenshot is 150px wide, with a 1px inset outline in the ink edge color. A drawing is at most 26rem wide, with a hairline border. A caption is muted, .85rem/1.4, under its image, in the center. Two of the four SVG drawings in `docs/capture-journey/` are drawings in the site look: `bundle-chain.svg` (stage 3) and `reward.svg` (stage 6). A drawing in the site look holds the site color block and the drawing font block (see the Drawing Colors Rule and the Drawing Font Rule). It is 400 units wide. Its background is the surface. A step is a square box in the ground color with a 1.5 muted border. A step number is a 30-unit ink square with a ground numeral, as the station number of the track. A step has no color of its own: its words say who does it. A muted line with an arrow head joins two steps. A dashed box marks a step outside the Greenstand system (step 4 of the reward) and the older path (the bundle chain). The page shows a drawing 350px wide at a 1280px screen, 416px wide at 1024px, and 310px wide at 390px. The text copy on GitHub shows it 360px wide. `web-map-badges.svg` and `verify-page.svg` keep their own colors, because they show screens of Greenstand apps. They are not a rule source.
 - **For developers:** a square `details` box with a hairline border and a padding of .25rem .9rem. The summary is Archivo 600 .92rem/1.6, width 87.5%, with a muted marker.
 
 ### Capture journey footer
@@ -623,11 +663,13 @@ The masthead holds only the estate mark: a moved page has no back link, because 
 - **Do** set headings, labels, and numerals in Archivo, and body text in the system sans.
 - **Do** keep a strip cell at 24px or more wherever it is a link.
 - **Do** turn off motion under `prefers-reduced-motion: reduce`.
+- **Do** put a drawing of the capture journey in the site look, unless it shows a screen of a Greenstand app: the site color block, the drawing font block, and the 5 neutral colors only. Run `build-capture-journey.mjs` for the colors and `subset-drawing-font.py` for the font.
 
 ### Don't:
 - **Don't** color text with an area color.
 - **Don't** show a state by its state color alone.
 - **Don't** use water blue for anything but links and the focus ring.
+- **Don't** put an area color, a state color, or water blue in a drawing in the site look.
 - **Don't** use a drop shadow, a gradient, a rounded corner, or leaf art. The one exception is the scroll shadows of a wide diagram (see the Flat Map Rule).
 - **Don't** use the default look of Mermaid; it draws node shadows. Use the "classic" look.
 - **Don't** add a Greenstand logo or Greenstand brand colors. The site has no binding Greenstand brand, and it shows no Greenstand logo until Greenstand approves one (PRODUCT.md).

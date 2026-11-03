@@ -10,7 +10,7 @@
 // Source URL, and its valid former names (a list, often empty). repos lists the repos of all
 // areas, in order. errors lists every problem at once; the caller prints them and exits.
 // Also exports the helpers that the build scripts share: readDocsFile, parseJson, markedBlock,
-// replaceMarked, formerNamesText, EM_DASH, fencedLines, readGraph, isObject, escapeRegExp,
+// markedSpan, replaceMarked, formerNamesText, EM_DASH, fencedLines, readGraph, isObject, escapeRegExp,
 // urlPath, plural, the name rule of the evidence (expandRepoName, hasWholeName, missingNames),
 // the evidence form (isRepoPath, parseLines, lineAnchor, citedLines), the GitHub API of the
 // evidence checks (githubApi, RAW, answerStatus), and the paths of the shared-resource page and of
@@ -327,22 +327,32 @@ const occurrences = (text, marker) => text.split(marker).length - 1;
 // the markers, and the caller then inserts the block.
 export const markedBlock = ({ begin, end }, inner) => `${begin}\n\n${inner}\n\n${end}`;
 
-// Replace the marked block in the text of file at with inner. Return the new text. If the
-// markers are not one of each, in order, record an error and return the text unchanged. If the
-// text has neither marker and markers.optional is set, return null: the caller inserts the block.
-export function replaceMarked(at, text, markers, inner, errors) {
+// Find the marked block in the text of file at: { start, stop }, from the start of its BEGIN marker
+// to the end of its END marker. If the markers are not one of each, in order, record an error and
+// return undefined. If the text has neither marker and markers.optional is set, return null.
+export function markedSpan(at, text, markers, errors) {
   const { begin, end, what, optional } = markers;
   const begins = occurrences(text, begin);
   const ends = occurrences(text, end);
   if (begins === 0 && ends === 0) {
     if (optional) return null;
-    return errors.push(`${at} lacks the BEGIN/END markers of the ${what}`), text;
+    return void errors.push(`${at} lacks the BEGIN/END markers of the ${what}`);
   }
   if (begins !== 1 || ends !== 1) {
-    return errors.push(`${at}: ${begins} BEGIN and ${ends} END markers of the ${what}; expected one of each${optional ? ", or none" : ""}`), text;
+    return void errors.push(`${at}: ${begins} BEGIN and ${ends} END markers of the ${what}; expected one of each${optional ? ", or none" : ""}`);
   }
   const start = text.indexOf(begin);
   const stop = text.indexOf(end);
-  if (stop < start) return errors.push(`${at}: the END marker of the ${what} comes before its BEGIN marker`), text;
-  return text.slice(0, start) + markedBlock(markers, inner) + text.slice(stop + end.length);
+  if (stop < start) return void errors.push(`${at}: the END marker of the ${what} comes before its BEGIN marker`);
+  return { start, stop: stop + end.length };
+}
+
+// Replace the marked block in the text of file at with inner. Return the new text. If the
+// markers are not one of each, in order, record an error and return the text unchanged. If the
+// text has neither marker and markers.optional is set, return null: the caller inserts the block.
+export function replaceMarked(at, text, markers, inner, errors) {
+  const span = markedSpan(at, text, markers, errors);
+  if (span === null) return null;
+  if (span === undefined) return text;
+  return text.slice(0, span.start) + markedBlock(markers, inner) + text.slice(span.stop);
 }
