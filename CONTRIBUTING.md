@@ -47,6 +47,7 @@ the data file, then run `node .github/scripts/build-capture-journey.mjs`.
    node .github/scripts/check-former-names.mjs
    node .github/scripts/check-graphs.mjs
    node .github/scripts/check-site-colors.mjs
+   node .github/scripts/build-contributors.mjs --check
    ```
 
    If you change `shared-resources.json`, also run
@@ -69,6 +70,30 @@ the data file, then run `node .github/scripts/build-capture-journey.mjs`.
 
 6. Open a pull request. `main` accepts changes only through a pull request. The required checks
    must pass.
+
+## Change the contributors page
+
+The [contributors page](https://arnoldcastro5000.github.io/understand-greenstand/contributors.html)
+is on the Pages site only. The deploy builds it from public GitHub data on each run, and once a
+day. No data file is in this repo. Two lists in [`recognition.json`](./recognition.json) change
+the counts. Change them by a pull request:
+
+- `bots`: an account of type User that is a bot, for example an AI coding agent with its own
+  account. Give its account id (`gh api users/<login> -q .id`), its login, and a note.
+- `excluded`: an item to leave out, for example spam: the URL of a pull request, of a comment on
+  it (`#issuecomment-<id>`), or of a review of it (`#pullrequestreview-<id>`), and a reason.
+
+When a pull request changes `recognition.json`, the required check also reads GitHub: each bot
+account and each excluded item must exist. Run the same check before you push:
+`GITHUB_TOKEN="$(gh auth token)" node .github/scripts/build-contributors.mjs --evidence`. When an
+entry matches nothing in the data at a deploy (for example, GitHub deleted the spam), the deploy
+gives a warning. Then remove the entry.
+
+A person asks to be removed with the form
+[Remove me from the contributors page](https://github.com/arnoldcastro5000/understand-greenstand/issues/new?template=remove-me.yml).
+The repo owner adds the account id of the issue author to the `RECOGNITION_OPT_OUT` secret (account
+ids, or `none`), and runs the deploy workflow by hand, within 7 days. To put a person back, the
+owner removes the id in the same way. The secret keeps the list out of public view.
 
 ## Change the shared-resource page or the capture journey
 

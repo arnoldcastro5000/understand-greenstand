@@ -68,6 +68,9 @@ The full steps are in [Join the team](https://github.com/Greenstand/Greenstand-O
   links to guides for this model.
 - Keep each pull request small: one issue, one pull request. A small pull request is easier to
   review.
+- After your first pull request, look for your name on the
+  [contributors page](https://arnoldcastro5000.github.io/understand-greenstand/contributors.html).
+  It thanks each person who contributed this quarter, and it welcomes each new contributor.
 
 ## Help without code
 

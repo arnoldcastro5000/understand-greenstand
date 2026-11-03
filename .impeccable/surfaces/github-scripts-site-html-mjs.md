@@ -2,13 +2,13 @@
 version: 1
 slug: "github-scripts-site-html-mjs"
 primary_target: ".github/scripts/site-html.mjs"
-related_targets: [".github/scripts/build-landing.mjs",".github/scripts/render-md.mjs",".github/scripts/capture-journey-page.mjs",".github/scripts/build-moved.mjs"]
+related_targets: [".github/scripts/build-landing.mjs",".github/scripts/render-md.mjs",".github/scripts/capture-journey-page.mjs",".github/scripts/build-moved.mjs",".github/scripts/contributors-page.mjs"]
 ---
 
 # Surface brief: the built pages of the Pages site
 
-Scope: the landing page, the markdown pages (`render-md.mjs`), the capture journey page, and the
-moved pages. Not the knowledge-graph viewer (third-party; keeps its theme). Mode: Read.
+Scope: the landing page, the markdown pages (`render-md.mjs`), the capture journey page, the
+contributors page (`contributors-page.mjs`, since 2026-11-03), and the moved pages. Not the knowledge-graph viewer (third-party; keeps its theme). Mode: Read.
 
 Audience and job: new volunteer developers find the right repo, its viewer, and its onboarding
 guide, and understand how the repos work together. Second: maintainers. The words, links, data,

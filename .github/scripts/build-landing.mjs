@@ -2,14 +2,16 @@
 // Build the landing page of the Pages site (<site-dir>/index.html) from the estate
 // (estate.mjs), so it shows the same areas, repos, and links as the README.md index. Like the top
 // of README.md, it also links the estate glossary, the volunteer guide, the capture journey, the
-// ecosystem maps, and the shared-resource page. The Start here box shows the steps of the Start
-// here path (start-path.mjs), like the Start here section of the estate index.
+// ecosystem maps, and the shared-resource page. Its "New volunteer?" line also links the
+// contributors page (build-contributors.mjs). The Start here box shows the steps of the Start here
+// path (start-path.mjs), like the Start here section of the estate index.
 // The page is in the site look (site-html.mjs). The estate strip shows each repo as a cell in the
 // color of its area; each cell links to the entry of the repo. On wide screens the strip stands
 // upright in the legend rail, with the names of the repos and the areas.
-// The deploy workflow runs it after it assembles <site-dir>/<repo>/. It fails if a page
-// that the landing page links to, or the font or the parcel field of the site look, is missing
-// there.
+// The deploy workflow runs it after it assembles <site-dir>/<repo>/ and puts the contributors page
+// there. It fails if a page that the landing page links to, or the font or the parcel field of the
+// site look, is missing there. That check also covers the files that the contributors page loads
+// (the font and the parcel field): build-contributors.mjs runs in a job with no site.
 // Usage: node build-landing.mjs <site-dir>
 import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -32,9 +34,9 @@ for (const { name } of repos) {
   for (const f of ASSEMBLED) if (!existsSync(join(site, name, f))) errors.push(`${site}/${name}/${f} is missing`);
 }
 // The deploy workflow writes these files at the site root: the pages of the estate glossary, the
-// volunteer guide, and the steps of the Start here path, and the font and the parcel field of the
-// site look.
-const ROOT_FILES = ["glossary.html", "contribute.html", ...steps.filter((s) => !s.links).map((s) => s.page), ...SITE_LOOK_FILES];
+// volunteer guide, the contributors page, and the steps of the Start here path, and the font and
+// the parcel field of the site look.
+const ROOT_FILES = ["glossary.html", "contribute.html", "contributors.html", ...steps.filter((s) => !s.links).map((s) => s.page), ...SITE_LOOK_FILES];
 for (const f of ROOT_FILES) if (!existsSync(join(site, f))) errors.push(`${site}/${f} is missing`);
 
 const link = (href, text) => `<a href="${esc(href)}">${text}</a>`;
@@ -247,7 +249,8 @@ interactive knowledge-graph viewer, an onboarding guide, a glossary, and a READM
 the source commit that the docs describe. The ${link("./glossary.html", "estate glossary")} lists the
 business terms of all repos and the shared resources.</p>
 <p class="welcome"><strong>New volunteer?</strong> Read ${link("./contribute.html", "How to contribute to Greenstand")}:
-how to join the community, pick a first task, and get help.</p>
+how to join the community, pick a first task, and get help. See who contributed this quarter on the
+${link("./contributors.html", "contributors page")}.</p>
 ${section(start)}
 <nav class="jump" aria-label="Areas">
 <span>Areas:</span>
