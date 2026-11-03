@@ -17,7 +17,7 @@ see the [ecosystem maps](../ARCHITECTURE.md).
 | [Web hosting and CDN](#web-hosting-and-cdn) | 3 (3 deploy) |
 | [Photo and upload storage](#photo-and-upload-storage) | 2 (2 write) |
 | [Shared database](#shared-database) | 6 (2 read, 4 write) |
-| [Message broker](#message-broker) | 3 (3 publish, 2 consume) |
+| [Message broker](#message-broker) | 2 (2 publish, 1 consume) |
 | [Sign-in](#sign-in) | 1 (1 sign&nbsp;in) |
 | [Monitoring and logs](#monitoring-and-logs) | 0 |
 
@@ -43,7 +43,7 @@ need a Docker Hub login to work on a code repo.
 | treetracker-admin-api | push, pull | [build workflow](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/.github/workflows/treetracker-admin-api-build-deploy.yml#L75-L84), [manifest](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/deployment/base/treetracker-admin-api-deployment.yaml#L28) |
 | treetracker-airflow-dags | pull | [Airflow DAG&nbsp;1](https://github.com/Greenstand/treetracker-airflow-dags/blob/a537231/migrate_captures_dag.py#L63), [Airflow DAG&nbsp;2](https://github.com/Greenstand/treetracker-airflow-dags/blob/a537231/migrate_stakeholders_dag.py#L64) |
 | treetracker-api | push, pull | [build workflow](https://github.com/Greenstand/treetracker-api/blob/85258c8/.github/workflows/treetracker-api-build-deploy-dev.yml#L104-L114), [manifest](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/deployment.yaml#L28) |
-| treetracker-field-data | push, pull | [build workflow](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/.github/workflows/treetracker-api-build-deploy-dev.yml#L109-L119), [manifest](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/deployment.yaml#L28) |
+| treetracker-field-data | push, pull | [build workflow](https://github.com/Greenstand/treetracker-field-data/blob/8ffb53c/.github/workflows/treetracker-api-build-deploy-dev.yml#L102-L112), [manifest](https://github.com/Greenstand/treetracker-field-data/blob/8ffb53c/deployment/base/deployment.yaml#L28) |
 | treetracker-query-api | push, pull | [build workflow](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/.github/workflows/treetracker-query-api-build-deploy-dev.yml#L57-L67), [manifest](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/deployment/base/deployment.yaml#L29) |
 | treetracker-tile-server | push, pull | [build workflow](https://github.com/Greenstand/treetracker-tile-server/blob/b619c05/.github/workflows/build-deploy.yml#L50-L59), [manifest](https://github.com/Greenstand/treetracker-tile-server/blob/b619c05/deployment/base/deployment.yaml#L39), [Dockerfile](https://github.com/Greenstand/treetracker-tile-server/blob/b619c05/Dockerfile#L1) |
 | treetracker-wallet-api | push, pull | [build workflow](https://github.com/Greenstand/treetracker-wallet-api/blob/e95c15a/.github/workflows/treetracker-wallet-api-build-deploy-dev.yml#L53-L63), [manifest](https://github.com/Greenstand/treetracker-wallet-api/blob/e95c15a/deployment/base/treetracker-wallet-api-deployment.yaml#L28) |
@@ -72,7 +72,7 @@ The names that you see in the workflows and the manifests:
 | Image | `greenstand/treetracker-web-map-client-dev` |
 | Image | `greenstand/treetracker-web-map-client-test` |
 
-Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-10-17).
+Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-11-02).
 
 <!-- END shared resource container-registry names -->
 
@@ -119,7 +119,7 @@ repos use 2 of the 4 ways:
 | images-api | deploy | [deploy workflow](https://github.com/Greenstand/images-api/blob/9d761d1/.github/workflows/treetracker-api-deploy-prod.yml#L23-L24) |
 | treetracker-admin-api | deploy | [deploy workflow](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/.github/workflows/treetracker-admin-api-deploy-prod.yml#L25-L26) |
 | treetracker-api | deploy | [deploy workflow](https://github.com/Greenstand/treetracker-api/blob/85258c8/.github/workflows/treetracker-api-deploy-prod.yml#L23-L24) |
-| treetracker-field-data | deploy | [deploy workflow](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/.github/workflows/treetracker-api-deploy-prod.yml#L23-L24) |
+| treetracker-field-data | deploy | [deploy workflow](https://github.com/Greenstand/treetracker-field-data/blob/8ffb53c/.github/workflows/treetracker-api-deploy-prod.yml#L23-L24) |
 | treetracker-query-api | deploy | [build workflow](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/.github/workflows/treetracker-query-api-build-deploy-dev.yml#L100-L106), [deploy workflow&nbsp;1](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/.github/workflows/deploy-test-env.yml#L35-L39), [deploy workflow&nbsp;2](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/.github/workflows/deploy-prod-env.yml#L35-L39) |
 | treetracker-tile-server | deploy | [build workflow](https://github.com/Greenstand/treetracker-tile-server/blob/b619c05/.github/workflows/build-deploy.yml#L102-L106), [deploy workflow](https://github.com/Greenstand/treetracker-tile-server/blob/b619c05/.github/workflows/deploy-prod.yml#L36-L40) |
 | treetracker-wallet-api | deploy | [deploy workflow](https://github.com/Greenstand/treetracker-wallet-api/blob/e95c15a/.github/workflows/treetracker-wallet-api-deploy-prod.yml#L36-L42) |
@@ -146,7 +146,7 @@ The names that you see in the workflows (each secret is a GitHub secret):
 | Overlay | `deployment/overlays/production` |
 | Overlay | `deployment/overlays/test` |
 
-Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-10-17).
+Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-11-02).
 
 <!-- END shared resource clusters-and-deploys names -->
 
@@ -192,7 +192,7 @@ Secret. An overlay can replace the `SealedSecret` of the base with its own.
 |---|---|---|
 | treetracker-admin-api | read | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/deployment/base/database-connection-sealed-secret.yaml#L4), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/deployment/base/rabbitmq-sealedsecret.yaml#L4), [manifest&nbsp;3](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/deployment/base/treetracker-admin-api-jwt-sealed-secret.yaml#L4) |
 | treetracker-api | read | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/database-connection-sealed-secret.yaml#L5), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/database-migration-connection-sealed-secret.yaml#L5), [manifest&nbsp;3](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/rabbitmq-connection-sealed-secret.yaml#L5) |
-| treetracker-field-data | read | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/database-connection-sealed-secret.yaml#L4), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/database-migration-connection-sealed-secret.yaml#L5), [manifest&nbsp;3](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/rabbitmq-connection-sealed-secret.yaml#L5) |
+| treetracker-field-data | read | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-field-data/blob/8ffb53c/deployment/base/database-connection-sealed-secret.yaml#L4), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-field-data/blob/8ffb53c/deployment/base/database-migration-connection-sealed-secret.yaml#L5) |
 | treetracker-query-api | read | [manifest](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/deployment/base/database-connection-sealed-secret.yaml#L5) |
 | treetracker-tile-server | read | [manifest](https://github.com/Greenstand/treetracker-tile-server/blob/b619c05/deployment/base/database-connection-sealed-secret.yaml#L5) |
 | treetracker-wallet-api | read | [manifest](https://github.com/Greenstand/treetracker-wallet-api/blob/e95c15a/deployment/base/treetracker-wallet-api-deployment.yaml#L35-L55) |
@@ -215,7 +215,7 @@ The names that you see in the manifests (each secret is a Kubernetes Secret):
 | Secret | `treetracker-rabbitmq-connection` |
 | Secret | `treetracker-wallet-jwt-keys` |
 
-Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-10-17).
+Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-11-02).
 
 <!-- END shared resource secrets-in-the-cluster names -->
 
@@ -258,7 +258,7 @@ the APIs through the gateway.
 | images-api | route | [manifest](https://github.com/Greenstand/images-api/blob/9d761d1/deployment/base/mapping.yaml#L6) |
 | treetracker-admin-api | route | [manifest](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/deployment/base/treetracker-admin-api-mapping.yaml#L6) |
 | treetracker-api | route | [manifest](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/mapping.yaml#L6) |
-| treetracker-field-data | route | [manifest](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/mapping.yaml#L6) |
+| treetracker-field-data | route | [manifest](https://github.com/Greenstand/treetracker-field-data/blob/8ffb53c/deployment/base/mapping.yaml#L6) |
 | treetracker-query-api | route | [manifest](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/deployment/base/mapping.yaml#L7) |
 | treetracker-tile-server | route | [manifest](https://github.com/Greenstand/treetracker-tile-server/blob/b619c05/deployment/base/mapping.yaml#L6) |
 | treetracker-wallet-api | route | [manifest](https://github.com/Greenstand/treetracker-wallet-api/blob/e95c15a/deployment/base/treetracker-wallet-api-mapping.yaml#L6) |
@@ -279,7 +279,7 @@ The names that you see in the manifests:
 | Route | `/treetracker/` |
 | Route | `/wallet/v2/` |
 
-Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-10-17).
+Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-11-02).
 
 <!-- END shared resource api-gateway-and-domains names -->
 
@@ -453,7 +453,7 @@ runs the migration tool db-migrate (see [Clusters and deploys](#clusters-and-dep
 |---|---|---|
 | treetracker-admin-api | write | [manifest](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/deployment/base/treetracker-admin-api-deployment.yaml#L37-L41) |
 | treetracker-api | write | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/deployment.yaml#L32-L38), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-api/blob/85258c8/deployment/base/database-migration-job.yaml#L25-L29) |
-| treetracker-field-data | write | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/deployment.yaml#L32-L38), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/deployment/base/database-migration-job.yaml#L25-L29) |
+| treetracker-field-data | write | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-field-data/blob/8ffb53c/deployment/base/deployment.yaml#L32-L38), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-field-data/blob/8ffb53c/deployment/base/database-migration-job.yaml#L25-L29) |
 | treetracker-query-api | read | [manifest](https://github.com/Greenstand/treetracker-query-api/blob/42897d6/deployment/base/deployment.yaml#L33-L37) |
 | treetracker-tile-server | read | [manifest](https://github.com/Greenstand/treetracker-tile-server/blob/b619c05/deployment/base/deployment.yaml#L57-L61) |
 | treetracker-wallet-api | write | [manifest&nbsp;1](https://github.com/Greenstand/treetracker-wallet-api/blob/e95c15a/deployment/base/treetracker-wallet-api-deployment.yaml#L42-L51), [manifest&nbsp;2](https://github.com/Greenstand/treetracker-wallet-api/blob/e95c15a/deployment/base/treetracker-wallet-api-db-migration-job.yaml#L25-L31) |
@@ -474,7 +474,7 @@ The names that you see in the manifests (each secret is a Kubernetes Secret):
 | Schema | `treetracker` |
 | Schema | `wallet` |
 
-Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-10-17).
+Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 2026-11-02).
 
 <!-- END shared resource shared-database names -->
 
@@ -496,7 +496,7 @@ Greenstand's Slack ([Slack basics](https://github.com/Greenstand/Greenstand-Over
 
 ## Message broker
 
-The message broker carries events from one code repo to another. The broker is RabbitMQ. For
+The message broker carries events between services. The broker is RabbitMQ. For
 the place of the broker, see the [platform map](../ARCHITECTURE.md#platform).
 
 ### How a code repo uses it
@@ -511,7 +511,6 @@ the broker from a Kubernetes Secret (see [Secrets in the cluster](#secrets-in-th
 |---|---|---|
 | treetracker-admin-api | publish | [source file](https://github.com/Greenstand/treetracker-admin-api/blob/1f25d3e/src/messaging/config.js#L11-L17) |
 | treetracker-api | publish, consume | [source file&nbsp;1](https://github.com/Greenstand/treetracker-api/blob/85258c8/server/infra/RabbitMQ/config/index.js#L2-L30), [source file&nbsp;2](https://github.com/Greenstand/treetracker-api/blob/85258c8/server/infra/RabbitMQ/config/index.js#L4-L36) |
-| treetracker-field-data | publish, consume | [source file&nbsp;1](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/server/infra/RabbitMQ/config/index.js#L2-L29), [source file&nbsp;2](https://github.com/Greenstand/treetracker-field-data/blob/a6dfe14/server/infra/RabbitMQ/config/index.js#L4-L35) |
 
 <!-- END shared resource message-broker uses -->
 
@@ -523,7 +522,6 @@ The names that you see in the source files:
 |---|---|
 | Queue | `admin-verifications` |
 | Queue | `capture-created` |
-| Queue | `raw-capture-created` |
 | Queue | `raw-capture-rejected` |
 | Queue | `tree-created` |
 
@@ -533,15 +531,15 @@ Each fact was checked at the snapshot of its code repo (generated 2026-09-02 to 
 
 Notes:
 
-- treetracker-api publishes `capture-created`, and treetracker-field-data consumes it.
-  treetracker-field-data publishes `raw-capture-rejected`, and treetracker-api consumes it.
+- treetracker-api publishes `capture-created` and consumes `raw-capture-rejected`. No other
+  code repo of the estate uses these 2 queues (checked 2026-11-03).
 - `admin-verifications` is an exchange, not a queue. The names table shows an exchange with the
   kind "Queue".
 - treetracker-admin-api publishes to `admin-verifications` only in the development environment.
   Its base manifest turns the publishing off, and only its development overlay turns it on
   (checked 2026-10-24).
-- No code repo of the estate consumes `raw-capture-created`, `tree-created`, or the messages of
-  `admin-verifications` (checked 2026-10-24).
+- No code repo of the estate consumes `tree-created` or the messages of `admin-verifications`
+  (checked 2026-10-24).
 
 ### Who looks after it
 
