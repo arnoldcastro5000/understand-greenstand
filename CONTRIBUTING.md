@@ -61,6 +61,12 @@ the data file, then run `node .github/scripts/build-capture-journey.mjs`.
    GITHUB_TOKEN="$(gh auth token)" node .github/scripts/build-capture-journey.mjs --evidence
    ```
 
+   Two drawings of the capture journey are in the site look: `bundle-chain.svg` and `reward.svg`.
+   Each holds a small copy of the Archivo font with only the characters of its words. If you change
+   their words, also run `.github/scripts/subset-drawing-font.py`. Its first lines tell you how to
+   get the font file and fontTools. `node .github/scripts/build-capture-journey.mjs` gives each
+   drawing the site colors.
+
 6. Open a pull request. `main` accepts changes only through a pull request. The required checks
    must pass.
 

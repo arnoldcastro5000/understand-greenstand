@@ -70,8 +70,23 @@ title); an ink track with square stations; the state marks (a hatch for a best g
 not working) in the state colors, also in forced colors and in print; the images on the surface
 plate; the stage layout follows the width of `main` (container queries). The moved pages: the
 estate mark in the masthead, the text in the reading column, no font preload. The body text is
-1.03125rem, so it follows the default font size of the reader. The four drawings of the capture
-journey keep their own former colors (the images did not change).
+1.03125rem, so it follows the default font size of the reader. In this build, the four drawings
+of the capture journey kept their own former colors (the images did not change). Ticket 10 put 2
+of them in the site look.
+
+Built 2026-11-03 (ticket 10): 2 of the 4 drawings of the capture journey are drawings in the site
+look: `bundle-chain.svg` (stage 3) and `reward.svg` (stage 6). Each holds the site color block:
+the 5 neutral colors (ground, surface, ink, muted, line), light and dark.
+`build-capture-journey.mjs` writes the block from `site-colors.mjs` (`site-drawings.mjs`), and
+`--check` fails in CI on a stale block. Each mode fails on another color and on a character with
+no glyph in the drawing font. Each drawing also holds the drawing font: a subset of Archivo
+("Archivo Drawing", weights 600 and 400 at a width of 87.5%) that `subset-drawing-font.py` writes,
+because an SVG in an `<img>` cannot load the font of the page. The steps are square ground boxes
+with a muted border; the step numbers are ink squares, as the station numbers of the track; a
+dashed box marks a step outside the Greenstand system or the older path. The former green, blue,
+and amber number circles of `reward.svg` are gone. Each drawing is 400 units wide (it was 480).
+`web-map-badges.svg` and `verify-page.svg` keep their own colors, because they show screens of
+Greenstand apps.
 
 ## Direction contract
 
