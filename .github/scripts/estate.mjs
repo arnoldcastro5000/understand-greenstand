@@ -4,8 +4,8 @@
 // build-moved.mjs (the moved pages of renamed repos), build-glossary.mjs,
 // build-repo-readmes.mjs, build-onboarding.mjs, build-ecosystem-maps.mjs,
 // build-shared-resources.mjs, build-capture-journey.mjs, capture-journey-page.mjs,
-// check-former-names.mjs, check-graphs.mjs, check-safety-review.mjs, drift-report.mjs,
-// render-md.mjs, and start-path.mjs.
+// build-contributors.mjs, contributors.mjs, contributors-page.mjs, check-former-names.mjs,
+// check-graphs.mjs, check-safety-review.mjs, drift-report.mjs, render-md.mjs, and start-path.mjs.
 // Returns { estate, areas, repos, count, errors }. Each repo in areas gets its snapshot, its
 // Source URL, and its valid former names (a list, often empty). repos lists the repos of all
 // areas, in order. errors lists every problem at once; the caller prints them and exits.

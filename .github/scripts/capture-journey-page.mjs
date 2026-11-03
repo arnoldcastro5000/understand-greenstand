@@ -4,7 +4,7 @@
 // build-capture-journey.mjs checks the data file, makes the view (the data with its links), and
 // writes the page with --site. The page is in the site look (site-html.mjs, DESIGN.md).
 import { plural } from "./estate.mjs";
-import { READING_COLUMN, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle } from "./site-html.mjs";
+import { CONTENT_COLUMN as COLUMN, READING_COLUMN, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle } from "./site-html.mjs";
 
 // The icons of the stages: the inside of an SVG with the view box 0 0 48 48, drawn with lines.
 export const ICONS = {
@@ -44,9 +44,8 @@ const titleText = (s) => htmlText(s).replace(/(^|\s)(the|a|an) (?=\S)/gi, "$1$2&
 const icon = (name, size) =>
   `<svg class="icon" viewBox="0 0 48 48" width="${size}" height="${size}" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`;
 
-// The content column of the page: the stages put the images and the text side by side in it.
-// Running text outside the stages stays in the reading column (READING_COLUMN).
-const COLUMN = "58rem";
+// COLUMN, the content column of the page (CONTENT_COLUMN): the stages put the images and the text
+// side by side in it. Running text outside the stages stays in the reading column (READING_COLUMN).
 
 // The marks of the states (DESIGN.md): a square with a hatch for a best guess, a square with a
 // cross for a part that does not work. Each one is a mask that the state color paints, so a state

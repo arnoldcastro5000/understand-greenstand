@@ -1,6 +1,7 @@
 // The shared parts of the generated HTML pages of the Pages site, all in the site look (DESIGN.md):
 // the landing page (build-landing.mjs), the text pages (render-md.mjs), the moved pages
-// (build-moved.mjs), and the page of the capture journey (capture-journey-page.mjs).
+// (build-moved.mjs), the page of the capture journey (capture-journey-page.mjs), and the
+// contributors page (contributors-page.mjs).
 import { AREA_COLORS, BACKGROUNDS, LINES, PARCEL_FIELD_INK_SHARE, TEXTS } from "./site-colors.mjs";
 
 // Escape text for HTML text and for a double-quoted attribute.
@@ -22,8 +23,12 @@ export const PARCEL_FIELD = "art/parcel-field.svg";
 export const SITE_LOOK_FILES = [ARCHIVO, PARCEL_FIELD];
 
 // The width of the reading column (DESIGN.md): the column of running text on a text page, on a
-// moved page, and on the capture journey page.
+// moved page, on the capture journey page, and on the contributors page.
 export const READING_COLUMN = "44rem";
+
+// The width of the content column of the capture journey page and the contributors page: wider
+// than the reading column, for the stages and for the grid of names.
+export const CONTENT_COLUMN = "58rem";
 
 // The media queries of the legend rail: a wide screen (64rem and more) shows the legend rail; a
 // narrow screen shows the masthead as a band at the top. "not all and" makes the narrow

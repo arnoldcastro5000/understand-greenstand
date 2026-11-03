@@ -54,6 +54,14 @@ name: Estate index
 # color blindness, or the parcel field is stronger than 1.25:1 to the ground or has no ink. Fix:
 # run `node .github/scripts/check-site-colors.mjs` and change the color or the ink share that the
 # error names.
+# Also fails when recognition.json (the bot list and the exclusion list of the contributors page)
+# has an error: a key that is not known, an account id that is not a whole number or is on the list
+# 2 times, an exclusion URL that is not a pull request, a comment, or a review of a Greenstand repo,
+# or an entry with no reason. Fix: run `node .github/scripts/build-contributors.mjs --check` and
+# follow its errors.
+# When a push or a pull request changes recognition.json, also fails when GitHub does not hold an
+# entry: a bot account id that is no account, or an excluded pull request, comment, or review that
+# is gone (or a comment that is not on its pull request). Fix the entry that the error names.
 # No path filter: a path-filtered check stays pending forever if it is ever made required.
 
 on:
@@ -109,6 +117,9 @@ jobs:
       - name: Check the colors of the site look
         run: node .github/scripts/check-site-colors.mjs
 
+      - name: Check the lists of the contributors page
+        run: node .github/scripts/build-contributors.mjs --check
+
       # Only when shared-resources.json changes: the step reads GitHub, and the other steps stay
       # offline. BASE is the commit before the push, or the base of the pull request. When it is
       # not known (a new branch), the step runs.
@@ -142,4 +153,20 @@ jobs:
             echo "the capture journey data, images, and code did not change since ${BASE:0:7}: no evidence check"
           else
             node .github/scripts/build-capture-journey.mjs --evidence
+          fi
+
+      # Only when recognition.json changes: the step reads GitHub. BASE as in the steps above; when
+      # it is not known (a new branch), the step runs.
+      - name: Check the entries of the contributors page lists on GitHub
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [[ "$BASE" =~ ^[0-9a-f]{40}$ && "$BASE" != 0000000000000000000000000000000000000000 ]] \
+            && git fetch --quiet --no-tags --depth=1 origin "$BASE" \
+            && git diff --quiet "$BASE" HEAD -- recognition.json; then
+            echo "recognition.json did not change since ${BASE:0:7}: no evidence check"
+          else
+            node .github/scripts/build-contributors.mjs --evidence
           fi

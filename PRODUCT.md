@@ -37,14 +37,16 @@ best guess or when code does not work today.
 
 - A static GitHub Pages site, built by Node scripts in `.github/scripts/` (no framework). Pages:
   the landing page, markdown pages rendered by `render-md.mjs`, the capture journey page
-  (`capture-journey-page.mjs`), the moved pages, and one viewer per repo.
-- Each page also has a markdown text copy on GitHub; GitHub draws that copy with its own look.
+  (`capture-journey-page.mjs`), the moved pages, the contributors page (`contributors-page.mjs`,
+  built from public GitHub data on each deploy), and one viewer per repo.
+- Each page but the contributors page also has a markdown text copy on GitHub; GitHub draws that
+  copy with its own look.
 - Readers use light and dark color schemes; the site follows `prefers-color-scheme`.
 
 ## Capabilities and Constraints
 
 - Scope of the visual work (user, 2026-11-02): the built pages (landing, text pages, capture
-  journey, moved pages). The knowledge-graph viewer is a third-party app (Understand-Anything,
+  journey, moved pages; the contributors page since 2026-11-03). The knowledge-graph viewer is a third-party app (Understand-Anything,
   changed only by a patch) and keeps its own theme.
 - No hosted third-party assets at run time: vendored files only, each hash-checked (as Mermaid
   is today).

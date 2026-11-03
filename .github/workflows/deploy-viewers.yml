@@ -3,6 +3,13 @@ name: Deploy viewers to Pages
 # Builds one static Understand-Anything viewer per documented repo and publishes them
 # to GitHub Pages, one per subpath (/understand-greenstand/<repo>/). No built bundles
 # live in git: the viewer is built from a pinned Understand-Anything source ref each run.
+# The job contributors builds the contributors page (build-contributors.mjs): each run fetches the
+# public pull requests of the Greenstand org with the workflow token. It is a job of its own, so
+# the secrets that it needs never reach the third-party build code of the build job. The data goes
+# only into the page, which is in 2 artifacts of the run, each kept 1 day: the page artifact (from
+# the contributors job to the build job) and the Pages artifact. No data file is in git, and the
+# log shows no login of a person. A daily run keeps the quarter to date current. To carry out a
+# removal, add the account id to the RECOGNITION_OPT_OUT secret and run this workflow by hand.
 
 on:
   push:
@@ -30,6 +37,20 @@ on:
       - ".github/scripts/slug.mjs"
       - ".github/scripts/start-path.mjs"
       - ".github/workflows/deploy-viewers.yml"
+      - "recognition.json"
+      - ".github/scripts/build-contributors.mjs"
+      - ".github/scripts/contributors.mjs"
+      - ".github/scripts/contributors-page.mjs"
+      - ".github/scripts/private-names.sh"
+      - ".github/scanner-versions.env"
+      - ".github/scripts/install-scanner.sh"
+      - ".gitleaks.toml"
+      - ".private-names-fingerprint"
+      - ".private-names-exceptions"
+  # Daily, for the quarter to date of the contributors page. GitHub can delay or skip a scheduled
+  # run, and stops schedules in a public repo after 60 days without activity.
+  schedule:
+    - cron: "23 4 * * *"
   workflow_dispatch:
 
 permissions:
@@ -56,7 +77,65 @@ env:
   ARCHIVO_SHA512: 1e880af0525e96b0f5a3b4e566590856d1e0736d1b3b93d945613b9947944dd30dd39e5a9739d057aff4d09d342017aef054001f8b37cd6f5424dbca1315dffa
 
 jobs:
+  # The contributors page. Only first-party actions and the scripts of this repo run here (and the
+  # 2 secrets scanners, pinned by their hash): no package install. The secrets go to the 2 steps
+  # that need them. A fetch error, an opt-out list error, or a private-name finding fails the
+  # job, so the deploy does not run, and the site keeps its last deploy.
+  contributors:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Load scanner pins
+        run: grep -E '^[A-Z0-9_]+=' .github/scanner-versions.env >> "$GITHUB_ENV"
+
+      - name: Install scanners
+        # For the private-name check of the page.
+        run: |
+          .github/scripts/install-scanner.sh gitleaks "$GITLEAKS_VERSION" "$GITLEAKS_SHA256"
+          .github/scripts/install-scanner.sh betterleaks "$BETTERLEAKS_VERSION" "$BETTERLEAKS_SHA256"
+
+      - name: Check that the CI name list is set and current
+        env:
+          PRIVATE_REPO_NAMES: ${{ secrets.PRIVATE_REPO_NAMES }}
+        run: |
+          if [ -z "$PRIVATE_REPO_NAMES" ]; then
+            echo "::error::PRIVATE_REPO_NAMES is not set. The contributors page is written only after a private-name check."
+            exit 1
+          fi
+          .github/scripts/private-names.sh fingerprint-check
+
+      - name: Build the contributors page
+        # It fetches the data (a few minutes). The workflow token reads public data only.
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RECOGNITION_OPT_OUT: ${{ secrets.RECOGNITION_OPT_OUT }}
+          PRIVATE_REPO_NAMES: ${{ secrets.PRIVATE_REPO_NAMES }}
+          # Fake terms for end-to-end tests only; normally unset.
+          PRIVATE_NAMES_EXTRA_TERMS: ${{ vars.PRIVATE_NAMES_EXTRA_TERMS }}
+        run: |
+          mkdir _contributors
+          node .github/scripts/build-contributors.mjs --out _contributors
+
+      - name: Upload the contributors page
+        # The page holds the data: keep it 1 day only.
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: contributors-page
+          path: _contributors/contributors.html
+          if-no-files-found: error
+          retention-days: 1
+
   build:
+    needs: contributors
     runs-on: ubuntu-latest
     steps:
       - name: Checkout docs repo
@@ -126,6 +205,13 @@ jobs:
           tar -xzf "fontsource-variable-archivo-${ARCHIVO_VERSION}.tgz" \
             package/LICENSE package/files/archivo-latin-wdth-normal.woff2
 
+      - name: Get the contributors page
+        # The page of the contributors job. This job has no secret.
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: contributors-page
+          path: _contributors
+
       - name: Assemble the Pages site
         run: |
           set -euo pipefail
@@ -194,6 +280,11 @@ jobs:
           node .github/scripts/build-capture-journey.mjs --site "$OUT"
           # Moved pages: the old subpath of a renamed repo sends readers to the new subpath.
           node .github/scripts/build-moved.mjs "$OUT"
+          # The contributors page of the contributors job: the recognition of the last quarter and
+          # of the quarter to date, linked from the landing page, the volunteer guide, README.md, and
+          # CONTRIBUTING.md. It loads the font and the parcel field; build-landing.mjs fails when
+          # the page, the font, or the parcel field is missing.
+          cp _contributors/contributors.html "$OUT/"
           # Landing index: the areas and links of estate.json and the steps of the Start here path
           # (start-path.mjs), as in the README.md index.
           # It fails if a page that the landing page links to is missing.
@@ -205,6 +296,8 @@ jobs:
           path: _site
           # Since v4 the action drops dotfiles by default; keep _site/.nojekyll.
           include-hidden-files: true
+          # The artifact holds the contributors page and its data: keep it 1 day only.
+          retention-days: 1
 
   deploy:
     needs: build
