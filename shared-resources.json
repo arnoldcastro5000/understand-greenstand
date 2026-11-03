@@ -7,7 +7,7 @@
     "treetracker-admin-api": "1f25d3e",
     "treetracker-web-map-client": "42b3a9a",
     "treetracker-tile-server": "b619c05",
-    "treetracker-field-data": "a6dfe14",
+    "treetracker-field-data": "8ffb53c",
     "treetracker-airflow-dags": "a537231",
     "treetracker-admin-client": "ecbfe05",
     "treetracker-wallet-admin-client": "62a60f3",
@@ -44,7 +44,7 @@
          "path": "deployment/base/deployment.yaml", "lines": "28",
          "names": [{"kind": "image", "name": "greenstand/treetracker-api"}]},
         {"repo": "treetracker-field-data", "use": "push", "label": "build workflow",
-         "path": ".github/workflows/treetracker-api-build-deploy-dev.yml", "lines": "109-119",
+         "path": ".github/workflows/treetracker-api-build-deploy-dev.yml", "lines": "102-112",
          "names": [{"kind": "secret", "name": "DOCKERHUB_USERNAME"}, {"kind": "secret", "name": "DOCKERHUB_TOKEN"}, {"kind": "image", "name": "greenstand/treetracker-field-data"}]},
         {"repo": "treetracker-field-data", "use": "pull", "label": "manifest",
          "path": "deployment/base/deployment.yaml", "lines": "28",
@@ -148,9 +148,6 @@
         {"repo": "treetracker-field-data", "use": "read", "label": "manifest",
          "path": "deployment/base/database-migration-connection-sealed-secret.yaml", "lines": "5",
          "names": [{"kind": "secret", "name": "database-migration-connection"}]},
-        {"repo": "treetracker-field-data", "use": "read", "label": "manifest",
-         "path": "deployment/base/rabbitmq-connection-sealed-secret.yaml", "lines": "5",
-         "names": [{"kind": "secret", "name": "rabbitmq-connection"}]},
         {"repo": "treetracker-query-api", "use": "read", "label": "manifest",
          "path": "deployment/base/database-connection-sealed-secret.yaml", "lines": "5",
          "names": [{"kind": "secret", "name": "query-api-database-connection"}]},
@@ -273,13 +270,7 @@
          "names": [{"kind": "queue", "name": "capture-created"}, {"kind": "queue", "name": "tree-created"}]},
         {"repo": "treetracker-api", "use": "consume", "label": "source file",
          "path": "server/infra/RabbitMQ/config/index.js", "lines": "4-36",
-         "names": [{"kind": "queue", "name": "raw-capture-rejected"}]},
-        {"repo": "treetracker-field-data", "use": "publish", "label": "source file",
-         "path": "server/infra/RabbitMQ/config/index.js", "lines": "2-29",
-         "names": [{"kind": "queue", "name": "raw-capture-created"}, {"kind": "queue", "name": "raw-capture-rejected"}]},
-        {"repo": "treetracker-field-data", "use": "consume", "label": "source file",
-         "path": "server/infra/RabbitMQ/config/index.js", "lines": "4-35",
-         "names": [{"kind": "queue", "name": "capture-created"}]}
+         "names": [{"kind": "queue", "name": "raw-capture-rejected"}]}
       ]
     },
     {

@@ -11,7 +11,7 @@
     "treetracker-web-map-client": "42b3a9a",
     "treetracker-tile-server": "b619c05",
     "treetracker-android": "949d962",
-    "treetracker-field-data": "a6dfe14",
+    "treetracker-field-data": "8ffb53c",
     "treetracker-airflow-dags": "a537231",
     "treetracker-infrastructure": "a740d11"
   },
@@ -44,8 +44,6 @@
       "evidence": "bulk-pack-transformer-v2 server/models/RawCapture.js:99-103 @cf2f6f0 (outside the estate: POST raw-captures)" },
     { "from": "bundles", "to": "treetracker-api", "label": "registers growers", "view": "capture",
       "evidence": "bulk-pack-transformer-v2 server/models/WalletRegistration.js:62-65 @cf2f6f0 (outside the estate: PUT grower_accounts)" },
-    { "from": "treetracker-api", "to": "treetracker-field-data", "label": "capture events (RabbitMQ)", "view": "capture", "arrow": "both",
-      "evidence": "treetracker-api server/infra/RabbitMQ/config/index.js:23-35; treetracker-field-data server/infra/RabbitMQ/config/index.js:22-34" },
     { "from": "treetracker-web-map-client", "to": "treetracker-query-api", "label": "reads trees, wallets", "view": "web-map",
       "evidence": "treetracker-web-map-client .env.production:1, src/models/apiPaths.js:3" },
     { "from": "treetracker-web-map-client", "to": "treetracker-tile-server", "label": "loads tiles", "view": "web-map",
