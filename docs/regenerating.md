@@ -44,16 +44,28 @@ reads each cited file on the default branch. A fact is gone when the file does n
 name, or is not there. A gone fact does not make a repo due. It stays on the list until the name
 comes back, or until you regenerate the repo and check its facts again (see [Notes](#notes)).
 
+The report also lists the capture journey facts to check. A capture journey fact is a name in an
+evidence entry of [`capture-journey.json`](../capture-journey.json), with the file of a repo that
+cites it. The repo can be outside the estate. The report reads each cited file on the default
+branch. A fact is gone when the file does not hold the name, or is not there. A gone fact does
+not make a repo due. To take a fact off the list, check its stage in the code on the default
+branch. Then update the words of the stage and its evidence entry in the data file: the path,
+the lines, the commit, and the names. Run `node .github/scripts/build-capture-journey.mjs`. The
+pull request needs a safety review (see
+[`CONTRIBUTING.md`](../CONTRIBUTING.md#change-the-shared-resource-page-or-the-capture-journey)).
+The job fails when it cannot read a repo outside the estate that the capture journey cites, as
+for a source repo: the repo can be private now, and the capture journey names it.
+
 The report goes to the job summary and to one issue, "Docs drift report". The workflow opens
-the issue when a repo is due or a shared-resource fact is gone. It edits the issue on each run.
-It comments when the list of due repos or the list of gone facts changes. It closes the issue
-when no repo is due and no fact is gone. Do not close the issue yourself: the next run opens it
-again while a repo is due or a fact is gone. A repo stays due until you regenerate it.
+the issue when a repo is due or a fact is gone. It edits the issue on each run. It comments when
+the list of due repos or the list of gone facts changes. It closes the issue when no repo is due
+and no fact is gone. Do not close the issue yourself: the next run opens it again while a repo is
+due or a fact is gone. A repo stays due until you regenerate it.
 
 The report shows only repo names, counts, compare links, the names that the shared-resource page
-shows, and the files that the page links. Before the job prints or posts any text, it runs the
-private-name check on it (see [`private-names.md`](./private-names.md)). The job needs the
-`PRIVATE_REPO_NAMES` secret, and fails without it.
+and the capture journey show, and the files that they link. Before the job prints or posts any
+text, it runs the private-name check on it (see [`private-names.md`](./private-names.md)). The
+job needs the `PRIVATE_REPO_NAMES` secret, and fails without it.
 
 To see the report now, run it locally. It prints the report and changes nothing:
 
@@ -61,8 +73,9 @@ To see the report now, run it locally. It prints the report and changes nothing:
 GITHUB_TOKEN="$(gh auth token)" node .github/scripts/drift-report.mjs
 ```
 
-A run makes about 2 GitHub API requests for each repo and 1 for each file that
-`shared-resources.json` cites. Without a token, the limit is 60 requests an hour. That is not
+A run makes about 2 GitHub API requests for each source repo, 1 for each repo outside the estate
+that the capture journey cites, and 1 for each file that `shared-resources.json` or
+`capture-journey.json` cites. Without a token, the limit is 60 requests an hour. That is not
 enough for one run.
 
 Limits:
@@ -298,4 +311,5 @@ working.
   See [The shared resources of the code repos](./shared-resources.md).
 - A regeneration does not change the capture journey
   ([`capture-journey.json`](../capture-journey.json)): each of its evidence entries pins its own
-  commit, not the snapshot of a repo.
+  commit, not the snapshot of a repo. The drift report lists its gone facts (see [The drift
+  report](#the-drift-report)).

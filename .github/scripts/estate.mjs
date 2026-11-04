@@ -10,11 +10,12 @@
 // Source URL, and its valid former names (a list, often empty). repos lists the repos of all
 // areas, in order. errors lists every problem at once; the caller prints them and exits.
 // Also exports the helpers that the build scripts share: readDocsFile, parseJson, markedBlock,
-// markedSpan, replaceMarked, formerNamesText, EM_DASH, fencedLines, readGraph, isObject, escapeRegExp,
-// urlPath, plural, the name rule of the evidence (expandRepoName, hasWholeName, missingNames),
-// the evidence form (isRepoPath, parseLines, lineAnchor, citedLines), the GitHub API of the
-// evidence checks (githubApi, RAW, answerStatus), and the paths of the shared-resource page and of
-// the capture journey.
+// markedSpan, replaceMarked, formerNamesText, EM_DASH, fencedLines, readGraph, isObject, isText,
+// escapeRegExp, urlPath, plural, the name rule of the evidence (expandRepoName, hasWholeName,
+// missingNames), the evidence form (isRepoPath, parseLines, lineAnchor, citedLines), the GitHub API
+// of the evidence checks (githubApi, RAW, answerStatus), the readers of the data files for scripts
+// that use only some fields (readSharedResources, readCaptureJourney), and the paths of the
+// shared-resource page and of the capture journey.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -37,6 +38,8 @@ export function parseJson(text) {
 
 // A JSON object: not null, and not a list.
 export const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+// A string with a character that is not white space.
+export const isText = (v) => typeof v === "string" && v.trim() !== "";
 
 // A text as a regular expression that matches exactly that text.
 export const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -269,6 +272,19 @@ export const SHARED_RESOURCES_PAGE = "docs/shared-resources.md";
 export const CAPTURE_JOURNEY_DATA = "capture-journey.json";
 export const CAPTURE_JOURNEY_COPY = "docs/capture-journey.md";
 export const CAPTURE_JOURNEY_IMAGES = "docs/capture-journey";
+
+// Read the stages of the capture journey's data file for a script that uses only some of their
+// fields. readable checks the shape of those fields in one stage, and fields names them in the
+// error. Return the stages, or record in errors what is wrong and return null.
+export function readCaptureJourney(errors, fields, readable) {
+  return readDocsFile(CAPTURE_JOURNEY_DATA, errors, (text) => {
+    const data = parseJson(text);
+    if (!isObject(data) || !Array.isArray(data.stages) || !data.stages.every((s) => isObject(s) && readable(s))) {
+      throw new Error(`must have a list of stages, each with ${fields}. Run: node .github/scripts/build-capture-journey.mjs --check`);
+    }
+    return data.stages;
+  });
+}
 
 // Read the resources of the data file for a script that uses only some of their fields. readable
 // checks the shape of those fields in one resource, and fields names them in the error. Return

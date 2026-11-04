@@ -5,19 +5,21 @@
 //                                            issue in $GITHUB_REPOSITORY (CI)
 // Reads the snapshots through estate.mjs and the described files from each knowledge-graph.json,
 // and asks the GitHub compare API what changed since. It also reads each file that
-// shared-resources.json cites, on the default branch, and lists the shared-resource facts that
-// are gone. Set GITHUB_TOKEN for the 5000/hour API limit: a run makes about 2 requests per repo
-// and 1 per cited file, and the anonymous limit is 60/hour.
+// shared-resources.json or capture-journey.json cites, on the default branch, and lists the facts
+// that are gone: the shared-resource facts and the capture journey facts. The capture journey can
+// cite a repo outside the estate. Set GITHUB_TOKEN for the 5000/hour API limit: a run makes about
+// 2 requests per source repo, 1 per repo outside the estate, and 1 per cited file, and the
+// anonymous limit is 60/hour.
 // The report is public (job summary, log, issue). It shows repo names, counts, compare links, the
-// names that the shared-resource page shows, and the files that the page links: commit messages
-// and other file paths of a source repo can mirror a private repo name. In GitHub Actions the
-// shared private-name check (private-names.sh) reads the whole text before any of it is printed
-// or posted.
+// names that the shared-resource page and the capture journey show, and the files that they link:
+// commit messages and other file paths of a source repo can mirror a private repo name. In GitHub
+// Actions the shared private-name check (private-names.sh) reads the whole text before any of it
+// is printed or posted.
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { appendFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { expandRepoName, hasWholeName, loadEstate, parseJson, plural, readDocsFile, root, urlPath } from "./estate.mjs";
+import { CAPTURE_JOURNEY_DATA, SHARED_RESOURCES_DATA, expandRepoName, hasWholeName, isObject, isText, loadEstate, parseJson, plural, readCaptureJourney, readDocsFile, root, urlPath } from "./estate.mjs";
 
 // A repo is due when any described file was removed or renamed. It is also due when at least
 // DUE_MIN_FILES described files changed, and they are at least DUE_PERCENT% of its described
@@ -29,10 +31,11 @@ const DUE_MIN_FILES = 2;
 const MAX_FILES = 300;
 const TITLE = "Docs drift report";
 // The first line of the issue body. It records the due repos and the gone facts of the last run,
-// so the next run can say what changed: "<!-- drift-report due: <repo> ... facts: <hash> ... -->".
-// Without gone facts, the line has no "facts:" part.
+// so the next run can say what changed:
+// "<!-- drift-report due: <repo> ... facts: <hash> ... journey: <hash> ... -->". "facts:" holds
+// the shared-resource facts, and "journey:" the capture journey facts. A part with no gone fact
+// is not on the line.
 const MARKER = "<!-- drift-report due:";
-const MARKER_FACTS = "facts:";
 // GitHub refuses an issue body of more than 65536 characters.
 const MAX_BODY = 65536;
 
@@ -43,7 +46,12 @@ const { GITHUB_TOKEN: token, GITHUB_REPOSITORY: docsRepo, GITHUB_STEP_SUMMARY: s
 const inActions = process.env.GITHUB_ACTIONS === "true";
 
 const { estate, repos, errors } = loadEstate();
-const sharedResources = readDocsFile("shared-resources.json", errors, parseJson);
+const sharedResources = readDocsFile(SHARED_RESOURCES_DATA, errors, parseJson);
+// The report reads only the stages and their evidence: the full check is build-capture-journey.mjs.
+const evidenceOk = (e) => isObject(e) && isText(e.repo) && isText(e.path) && isText(e.commit) && Array.isArray(e.names) && e.names.every(isText);
+const stages = readCaptureJourney(errors, "an id, a short title, and evidence entries (a repo, a path, a commit, and names)", (s) =>
+  isText(s.id) && isText(s.short) && Array.isArray(s.evidence) && s.evidence.every(evidenceOk),
+);
 if (errors.length) fail(errors);
 // The issue belongs to github-actions: a local sync would open a second one under your name.
 if (syncIssue && !inActions) fail(["--sync-issue runs only in GitHub Actions"]);
@@ -126,38 +134,110 @@ async function measure({ name, sha, date }) {
   };
 }
 
-// The shared-resource facts: each name of shared-resources.json with the resource and the file
-// that cite it, once, in the order of the data file. The short hash of a fact goes into the issue
-// marker.
-const facts = new Map();
-for (const resource of sharedResources.resources) {
-  for (const { repo, path, names } of resource.evidence) {
-    for (const { kind, name } of names) {
-      const key = [resource.id, repo, path, kind, name].join("\n");
-      if (!facts.has(key)) facts.set(key, { hash: createHash("sha256").update(key).digest("hex").slice(0, 7), resource, repo, path, kind, name });
-    }
-  }
+// A fact is a name with the file that cites it. Each page with facts has its own section in the
+// report and its own label in the issue marker. The short hash of a fact goes into the marker.
+const hashOf = (key) => createHash("sha256").update(key).digest("hex").slice(0, 7);
+function factsOf(entries) {
+  const facts = new Map();
+  for (const fact of entries) if (!facts.has(fact.key)) facts.set(fact.key, { ...fact, hash: hashOf(fact.key) });
+  return [...facts.values()];
 }
 
-// A fact is gone when its file on the default branch does not hold the name (the name rule of
-// estate.mjs), or is not there. A gone fact does not make a repo due, and it keeps the result of
-// its repo (source). The facts of a repo that is not found are not read: the "Not found" section
-// covers that repo, without its name.
-async function goneFacts(results) {
-  const files = new Map(); // "<repo>\n<path>" -> a promise of the text of the file, or of null
+// The shared-resource facts: each name of shared-resources.json with the resource and the file
+// that cite it, once, in the order of the data file.
+const sharedFacts = factsOf(
+  sharedResources.resources.flatMap((resource) =>
+    resource.evidence.flatMap(({ repo, path, names }) =>
+      names.map(({ kind, name }) => ({ key: [resource.id, repo, path, kind, name].join("\n"), resource, repo, path, kind, name })),
+    ),
+  ),
+);
+
+// The capture journey facts: each name of capture-journey.json with the stage and the file that
+// cite it, once, in the order of the data file. Its repo can be outside the estate. The key starts
+// with the data file, so that no journey fact has the hash of a shared-resource fact.
+const journeyFacts = factsOf(
+  stages.flatMap((stage) =>
+    stage.evidence.flatMap(({ repo, path, commit, names }) =>
+      names.map((name) => ({ key: [CAPTURE_JOURNEY_DATA, stage.id, repo, path, name].join("\n"), stage, repo, path, commit, name })),
+    ),
+  ),
+);
+
+// The repos outside the estate that the capture journey cites: only their default branch is read.
+const estateNames = new Set(repos.map((r) => r.name));
+const outsideNames = [...new Set(journeyFacts.map((f) => f.repo).filter((name) => !estateNames.has(name)))];
+async function lookUp(name) {
+  const repo = await api("GET", `/repos/${estate.sourceOrg}/${name}`);
+  return repo ? { name, branch: repo.default_branch } : { name, missing: true };
+}
+
+// A fact is gone when its file on the default branch does not hold the name, or is not there. A
+// gone fact does not make a repo due. The facts of a repo that is not found are not read: the "Not
+// found" section covers that repo, without its name. Each file is read once for all facts.
+const files = new Map(); // "<repo>\n<path>" -> a promise of the text of the file, or of null
+async function goneFacts({ facts, holds }, found) {
   const gone = [];
-  for (const fact of facts.values()) {
-    const source = results.find((r) => r.name === fact.repo && !r.missing);
+  for (const fact of facts) {
+    const source = found.get(fact.repo);
     if (!source) continue;
     const key = `${fact.repo}\n${fact.path}`;
     if (!files.has(key)) files.set(key, fileText(fact.repo, fact.path, source.branch));
     const text = await files.get(key);
     if (text === null) gone.push({ ...fact, source, fileGone: true });
-    else if (!hasWholeName(expandRepoName(text, fact.repo), fact.name)) gone.push({ ...fact, source });
+    else if (!holds(text, fact)) gone.push({ ...fact, source });
   }
   return gone;
 }
 
+const fileLink = (f, ref) => `[\`${f.path}\`](https://github.com/${estate.sourceOrg}/${f.repo}/blob/${ref}/${urlPath(f.path)})`;
+
+// The sections of facts, in the order of the report. holds is the name rule of the evidence check
+// of the page: build-shared-resources.mjs counts the repo name expression of a workflow as the
+// repo name, and build-capture-journey.mjs does not. A gone fact links its file on the default
+// branch. When the file is not there, a shared-resource fact links it at the snapshot (with the
+// short commit, as the links of the page do), and a capture journey fact at the commit that it
+// cites. A run adds the gone facts (gone) and the facts that it could not read (unread).
+const SECTIONS = [
+  {
+    heading: "Shared-resource facts to check",
+    label: "facts:",
+    term: "shared-resource fact",
+    facts: sharedFacts,
+    holds: (text, f) => hasWholeName(expandRepoName(text, f.repo), f.name),
+    intro: () =>
+      `A shared-resource fact is a name on the [shared-resource page](${doc("docs/shared-resources.md")}) and the file of a ` +
+      "code repo that cites it. A fact is gone when that file on the default branch does not hold the name, or is not " +
+      "there. A gone fact does not make a repo due. It leaves this list when the name comes back, or when you regenerate " +
+      `the repo and [check its facts again](${doc("docs/regenerating.md#notes")}).`,
+    unreadRepos: (n) => (n === 1 ? "the source repo" : `${n} source repos`),
+    item: (f) => {
+      const resource = `**[${f.resource.name}](${doc(`docs/shared-resources.md#${f.resource.id}`)})**`;
+      return f.fileGone
+        ? `- ${resource}: the file of the ${f.kind} \`${f.name}\` is not on the default branch (${f.source.branch}).\\\n  ${f.repo} ${fileLink(f, f.source.sha.slice(0, 7))} at the snapshot`
+        : `- ${resource}: the ${f.kind} \`${f.name}\` is not in the file.\\\n  ${f.repo} ${fileLink(f, f.source.branch)}`;
+    },
+  },
+  {
+    heading: "Capture journey facts to check",
+    label: "journey:",
+    term: "capture journey fact",
+    facts: journeyFacts,
+    holds: (text, f) => hasWholeName(text, f.name),
+    intro: () =>
+      `A capture journey fact is a name in an evidence entry of [the capture journey](${estate.siteUrl}capture-journey.html) and ` +
+      "the file of a repo that cites it. The repo can be outside the estate. A fact is gone when that file on the default " +
+      "branch does not hold the name, or is not there. A gone fact does not make a repo due. It leaves this list when the " +
+      `name comes back, or when you [check the stage again](${doc("docs/regenerating.md#the-drift-report")}) and update its evidence.`,
+    unreadRepos: (n) => (n === 1 ? "their repo" : `${n} repos`),
+    item: (f) => {
+      const stage = `**[${f.stage.short}](${estate.siteUrl}capture-journey.html#${f.stage.id})**`;
+      return f.fileGone
+        ? `- ${stage}: the file of the name \`${f.name}\` is not on the default branch (${f.source.branch}).\\\n  ${f.repo} ${fileLink(f, f.commit)} at the cited commit`
+        : `- ${stage}: the name \`${f.name}\` is not in the file.\\\n  ${f.repo} ${fileLink(f, f.source.branch)}`;
+    },
+  },
+];
 function reasons(r) {
   if (r.broken) return [r.broken];
   const out = [];
@@ -177,18 +257,24 @@ function item(r) {
   return `- **${r.name}**: ${reasons(r).join("; ")}.\\\n  ${context}`;
 }
 
-let results, gone;
+let results, outsideRepos;
 try {
-  results = await Promise.all(repos.map(measure));
-  gone = await goneFacts(results);
+  [results, outsideRepos] = await Promise.all([Promise.all(repos.map(measure)), Promise.all(outsideNames.map(lookUp))]);
+  const found = new Map([...results, ...outsideRepos].filter((r) => !r.missing).map((r) => [r.name, r]));
+  for (const section of SECTIONS) section.gone = await goneFacts(section, found);
 } catch (e) {
   fail([e.message, "no issue was changed"]);
 }
 
 const missing = results.filter((r) => r.missing);
-const missingNames = new Set(missing.map((r) => r.name));
-// The facts that were not read, because their repo is not found.
-const unread = [...facts.values()].filter((f) => missingNames.has(f.repo));
+const outsideMissing = outsideRepos.filter((r) => r.missing);
+const missingNames = new Set([...missing, ...outsideMissing].map((r) => r.name));
+for (const section of SECTIONS) section.unread = section.facts.filter((f) => missingNames.has(f.repo));
+// The repos that could not be read, counted by kind: "1 source repo", "2 repos outside the estate".
+const notFoundCounts = [
+  missing.length && plural(missing.length, "source repo"),
+  outsideMissing.length && plural(outsideMissing.length, "repo outside the estate", "repos outside the estate"),
+].filter(Boolean);
 const measured = results.filter((r) => !r.missing);
 const isDue = (r) =>
   r.broken || r.removed > 0 || (r.percent >= DUE_PERCENT && r.changed >= DUE_MIN_FILES) || r.truncated;
@@ -202,21 +288,10 @@ const notDue = measured.filter((r) => !isDue(r) && r.commits > 0).sort(bySeverit
 const doc = (path) => (docsRepo ? `https://github.com/${docsRepo}/blob/HEAD/${path}` : path);
 const now = new Date().toISOString().replace("T", " ").slice(0, 16);
 
-// A gone fact links its file on the default branch, or at the snapshot when the file is not there.
-// The snapshot link uses the short commit, as the links of the shared-resource page do.
-function factItem(f) {
-  const resource = `**[${f.resource.name}](${doc(`docs/shared-resources.md#${f.resource.id}`)})**`;
-  const ref = f.fileGone ? f.source.sha.slice(0, 7) : f.source.branch;
-  const file = `[\`${f.path}\`](https://github.com/${estate.sourceOrg}/${f.repo}/blob/${ref}/${urlPath(f.path)})`;
-  return f.fileGone
-    ? `- ${resource}: the file of the ${f.kind} \`${f.name}\` is not on the default branch (${f.source.branch}).\\\n  ${f.repo} ${file} at the snapshot`
-    : `- ${resource}: the ${f.kind} \`${f.name}\` is not in the file.\\\n  ${f.repo} ${file}`;
-}
 
-// The report with the first `shown` gone facts. Only the issue shows fewer than all: the others
-// are in the job summary of the run.
+// The report with the first `shown[i]` gone facts of each section. Only the issue shows fewer than
+// all: the others are in the job summary of the run.
 function reportOf(shown) {
-  const unreadRepos = new Set(unread.map((f) => f.repo)).size;
   const runUrl = `${process.env.GITHUB_SERVER_URL}/${docsRepo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
   const lines = [
     `Report of ${now} UTC, for ${plural(results.length, "source repo")}. Drift is the change in a ` +
@@ -234,48 +309,49 @@ function reportOf(shown) {
     "",
     ...notDue.map(item),
     ...(quiet.length ? [`- No drift: ${quiet.map((r) => r.name).join(", ")}.`] : []),
-    "",
-    `### Shared-resource facts to check (${gone.length})`,
-    "",
-    `A shared-resource fact is a name on the [shared-resource page](${doc("docs/shared-resources.md")}) and the file of a ` +
-      "code repo that cites it. A fact is gone when that file on the default branch does not hold the name, or is not " +
-      "there. A gone fact does not make a repo due. It leaves this list when the name comes back, or when you regenerate " +
-      `the repo and [check its facts again](${doc("docs/regenerating.md#notes")}).`,
-    "",
-    ...(gone.length ? gone.slice(0, shown).map(factItem) : ["No fact is gone."]),
-    ...(shown < gone.length ? [`- And ${plural(gone.length - shown, "more fact")}: see the [job summary of this run](${runUrl}).`] : []),
-    ...(unread.length
-      ? [
-          "",
-          `The report did not check ${plural(unread.length, "fact")}, because it could not read ` +
-            `${unreadRepos === 1 ? "the source repo" : `${unreadRepos} source repos`} (see "Not found" below).`,
-        ]
-      : []),
   ];
-  if (missing.length) {
+  SECTIONS.forEach((section, i) => {
+    const unreadRepos = new Set(section.unread.map((f) => f.repo)).size;
+    lines.push(
+      "",
+      `### ${section.heading} (${section.gone.length})`,
+      "",
+      section.intro(),
+      "",
+      ...(section.gone.length ? section.gone.slice(0, shown[i]).map(section.item) : ["No fact is gone."]),
+      ...(shown[i] < section.gone.length ? [`- And ${plural(section.gone.length - shown[i], "more fact")}: see the [job summary of this run](${runUrl}).`] : []),
+      ...(section.unread.length
+        ? ["", `The report did not check ${plural(section.unread.length, "fact")}, because it could not read ${section.unreadRepos(unreadRepos)} (see "Not found" below).`]
+        : []),
+    );
+  });
+  if (missingNames.size) {
     lines.push(
       "",
       "### Not found",
       "",
-      `${plural(missing.length, "source repo")} could not be read. A repo that is deleted or private ` +
+      `${notFoundCounts.join(" and ")} could not be read. A repo that is deleted or private ` +
         "returns the same answer. In GitHub Actions the report does not show the name, because a " +
         "private repo name must not be published. Run this report locally to see the name, and see " +
         `[A repo turns private after we wrote its name](${doc("docs/private-names.md#a-repo-turns-private-after-we-wrote-its-name")}).`,
     );
-    if (!inActions) lines.push("", ...missing.map((r) => `- ${r.name}`));
+    if (!inActions) lines.push("", ...[...missing, ...outsideMissing].map((r) => `- ${r.name}`));
   }
   return lines.join("\n") + "\n";
 }
 
-const report = reportOf(gone.length);
+const report = reportOf(SECTIONS.map((section) => section.gone.length));
 const dueNames = due.map((r) => r.name);
-const goneHashes = gone.map((f) => f.hash);
 
-// The issue body: the marker, then the report with as many gone facts as fit in MAX_BODY.
+// The issue body: the marker, then the report with as many gone facts as fit in MAX_BODY. Each
+// step shows one fact less of the section that shows the most.
 function issueBody(marker) {
-  for (let shown = gone.length; ; shown--) {
+  const shown = SECTIONS.map((section) => section.gone.length);
+  for (;;) {
     const body = `${marker}\n${reportOf(shown)}`;
-    if (Buffer.byteLength(body) <= MAX_BODY || shown === 0) return body;
+    const most = shown.indexOf(Math.max(...shown));
+    if (Buffer.byteLength(body) <= MAX_BODY || shown[most] === 0) return body;
+    shown[most]--;
   }
 }
 
@@ -297,40 +373,45 @@ process.stdout.write(page);
 if (summaryFile) appendFileSync(summaryFile, page);
 
 if (syncIssue) await sync();
-if (missing.length) fail([`${plural(missing.length, "source repo")} not found`]);
+if (notFoundCounts.length) fail(notFoundCounts.map((count) => `${count} not found`));
 
 // One issue holds the report. A run opens or reopens it when a repo is due or a fact is gone,
 // edits it on each run, and closes it when no repo is due and no fact is gone. A comment (it
 // notifies) says when the due list or the list of gone facts changes.
 async function sync() {
   const issue = await findIssue();
-  const marked = issue?.body?.split("\n", 1)[0].slice(MARKER.length).replace("-->", "").trim().split(/\s+/).filter(Boolean) ?? [];
-  const at = marked.indexOf(MARKER_FACTS);
-  const dueBefore = at < 0 ? marked : marked.slice(0, at);
-  // Only short hashes count as facts: a hand edit can leave other words.
-  const factsBefore = at < 0 ? [] : marked.slice(at + 1).filter((t) => /^[0-9a-f]{7}$/.test(t));
-  const added = dueNames.filter((n) => !dueBefore.includes(n));
+  const before = parseMarker(issue?.body?.split("\n", 1)[0] ?? "");
+  const added = dueNames.filter((n) => !before.due.includes(n));
   // A repo that is not found now may be private: the "Not found" section covers it, without a name.
-  const dropped = dueBefore.filter((n) => !dueNames.includes(n) && !missingNames.has(n));
-  // A fact of the last run that was not read now stays on the list: its hash names no repo.
-  const unreadHashes = new Set(unread.map((f) => f.hash));
-  const factHashes = [...goneHashes, ...factsBefore.filter((h) => unreadHashes.has(h))];
-  const factsAdded = goneHashes.filter((h) => !factsBefore.includes(h));
-  const factsDropped = factsBefore.filter((h) => !factHashes.includes(h));
-  const note = [
-    added.length && `Now due: ${added.join(", ")}.`,
-    dropped.length && `No longer due: ${dropped.join(", ")}.`,
-    factsAdded.length && `${plural(factsAdded.length, "new shared-resource fact")} to check.`,
-    factsDropped.length &&
-      `${plural(factsDropped.length, "shared-resource fact")} ${factsDropped.length === 1 ? "is" : "are"} no longer on the list.`,
-  ].filter(Boolean).join(" ");
-  const body = issueBody([MARKER, ...dueNames, ...(factHashes.length ? [MARKER_FACTS, ...factHashes] : []), "-->"].join(" "));
+  const dropped = before.due.filter((n) => !dueNames.includes(n) && !missingNames.has(n));
+  const notes = [added.length && `Now due: ${added.join(", ")}.`, dropped.length && `No longer due: ${dropped.join(", ")}.`];
+  const again = [dueNames.length && `Due again: ${dueNames.join(", ")}.`];
+  const marker = [MARKER, ...dueNames];
+  let anyFact = false;
+  for (const section of SECTIONS) {
+    const factsBefore = before.facts[section.label] ?? [];
+    // A fact of the last run that was not read now stays on the list: its hash names no repo.
+    const unreadHashes = new Set(section.unread.map((f) => f.hash));
+    const goneHashes = section.gone.map((f) => f.hash);
+    const hashes = [...goneHashes, ...factsBefore.filter((h) => unreadHashes.has(h))];
+    const factsAdded = goneHashes.filter((h) => !factsBefore.includes(h));
+    const factsDropped = factsBefore.filter((h) => !hashes.includes(h));
+    notes.push(
+      factsAdded.length && `${plural(factsAdded.length, `new ${section.term}`)} to check.`,
+      factsDropped.length && `${plural(factsDropped.length, section.term)} ${factsDropped.length === 1 ? "is" : "are"} no longer on the list.`,
+    );
+    again.push(hashes.length && `${plural(hashes.length, section.term)} to check again.`);
+    if (hashes.length) marker.push(section.label, ...hashes);
+    anyFact ||= hashes.length > 0;
+  }
+  const note = notes.filter(Boolean).join(" ");
+  const body = issueBody([...marker, "-->"].join(" "));
   check(body, "the issue body");
   const path = `/repos/${docsRepo}/issues`;
 
-  if (!dueNames.length && !factHashes.length) {
+  if (!dueNames.length && !anyFact) {
     if (!issue || issue.state === "closed") return console.error("issue: no repo is due, no fact is gone, and no issue is open");
-    const comment = `${note} No repo is due and no shared-resource fact is gone now, so this issue closes.`.trim();
+    const comment = `${note} No repo is due and no fact is gone now, so this issue closes.`.trim();
     check(comment, "the issue comment");
     await api("PATCH", `${path}/${issue.number}`, { body });
     await api("POST", `${path}/${issue.number}/comments`, { body: comment });
@@ -342,17 +423,29 @@ async function sync() {
     return console.error(`issue: opened #${made.number}`);
   }
   const reopen = issue.state === "closed";
-  const again = [
-    dueNames.length && `Due again: ${dueNames.join(", ")}.`,
-    factHashes.length && `${plural(factHashes.length, "shared-resource fact")} to check again.`,
-  ].filter(Boolean).join(" ");
-  const comment = note || (reopen ? again : "");
+  const comment = note || (reopen ? again.filter(Boolean).join(" ") : "");
   if (comment) check(comment, "the issue comment");
   const edit = issue.body !== body || reopen;
   if (edit) await api("PATCH", `${path}/${issue.number}`, { body, ...(reopen && { state: "open" }) });
   if (comment) await api("POST", `${path}/${issue.number}/comments`, { body: comment });
   const done = reopen ? "reopened" : edit ? "updated" : "unchanged";
   console.error(`issue: ${done} #${issue.number}${comment ? ` (${comment})` : ""}`);
+}
+
+// The due repos and the facts of each section on a marker line. A token after the label of a
+// section belongs to that section until the next label. Only short hashes count as facts: a hand
+// edit can leave other words.
+function parseMarker(line) {
+  if (!line.startsWith(MARKER)) return { due: [], facts: {} };
+  const labels = new Set(SECTIONS.map((section) => section.label));
+  const due = [], facts = {};
+  let label = null;
+  for (const token of line.slice(MARKER.length).replace("-->", "").trim().split(/\s+/).filter(Boolean)) {
+    if (labels.has(token)) label = token;
+    else if (!label) due.push(token);
+    else if (/^[0-9a-f]{7}$/.test(token)) (facts[label] ??= []).push(token);
+  }
+  return { due, facts };
 }
 
 // The oldest issue that github-actions opened with the marker. Pull requests are skipped.
