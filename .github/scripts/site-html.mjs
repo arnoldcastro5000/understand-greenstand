@@ -26,9 +26,22 @@ export const SITE_LOOK_FILES = [ARCHIVO, PARCEL_FIELD];
 // moved page, on the capture journey page, and on the contributors page.
 export const READING_COLUMN = "44rem";
 
-// The width of the content column of the capture journey page and the contributors page: wider
-// than the reading column, for the stages and for the grid of names.
+// The width of the content column of the capture journey page: wider than the reading column, for
+// the stages (the images beside the text).
 export const CONTENT_COLUMN = "58rem";
+
+// The edge of a plate (a block in the surface color: a diagram, a code block, a quote, the Start
+// here field, the welcome plate): a hairline in the line color, as the neatline of a map frame, so
+// the plate shows against the ground (site-look ticket 07). No shadow. The image plates of the
+// capture journey have no edge: each image on them has its own frame.
+export const PLATE_EDGE = "1px solid var(--line)";
+
+// The chip of inline code on the pages of running text (the text pages, the capture journey page,
+// the contributors page, the moved pages): the surface fill and a thin side padding, so a code in
+// parentheses reads as tight punctuation, "(x)", not "( x )". Code in a pre block has no chip. The
+// landing page shows its commit ids with no chip.
+export const CODE_CHIP = `  code { padding: .1em .15em; background: var(--surface); }
+  pre code { padding: 0; background: none; }`;
 
 // The media queries of the legend rail: a wide screen (64rem and more) shows the legend rail; a
 // narrow screen shows the masthead as a band at the top. "not all and" makes the narrow
@@ -126,17 +139,19 @@ export const areaGroup = (area, cells) => `<span class="group" style="${areaStyl
 
 // The estate mark: the estate strip as a picture, with no links and no words, hidden from screen
 // readers. One cell (<i>) for each repo, in a group for each area with repos (not the featured
-// area). Each page gives it its own size.
-export const estateMark = (areas) => [
+// area). Each page gives it its own size. current is the name of the repo of a one-repo page (its
+// onboarding guide, README, or glossary, or a moved page of it), or null: the cell of that repo
+// gets an ink outline, the locator (as the address target on the estate strip of the landing page).
+export const estateMark = (areas, current = null) => [
   '<div class="mark" aria-hidden="true">',
-  ...areas.filter((a) => !a.featured).map((area) => areaGroup(area, "<i></i>".repeat(area.repos.length))),
+  ...areas.filter((a) => !a.featured).map((area) => areaGroup(area, area.repos.map((r) => (r.name === current ? '<i class="here"></i>' : "<i></i>")).join(""))),
   "</div>",
 ].join("\n");
 
 // The masthead of a page in the site look other than the landing page (the landing page has its
 // own): the estate mark over the parts of the page (for example the back links). siteStyle paints
 // the parcel field under it.
-export const masthead = (areas, parts = "") => ['<header class="masthead">', estateMark(areas), ...(parts ? [parts] : []), "</header>"].join("\n");
+export const masthead = (areas, parts = "", current = null) => ['<header class="masthead">', estateMark(areas, current), ...(parts ? [parts] : []), "</header>"].join("\n");
 
 // The style of the masthead and of the page grid. column is the width of the content column of
 // the page.
@@ -154,6 +169,7 @@ export const mastheadStyle = (column) => `  .masthead { padding: 1.25rem max(1.2
   .mark .group { display: flex; flex: var(--n) 1 0; gap: 1px; min-width: 0; }
   .mark i { flex: 1 1 0; min-width: 0; background: var(--area); box-shadow: inset 0 0 0 1px var(--edge);
     -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .mark i.here { outline: 2px solid var(--ink); outline-offset: 1px; }
   .masthead nav { display: flex; flex-wrap: wrap; gap: .25rem 1.5rem; font: 500 .98rem/1.3 var(--display);
     font-stretch: 87.5%; }
   .masthead nav a { display: inline-block; padding-block: .15rem; color: var(--ink); text-decoration: none; }

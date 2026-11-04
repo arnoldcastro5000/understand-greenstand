@@ -4,7 +4,7 @@
 // build-capture-journey.mjs checks the data file, makes the view (the data with its links), and
 // writes the page with --site. The page is in the site look (site-html.mjs, DESIGN.md).
 import { plural } from "./estate.mjs";
-import { CONTENT_COLUMN as COLUMN, READING_COLUMN, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle } from "./site-html.mjs";
+import { CODE_CHIP, CONTENT_COLUMN as COLUMN, READING_COLUMN, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle } from "./site-html.mjs";
 
 // The icons of the stages: the inside of an SVG with the view box 0 0 48 48, drawn with lines.
 export const ICONS = {
@@ -66,7 +66,8 @@ const PAGE_STYLE = `  /* A long word breaks anywhere, so no text makes the page 
   main { --pad: 1.25rem; container-type: inline-size; padding: 1.25rem var(--pad) 5rem; }
   main > * { box-sizing: border-box; max-width: ${COLUMN}; margin-inline: auto; }
   p, ul { margin-block: 0 1rem; }
-  code { padding: .1em .35em; background: var(--surface); white-space: nowrap; }
+${CODE_CHIP}
+  code { white-space: nowrap; }
   img { max-width: 100%; height: auto; }
   .muted { color: var(--muted); }
   .icon { display: block; }
@@ -135,7 +136,18 @@ const PAGE_STYLE = `  /* A long word breaks anywhere, so no text makes the page 
     font-stretch: 87.5%; font-variant-numeric: tabular-nums; color: var(--muted); }
   .num .icon { width: 1.75rem; height: 1.75rem; padding: .3rem; box-sizing: border-box; border: 1.5px solid var(--ink);
     color: var(--ink); }
-  /* The images of a stage lie on a plate in the surface color. */
+  /* The stage label (the station icon over "Stage n of 6") is in a margin column at the left of the
+     heading, level with its first line: no label above a heading (the craft floor). The DOM order
+     stays. The heading and the text under it hang in the second column, so they share one left
+     edge, as the Start here steps do. On a small phone (below) the text takes the full width. */
+  .text { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: .9rem; align-items: start; }
+  .text > * { grid-column: 2; }
+  .text > .num { grid-column: 1; grid-row: 1 / span 2; flex-direction: column; align-items: flex-start; gap: 0;
+    margin: .6rem 0 0; white-space: nowrap; }
+  .text > .num .icon { margin-bottom: .4rem; }
+  .text > h2 { grid-column: 2; grid-row: 1; }
+  /* The images of a stage lie on a plate in the surface color. The plate has no edge (PLATE_EDGE):
+     each image on it has its own frame, and an edge would make a frame inside a frame. */
   .media { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; padding: 1.25rem; background: var(--surface); }
   figure { margin: 0; text-align: center; }
   figure img { display: block; width: 100%; box-sizing: border-box; }
@@ -165,6 +177,17 @@ const PAGE_STYLE = `  /* A long word breaks anywhere, so no text makes the page 
     .track { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 1.25rem; }
     .track::before { display: none; }
     figure.phone { width: 130px; }
+  }
+  /* On a small phone the image plate spans the width of the screen, with a thin side padding, so
+     the smallest text of a drawing shows at 11 px or more at 320 px (site-look ticket 07). */
+  @container (max-width: 30rem) {
+    .media { margin-inline: calc(-1 * var(--pad)); padding-inline: .5rem; }
+    /* A small phone: the label column is compact and the text under the heading takes the full
+       width, so a line keeps about 40 characters. */
+    .text { column-gap: .7rem; }
+    .text > :not(.num, h2) { grid-column: 1 / -1; }
+    .text > .num { grid-row: 1; margin-bottom: .9rem; font-size: .74rem; }
+    .text > .num .icon { width: 1.5rem; height: 1.5rem; padding: .22rem; margin-bottom: .3rem; }
   }
   /* On the narrowest phones a long code (a file name) can break, so it stays in its box. */
   @container (max-width: 20rem) {
@@ -231,7 +254,7 @@ function stageHtml(stage, i, view) {
     `<section id="${stage.id}" class="${classes}" data-short="${htmlText(stage.short)}">`,
     ...(stage.images.length ? [`<div class="media">${stage.images.map((image) => figureHtml(image, view.imageDir)).join("")}</div>`] : []),
     '<div class="text">',
-    `<p class="num">${icon(stage.icon, 22)} Stage ${i + 1} of ${view.stages.length}</p>`,
+    `<p class="num">${icon(stage.icon, 22)} Stage <span class="of">${i + 1} of ${view.stages.length}</span></p>`,
     `<h2>${titleText(stage.title)}</h2>`,
     ...stage.story.map((p) => `<p>${htmlText(p)}</p>`),
     ...stage.flags.map(flagHtml),

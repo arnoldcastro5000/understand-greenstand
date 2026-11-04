@@ -9,10 +9,11 @@
 // windows show, one after the other. The page shows the login only (no avatar), linked to the
 // GitHub profile.
 import { plural } from "./estate.mjs";
-import { CONTENT_COLUMN as COLUMN, READING_COLUMN, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle } from "./site-html.mjs";
+import { CODE_CHIP, PLATE_EDGE, READING_COLUMN, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle } from "./site-html.mjs";
 
-// COLUMN, the content column of the page (CONTENT_COLUMN): the grid of names uses it. Running text
-// stays in the reading column (READING_COLUMN).
+// Each part of the page (the text, the welcome plate, the grid of names, the heading rules) is in the
+// reading column (READING_COLUMN), so the page has one right edge, as the text pages do (site-look
+// ticket 07).
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 // A date (UTC) in words: "3 November 2026", or "3 November" without the year.
@@ -115,15 +116,14 @@ function windowPart(w, index, caveatAt) {
 // and both windows show with their titles. With JavaScript (the class "js" on html) the switch
 // shows, only the chosen window shows, and its title is for screen readers only.
 const STYLE = `  main { padding: 1.5rem 1.25rem 5rem; }
-  main > * { box-sizing: border-box; max-width: ${COLUMN}; margin-inline: auto; }
+  main > * { box-sizing: border-box; max-width: ${READING_COLUMN}; margin-inline: auto; }
   @media ${WIDE} { main { padding: 1.25rem clamp(1.5rem, 4vw, 4.5rem) 5rem; } main > * { margin-inline: 0; } }
   h1 { margin-block: 1.5rem 1.1rem; font-size: clamp(1.9rem, 1.5rem + 1.8vw, 2.6rem); font-weight: 720; letter-spacing: -.02em; }
   h2 { margin-block: 2.9rem .8rem; padding-top: .75rem; border-top: 2px solid var(--ink); font-size: 1.5rem; font-weight: 660;
     scroll-margin-top: 1.5rem; }
   h3 { margin-block: 2.2rem .6rem; font-size: 1.2rem; font-weight: 660; }
   p, ul, dl { margin-block: 0 1rem; }
-  code { padding: .1em .35em; background: var(--surface); }
-  .lede, .count, .caveat, .welcome, .how, .about { max-width: ${READING_COLUMN}; }
+${CODE_CHIP}
   .lede { font-size: 1.06rem; }
   .caveat { color: var(--muted); font-size: .92rem; scroll-margin-top: 1.5rem; }
   .count { font: 500 1rem/1.4 var(--display); font-stretch: 87.5%; font-variant-numeric: tabular-nums; }
@@ -136,7 +136,7 @@ const STYLE = `  main { padding: 1.5rem 1.25rem 5rem; }
   .switch button { appearance: none; margin: 0; padding: .55rem 1rem; border: 0; border-radius: 0; text-align: left;
     cursor: pointer; color: var(--ink); background: transparent; font: 600 .98rem/1.3 var(--display); font-stretch: 87.5%; }
   .switch button + button { border-left: 1px solid var(--line); }
-  .switch .dates { display: block; color: var(--muted); font: 400 .82rem/1.3 system-ui, sans-serif; }
+  .switch .dates { display: block; color: var(--muted); font: 400 .82rem/1.3 system-ui, sans-serif; font-variant-numeric: tabular-nums; }
   .switch button[aria-pressed="true"] { color: var(--ground); background: var(--ink); }
   .switch button[aria-pressed="true"] .dates { color: var(--ground); }
   .switch button:focus-visible { outline-offset: -4px; outline-color: currentColor; }
@@ -144,17 +144,18 @@ const STYLE = `  main { padding: 1.5rem 1.25rem 5rem; }
     .switch button[aria-pressed="true"] { forced-color-adjust: none; color: HighlightText; background: Highlight; }
     .switch button[aria-pressed="true"] .dates { forced-color-adjust: none; color: HighlightText; } }
 
-  .window-title .dates { display: block; margin-top: .35rem; color: var(--muted); font: 400 .92rem/1.4 system-ui, sans-serif; }
+  .window-title .dates { display: block; margin-top: .35rem; color: var(--muted); font: 400 .92rem/1.4 system-ui, sans-serif;
+    font-variant-numeric: tabular-nums; }
   .js .window:not(.shown) { display: none; }
   .js .window-title { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; border: 0; overflow: hidden;
     clip-path: inset(50%); white-space: nowrap; }
   .js .window > .count { margin-top: 1.5rem; }
 
-  .welcome { margin-block: 1.25rem 0; padding: 1.4rem 1.75rem 1rem; background: var(--surface); }
+  .welcome { box-sizing: border-box; margin-block: 1.25rem 0; padding: 1.4rem 1.75rem 1rem; border: ${PLATE_EDGE};
+    background: var(--surface); }
   .welcome h3 { margin: 0 0 .6rem; font-size: 1.5rem; font-weight: 680; }
   .welcomes { margin: 0; padding: 0; list-style: none; }
   .welcomes li { padding: .85rem 0 .9rem; border-top: 1px solid var(--line); }
-  @media (forced-colors: active) { .welcome { border: 1px solid CanvasText; } }
   @media (max-width: 30rem) { .welcome { padding-inline: 1.1rem; } }
 
   .names { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr)); gap: 0 2rem; padding: 0;
@@ -205,7 +206,7 @@ value of a contribution: read the <a href="#caveat">note on counts</a>.`;
 ${siteHead(".")}
 <style>
 ${siteStyle(".")}
-${mastheadStyle(COLUMN)}
+${mastheadStyle(READING_COLUMN)}
 ${STYLE}
 </style>
 </head>

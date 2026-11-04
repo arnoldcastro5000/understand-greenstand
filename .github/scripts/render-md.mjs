@@ -19,7 +19,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, posix } from "node:path";
 import { marked } from "marked";
 import { escapeRegExp, loadEstate } from "./estate.mjs";
-import { DISPLAY, DISPLAY_FACE, READING_COLUMN, SITE_LOOK_FILES, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
+import { CODE_CHIP, DISPLAY, PLATE_EDGE, DISPLAY_FACE, READING_COLUMN, SITE_LOOK_FILES, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
 import { BACKGROUNDS, DIAGRAM_NODE_TINT, LINES, TEXTS } from "./site-colors.mjs";
 import { slugger } from "./slug.mjs";
 
@@ -48,6 +48,8 @@ const atRoot = here !== null && !here.includes("/");
 // The path from the page to the root of the site: "." or "..".
 const toRoot = posix.relative(posix.dirname(here ?? ""), ".") || ".";
 const { GITHUB_REPOSITORY: repo, GITHUB_SHA: sha } = process.env;
+// The repo of a one-repo page (repos/<name>/...): the estate mark shows its locator.
+const pageRepo = from.match(/^repos\/([^/]+)\//)?.[1] ?? null;
 
 function rewrite(href) {
   if (!here || /^([a-z][a-z0-9+.-]*:|#|\/)/i.test(href)) return href;
@@ -203,7 +205,10 @@ import(${JSON.stringify(mermaidRel.startsWith("../") ? mermaidRel : `./${mermaid
         pre.removeAttribute("data-processed");
         pre.textContent = source;
       }
-      mermaid.initialize({ startOnLoad: false, theme: "base", look: "classic", themeVariables: dark.matches ? themes.dark : themes.light });
+      // A node padding of 10 (the default is 15) lets the widest map (914 px at 15) show at its size in
+      // the content column at 1280 px (site-look ticket 07). nodeSpacing does not change the width.
+      mermaid.initialize({ startOnLoad: false, theme: "base", look: "classic", flowchart: { padding: 10 },
+        themeVariables: dark.matches ? themes.dark : themes.light });
       return document.fonts.load('400 16px "${DISPLAY_FACE}"').then(() => mermaid.run()).finally(() => {
         for (const g of root.querySelectorAll("pre.mermaid g.node")) {
           const color = colorOf[g.textContent.trim()];
@@ -253,13 +258,12 @@ ${mastheadStyle(READING_COLUMN)}
   li { margin-block: .3rem; }
   li > :is(ul, ol) { margin-block: .3rem 0; }
   li::marker { color: var(--muted); }
-  code { padding: .1em .35em; background: var(--surface); }
-  pre { padding: 1rem; overflow: auto; background: var(--surface); }
-  pre code { padding: 0; background: none; }
+${CODE_CHIP}
+  pre { padding: 1rem; overflow: auto; border: ${PLATE_EDGE}; background: var(--surface); }
   table { display: block; width: 100%; overflow: auto; border-collapse: collapse; font-variant-numeric: tabular-nums; }
   th { font: 600 .92rem/1.3 var(--display); font-stretch: 87.5%; text-align: left; background: var(--surface); }
   th, td { padding: .55rem .8rem; border-bottom: 1px solid var(--line); vertical-align: top; }
-  blockquote { margin-inline: 0; padding: .75rem 1rem; color: var(--muted); background: var(--surface); }
+  blockquote { margin-inline: 0; padding: .75rem 1rem; color: var(--muted); border: ${PLATE_EDGE}; background: var(--surface); }
   blockquote > :last-child { margin-bottom: 0; }
   hr { height: 0; margin-block: 2rem; border: 0; border-top: 1px solid var(--line); }
   img { max-width: 100%; }
@@ -271,7 +275,7 @@ ${mastheadStyle(READING_COLUMN)}
 </style>${mermaidHead}
 </head>
 <body>
-${masthead(areas, `<nav><a href="${esc(backHref)}">&larr; ${esc(backLabel)}</a>${atRoot ? "" : '<a href="../">All viewers</a>'}</nav>`)}
+${masthead(areas, `<nav><a href="${esc(backHref)}">&larr; ${esc(backLabel)}</a>${atRoot ? "" : '<a href="../">All viewers</a>'}</nav>`, pageRepo)}
 <main>
 ${body}</main>${mermaidScript}
 </body>
