@@ -7,14 +7,13 @@
 //        node build-glossary.mjs --check   exit 1 if a glossary is missing or stale (CI)
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { SHARED_RESOURCES_DATA, SHARED_RESOURCES_PAGE, loadEstate, parseJson, readDocsFile, readSharedResources, root } from "./estate.mjs";
+import { SHARED_RESOURCES_DATA, SHARED_RESOURCES_PAGE, isText, loadEstate, parseJson, readDocsFile, readSharedResources, root } from "./estate.mjs";
 import { slugger } from "./slug.mjs";
 
 const SCRIPT = ".github/scripts/build-glossary.mjs";
 const check = process.argv.includes("--check");
 const { repos, count, errors } = loadEstate();
 
-const isText = (v) => typeof v === "string" && v.trim() !== "";
 // Text from the graph goes into Markdown: escape what would change its meaning.
 const md = (s) => s.trim().replace(/[\\`*[\]<>]/g, "\\$&").replace(/(^|[^\p{L}\p{N}])_|_(?=[^\p{L}\p{N}]|$)/gu, (m) => m.replace("_", "\\_"));
 const code = (s) => (s.includes("`") ? md(s) : `\`${s.trim()}\``);
