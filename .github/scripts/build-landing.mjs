@@ -16,7 +16,7 @@
 import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { formerNamesText, loadEstate } from "./estate.mjs";
-import { SITE_LOOK_FILES, WIDE, areaGroup, areaStyle, esc, estateMark, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
+import { PLATE_EDGE, SITE_LOOK_FILES, WIDE, areaGroup, areaStyle, esc, estateMark, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
 import { startPath } from "./start-path.mjs";
 
 const site = process.argv[2];
@@ -186,7 +186,7 @@ ${siteStyle(".")}
   .welcome { margin-bottom: 2.25rem; }
   .chip { display: inline-block; width: .8em; height: .8em; margin-right: .45em; vertical-align: -.02em;
     background: var(--area); box-shadow: inset 0 0 0 1px var(--edge); }
-  .featured { padding: 1.6rem 1.75rem 1.4rem; background: var(--surface); }
+  .featured { padding: 1.6rem 1.75rem 1.4rem; border: ${PLATE_EDGE}; background: var(--surface); }
   .featured h2 { margin: 0 0 .35rem; font-size: 1.55rem; font-weight: 680; }
   .featured .intro { margin-bottom: 1rem; color: var(--muted); }
   .path { margin: 0; padding: 0; list-style: none; counter-reset: step; }
@@ -213,7 +213,8 @@ ${siteStyle(".")}
   .name { font: 640 1.12rem/1.3 var(--display); }
   .desc { max-width: 40rem; margin: .2rem 0 .45rem; }
   .links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem 1.25rem; font-size: .92rem; }
-  .snap { color: var(--muted); font-variant-numeric: tabular-nums; }
+  /* The snapshot is the scene date of a map sheet: a label in the display face, with tabular figures. */
+  .snap { color: var(--muted); font: 500 .88rem/1.3 var(--display); font-stretch: 87.5%; font-variant-numeric: tabular-nums; }
   @container masthead (min-width: ${linksFrom}px) { .strip { display: flex; } .mark { display: none; } }
   @media ${WIDE} {
     body { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); align-items: start; }

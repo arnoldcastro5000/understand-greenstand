@@ -88,6 +88,17 @@ and amber number circles of `reward.svg` are gone. Each drawing is 400 units wid
 `web-map-badges.svg` and `verify-page.svg` keep their own colors, because they show screens of
 Greenstand apps.
 
+Built 2026-11-03 (ticket 07, the finish): the impeccable-finish-reviewer gave "ship" after 3
+verdict passes. The stage label of the capture journey is in a margin column beside its heading
+(the heading and its text hang in column 2 where main is 30rem or wider); the contributors page has
+one right edge (the reading column); the inline code chip is CODE_CHIP (side padding .15em); the
+image plate of the capture journey reaches the screen edges on a small phone; the 2 app-screen
+drawings are 360 units wide (the smallest text 11.8 px at 320); the Mermaid node padding is 10, so
+every map shows at its size at 1280 px. On the user's word, the 3 ceiling points of the review are
+built too: the locator (an ink outline on the repo cell of the estate mark on a one-repo page), the
+snapshot line as a display-face label, and PLATE_EDGE (a 1px neatline on each plate but the image
+plates, whose images have their own frames). Firefox and WebKit draw the drawing font (checked).
+
 ## Direction contract
 
 THESIS: The site reads as a land-cover classification map of the code estate: areas are classes,

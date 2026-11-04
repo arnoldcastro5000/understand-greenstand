@@ -12,7 +12,7 @@
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadEstate } from "./estate.mjs";
-import { READING_COLUMN, SITE_LOOK_FILES, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
+import { CODE_CHIP, READING_COLUMN, SITE_LOOK_FILES, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
 
 const site = process.argv[2];
 if (!site) {
@@ -79,12 +79,12 @@ ${mastheadStyle(READING_COLUMN)}
     main { padding: 2.4rem clamp(1.5rem, 4vw, 4.5rem) 5rem; }
     main > * { margin-inline: 0; }
   }
-  code { padding: .1em .35em; background: var(--surface); }
+${CODE_CHIP}
   a, code { white-space: nowrap; }
 </style>
 </head>
 <body>
-${masthead(estate.areas)}
+${masthead(estate.areas, "", name)}
 <main>
 <p>The source repo <code>${esc(former)}</code> is now <code>${esc(name)}</code>. This page moved to
 <a href="${esc(href)}">${esc(name)}</a>.</p>
