@@ -25,7 +25,7 @@
   ],
   "systems": [
     {"id": "postgres", "name": "PostgreSQL", "shape": "database"},
-    {"id": "storage", "name": "Object storage", "shape": "database"},
+    {"id": "storage", "name": "Cloud storage", "shape": "database"},
     {"id": "keycloak", "name": "Keycloak", "shape": "box"},
     {"id": "rabbitmq", "name": "RabbitMQ", "shape": "box"},
     {"id": "gateway", "name": "API gateway", "shape": "box"},

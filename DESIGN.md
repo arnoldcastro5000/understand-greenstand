@@ -326,6 +326,9 @@ components:
     typography: "{typography.label-summary}"
     rounded: "{rounded.none}"
     padding: "0.25rem 0.9rem"
+  chapter-number:
+    textColor: "{colors.muted}"
+    typography: "{typography.label}"
   drawing:
     backgroundColor: "{colors.surface}"
     rounded: "{rounded.none}"
@@ -352,7 +355,7 @@ The site reads as a land-cover classification map of the code estate. Each area 
 
 The site look is calm and dense. The page is a mineral ground with evergreen-black ink. Hairline rules divide the content. The parcel field, the faint ink boundaries of made-up field parcels, lies behind the legend rail. It is decoration, not data. Apart from the link blue, the area colors are the only saturated colors on the page, and they fill shapes only. The pages follow the color scheme of the reader, so each color is a pair: one value for light, one value for dark (the `-dark` tokens). The site look refuses the GitHub-clone docs look (the former look) and the stock eco template: no leaf art, no gradients, no drop shadows, no Greenstand logo.
 
-Scope of this record: every page that the site scripts make is in the site look. These pages are the landing page, the text pages, the capture journey page, the contributors page, and the moved pages. The shared base is the colors in `.github/scripts/site-colors.mjs` and these parts of `.github/scripts/site-html.mjs`: `siteStyle`, `siteHead`, the estate mark (`estateMark(areas, current)`, `areaGroup`, `areaStyle`), the masthead (`masthead`, `mastheadStyle`), the reading column (`READING_COLUMN`), the content column of the capture journey page (`CONTENT_COLUMN`), the plate edge (`PLATE_EDGE`), the inline code chip (`CODE_CHIP`), and the files of the site look (`SITE_LOOK_FILES`: the font and the parcel field). The parcel field is also in the shared base (`.github/scripts/build-parcel-field.mjs` writes `art/parcel-field.svg`). `build-landing.mjs` writes the landing page. `render-md.mjs` writes the text pages: the ecosystem maps, the shared-resource page, the estate glossary, the volunteer guide, and the onboarding guide, the README, and the glossary of each repo. `capture-journey-page.mjs` holds the capture journey page, and `build-capture-journey.mjs --site` writes it. `build-moved.mjs` writes the moved pages: a moved page is at the former name of a repo and sends the reader to the new name. Every page shows the parcel field. The former look (`BASE_STYLE`) is not in the build any more.
+Scope of this record: every page that the site scripts make is in the site look. These pages are the landing page, the text pages, the capture journey pages, the contributors page, and the moved pages. The shared base is the colors in `.github/scripts/site-colors.mjs` and these parts of `.github/scripts/site-html.mjs`: `siteStyle`, `siteHead`, the estate mark (`estateMark(areas, current)`, `areaGroup`, `areaStyle`), the masthead (`masthead`, `mastheadStyle`), the reading column (`READING_COLUMN`), the content column of the capture journey page (`CONTENT_COLUMN`), the plate edge (`PLATE_EDGE`), the inline code chip (`CODE_CHIP`), and the files of the site look (`SITE_LOOK_FILES`: the font and the parcel field). The parcel field is also in the shared base (`.github/scripts/build-parcel-field.mjs` writes `art/parcel-field.svg`). `build-landing.mjs` writes the landing page. `render-md.mjs` writes the text pages: the ecosystem maps, the shared-resource page, the estate glossary, the volunteer guide, and the onboarding guide, the README, and the glossary of each repo. `capture-journey-page.mjs` holds the capture journey page of each chapter, and `build-capture-journey.mjs --site` writes them: `capture-journey.html` for chapter 1 and `capture-journey-<id>.html` for a later chapter (`capture-journey-web-map.html` for chapter 2). `build-moved.mjs` writes the moved pages: a moved page is at the former name of a repo and sends the reader to the new name. Every page shows the parcel field. The former look (`BASE_STYLE`) is not in the build any more.
 
 **Key Characteristics:**
 - A mineral ground, an ink text color, and water blue for links only, from one data module of [light, dark] pairs.
@@ -390,7 +393,7 @@ The state colors (`STATES`). A state color is the color of a state. The state co
 - **Best-Guess Ochre** (`best-guess`): the state color of a best guess.
 - **Not-Working Rose** (`not-working`): the state color of a part that does not work or is gone.
 
-A state never shows by its state color alone: a best guess also has a hatch, and a part that does not work also has a cross. CI checks these tokens. The capture journey page shows both states: in a state tag, in a flag, and in the legend (see State marks). The error image of a broken diagram also uses a state color: Mermaid draws it in the not-working color (`errorBkgColor` and `errorTextColor`), with its own error text.
+A state never shows by its state color alone: a best guess also has a hatch, and a part that does not work also has a cross. CI checks these tokens. The capture journey pages show the states: in a state tag, in a flag, and in the legend (see State marks). The legend of a chapter shows only the flag kinds that the chapter has. The error image of a broken diagram also uses a state color: Mermaid draws it in the not-working color (`errorBkgColor` and `errorTextColor`), with its own error text.
 
 ### Neutral
 - **Mineral Ground** (`ground`): the page background, the `html` background, the browser bar color (`theme-color`), the scrollbar track, and the fill of the diagram nodes and clusters. On the capture journey page, it is the fill of a station, the color of a station number and of a station icon on hover, and the background of the sticky bar. In a drawing in the site look: the fill of a step box, of the cloud, and of the cylinder, and the color of a step numeral.
@@ -456,13 +459,13 @@ On the capture journey page:
 - **Display (text page)**: the h1 (the title).
 - **Subtitle** (400, 1.15rem, muted, `text-wrap: balance`): the line under the title.
 - **Headline (text page)** (660, 1.5rem, 1.15): the h2 of a stage.
-- **Label** (600, .82rem, width 87.5%): the chapter line (muted, line height 1.25), the state tags (in the state color, line height 1.7), and the stage label (muted, tabular, line height 1.2; .74rem where `main` is below 30rem).
+- **Label** (600, .82rem, width 87.5%): the chapter line (muted, line height 1.25), the state tags (in the state color, line height 1.7), the stage label (muted, tabular, line height 1.2; .74rem where `main` is below 30rem), and the chapter number in the footer (muted, tabular, line height 1.4).
 - **Label (station)**: the label of a station uses the rail-name style (500, .9rem, 1.25, width 87.5%).
 - **Numeral (station)** (600, .75rem, 1.25rem, width 75%, tabular): the number of a station.
 - **Label (bar)** (600, .9rem, 1.3, width 87.5%, tabular): the text of the sticky bar.
 - **Label (summary)** (600, .92rem, 1.6, width 87.5%): the summary of a "For developers" box. The text of the box is .92rem.
 - Captions are .85rem with a line height of 1.4. The legend is .92rem with a line height of 1.5.
-- A long word breaks anywhere (`overflow-wrap: anywhere`), so no text makes the page wider than the screen. Code stays on one line, because a reader copies it.
+- A long word breaks anywhere (`overflow-wrap: anywhere`), so no text makes the page wider than the screen. Code stays on one line when it fits, because a reader copies it. In a "For developers" box, a longer code breaks inside its own box.
 - In a title, "the", "a", or "an" stays on the line of the next word (a no-break space).
 
 In a drawing in the site look (all text in the drawing font, with `text-rendering: geometricPrecision`):
@@ -515,9 +518,9 @@ The capture journey page uses the masthead and the page grid of the text pages (
 
 The intro paragraphs, the legend, and the footer paragraphs stay in the reading column (`READING_COLUMN`, 44rem). `main` is a container (`container-type: inline-size`). The stage layout and the track follow the width of `main`, not of the screen, because the legend rail takes a part of a wide screen:
 - **`main` 46rem or less:** a stage is one column, and the images come first.
-- **`main` 34rem or less:** the track is rows of 3 stations with no line. A phone screenshot is 130px wide (150px in a wider `main`).
+- **`main` 34rem or less:** a track of up to 4 stations stays in one row, with its line. A longer track is rows of 3 stations with no line. A phone screenshot is 130px wide (150px in a wider `main`).
 - **`main` below 30rem (a small phone):** the image plate of a stage reaches the edges of the screen (a negative margin of the page padding), with a side padding of .5rem. The stage label column is compact, and the text under the heading takes the full width.
-- **`main` 20rem or less (the narrowest phones):** the code in a "For developers" box can break, so it stays in its box.
+- **`main` below 20rem (the narrowest phones):** a track of 4 stations is 2 rows of 2, with no line. No station is ever alone in a row (`trackColumns` in `capture-journey-page.mjs`).
 
 Stages are 3rem apart. A link to a stage lands the stage under the sticky bar (`scroll-margin-top: 2.5rem`), so the ink rule of the stage shows under the hairline of the bar.
 
@@ -636,12 +639,13 @@ The background of the site look: the boundaries of made-up field parcels, seen f
 - **Text links:** water blue with a soft underline (see Colors). Focus: a 2px water-blue outline with a 2px offset on every focusable element.
 
 ### Capture journey masthead
-The text-page masthead with three parts: the estate mark, the back link ("← All viewers"), and the chapter line ("Chapter 1 of the capture journey", class `chapter`).
+The text-page masthead with three parts: the estate mark, the back link ("← All viewers"), and the chapter line ("Chapter N of the capture journey", class `chapter`).
 - **Chapter line:** Archivo 600 .82rem/1.25, width 87.5%, muted. It is .5rem below the back link in the narrow band and 1.25rem below it in the legend rail. It is in the masthead, not above the title: the craft floor bans an eyebrow above a heading.
 
 ### Capture journey head
 - **Title:** the h1 in the display text-page style.
 - **Subtitle:** muted, 1.15rem, `text-wrap: balance`.
+- **Start line (a later chapter):** the first paragraph of the intro, in the reading column, in body text: "This chapter starts at" a link to the stage of an earlier chapter where the chapter starts, then the sentence on the chapters ("Chapters 2 to 4 follow the same capture on different paths. Their numbers give only the reading order."). Chapter 1 has no start line.
 
 ### Track
 One station for each stage, in one row, on a 1.5px ink line from the first station to the last. The track is an ordered list with the label "The stages".
@@ -649,13 +653,13 @@ One station for each stage, in one row, on a 1.5px ink line from the first stati
 - **Number:** the number of the stage on an ink square (1.25rem high, 1.25rem or more wide) at the top right of the station. Archivo 600 .75rem, width 75%, tabular, in the ground color. It keeps its color in print.
 - **Label:** the short name of the stage, under the station, in the center. Archivo 500 .9rem/1.25, width 87.5%, ink.
 - **Hover:** the station fills with ink, and the icon takes the ground color. The label gets a hairline underline.
-- **Narrow `main` (34rem or less):** rows of 3 stations, 1.25rem apart, with no line.
+- **Narrow `main` (34rem or less):** up to 4 stations in one row, with the line; more stations in rows of 3, 1.25rem apart, with no line. Below 20rem, 4 stations sit as 2 rows of 2. No station is alone in a row.
 
 ### Sticky bar
 The bar shows the stage in view. A script updates it. Without JavaScript, the bar stays hidden. Screen readers do not read it (`aria-hidden`).
 - **Box:** 2.5rem high, sticky at the top, across `main`: the ground with a hairline below. Its content aligns with the content column. On a wide screen it starts 1px right of the rail edge, so the rail-edge hairline stays in view.
 - **Dots:** one .65rem square for each stage, .3rem apart, with a 1.5px ink border. A done stage has a muted fill and a muted border. The current stage has an ink fill (CanvasText in forced colors).
-- **Text:** "N of 6: <stage>" in Archivo 600 .9rem/1.3, width 87.5%, tabular. It stays on one line. A long stage name ends in an ellipsis.
+- **Text:** "N of M: <stage>" (M is the count of the stages of the chapter) in Archivo 600 .9rem/1.3, width 87.5%, tabular. It stays on one line. A long stage name ends in an ellipsis.
 - **Print:** the bar does not print.
 
 ### State marks
@@ -668,15 +672,16 @@ A state shows by its mark, its label, and its state color together.
 ### Stage
 - **Rule:** a 2px ink rule above the stage (as the text-page h2), with a padding of 1.5rem below it.
 - **Layout:** the images and the text side by side (1 : 1.2). The text is in the wider column. A flipped stage (each second stage) mirrors the columns. A stage with no images is one column. In a narrow `main` (46rem or less), each stage is one column.
-- **Stage label:** the small station icon (a 1.75rem square, 1.5px ink border, ink icon) over "Stage N of 6". Archivo 600 .82rem/1.2, width 87.5%, tabular, muted. The number part is its own span, so the label breaks after "Stage". It is a section number: the craft floor allows a number that carries the order. The label is in a margin column at the left of the heading, level with its first line, never above the heading. The DOM order stays: the label comes before the heading.
+- **Stage label:** the small station icon (a 1.75rem square, 1.5px ink border, ink icon) over "Stage N of M". Archivo 600 .82rem/1.2, width 87.5%, tabular, muted. The number part is its own span, so the label breaks after "Stage". It is a section number: the craft floor allows a number that carries the order. The label is in a margin column at the left of the heading, level with its first line, never above the heading. The DOM order stays: the label comes before the heading.
 - **Hang:** the text of a stage is a grid of 2 columns (the label column and the text column, .9rem apart). The heading and all text under it hang in the text column, so they share one left edge, as the Start here steps do.
 - **Small phone (`main` below 30rem):** the label column is compact: the icon is 1.5rem, the label is .74rem, and the gap is .7rem. The heading stays beside the label. The text under the heading takes the full width.
 - **Heading:** the h2 in the text-page headline style (660, 1.5rem).
-- **Images:** the images lie on a plate in the surface color, with a padding of 1.25rem and a gap of 1rem, in the center. The plate has no neatline (see the One Frame Rule). Where `main` is below 30rem, the plate reaches the screen edges, with a side padding of .5rem. A phone screenshot is 150px wide, with a 1px inset outline in the ink edge color. A drawing is at most 26rem wide, with a hairline border. A caption is muted, .85rem/1.4, under its image, in the center. Two of the four SVG drawings in `docs/capture-journey/` are drawings in the site look: `bundle-chain.svg` (stage 3) and `reward.svg` (stage 6). A drawing in the site look holds the site color block and the drawing font block (see the Drawing Colors Rule and the Drawing Font Rule). It is 400 units wide. Its background is the surface. A step is a square box in the ground color with a 1.5 muted border. A step number is a 30-unit ink square with a ground numeral, as the station number of the track. A step has no color of its own: its words say who does it. A muted line with an arrow head joins two steps. A dashed box marks a step outside the Greenstand system (step 4 of the reward) and the older path (the bundle chain). The page shows a drawing 350px wide at a 1280px screen, 416px wide at 1024px, and 304px wide at 320px. The text copy on GitHub shows it 360px wide. `web-map-badges.svg` and `verify-page.svg` keep their own colors, because they show screens of Greenstand apps. They are not a rule source. They are 360 units wide. `web-map-badges.svg` is a vertical pair: a card, an arrow down, and a card. `verify-page.svg` has a photo grid of 2 columns and 3 rows beside the side panel.
-- **For developers:** a square `details` box with a hairline border and a padding of .25rem .9rem. The summary is Archivo 600 .92rem/1.6, width 87.5%, with a muted marker.
+- **Images:** the images lie on a plate in the surface color, with a padding of 1.25rem and a gap of 1rem, in the center. The plate has no neatline (see the One Frame Rule). Where `main` is below 30rem, the plate reaches the screen edges, with a side padding of .5rem. A phone screenshot is 150px wide, with a 1px inset outline in the ink edge color. A drawing is at most 26rem wide, with a hairline border. A caption is muted, .85rem/1.4, under its image, in the center. Five of the seven SVG drawings in `docs/capture-journey/` are drawings in the site look: `bundle-chain.svg` (chapter 1, stage 3), `reward.svg` (chapter 1, stage 6), and in chapter 2 `map-pins.svg` (stage 1), `map-clusters.svg` (stage 2), and `tree-page.svg` (stage 4). A drawing in the site look holds the site color block and the drawing font block (see the Drawing Colors Rule and the Drawing Font Rule). It is 400 units wide. Its background is the surface. A step is a square box in the ground color with a 1.5 muted border. A step number is a 30-unit ink square with a ground numeral, as the station number of the track. A step has no color of its own: its words say who does it. A muted line with an arrow head joins two steps. A dashed box marks a step outside the Greenstand system (step 4 of the reward) and the older path (the bundle chain). The map drawings of chapter 2 show a made-up map on a ground card with a 1.5 muted border and field edges in the line color: a pin is a muted drop shape with a ground hole, a new pin is ink, and a cluster is a ground circle with a 2-unit ink ring and an ink count (a dashed ring for a count that changes). A tag is a ground box, 36 units high, with a 1.5 ink border and an ink title, inside a card. A muted 1.5 line leads from a pin or a cluster to its tag or its page. The tree page is a ground card beside a narrow map card. Its photo is a surface plate with a tree: a ground crown with a 2-unit muted edge, a muted trunk, and a muted ground line. The first badge of the tree page (the state of the capture) is a tag. A second badge is a ground box with a 1.5 muted border and a muted line. The page shows a drawing 350px wide at a 1280px screen, 416px wide at 1024px, and 304px wide at 320px. The text copy on GitHub shows it 360px wide. `web-map-badges.svg` and `verify-page.svg` keep their own colors, because they show screens of Greenstand apps. They are not a rule source. They are 360 units wide. `web-map-badges.svg` is a vertical pair: a card, an arrow down, and a card. `verify-page.svg` has a photo grid of 2 columns and 3 rows beside the side panel.
+- **For developers:** a square `details` box with a hairline border and a padding of .25rem .9rem. The summary is Archivo 600 .92rem/1.6, width 87.5%, with a muted marker. A code in the box is an inline block that is never wider than the box: it stays on one line when it fits, and a longer code (a long file name) breaks inside its own box. A code in a link keeps the line of the link.
 
 ### Capture journey footer
-A hairline above it and muted text. The hairline has a margin of 3rem above it and a padding of 1.25rem below it. The footer holds the next chapter, the image credits, and the link to the text copy.
+The footer is `footer.page-end`: a hairline above it and muted text. The hairline has a margin of 3rem above it and a padding of 1.25rem below it. The footer holds the chapters, the image credits, and the link to the text copy.
+- **Chapters:** a navigation landmark with the heading "Chapters" (Archivo 660 1.15rem, ink). On chapter 1 the sentence on the chapters follows it. Then one row for each chapter, between 1px hairlines, in the reading column: "Chapter N" in a 5rem margin column (Archivo 600 .82rem/1.4, width 87.5%, tabular, muted), then the subtitle of the chapter. The subtitle of each other chapter is a link to its page. The row of this page has no link: the subtitle is ink and "(this page)" follows it. Last, the text on the chapters that are not written yet.
 
 ### Moved page
 The masthead holds only the estate mark: a moved page has no back link, because it adds no new link. One paragraph follows in the reading column: the former name, the new name, and the link. The inline code is the code chip (`CODE_CHIP`). A link and a code stay on one line. The estate mark shows the locator on the cell of the repo under its new name.

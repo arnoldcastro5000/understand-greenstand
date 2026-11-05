@@ -47,7 +47,8 @@ const inActions = process.env.GITHUB_ACTIONS === "true";
 
 const { estate, repos, errors } = loadEstate();
 const sharedResources = readDocsFile(SHARED_RESOURCES_DATA, errors, parseJson);
-// The report reads only the stages and their evidence: the full check is build-capture-journey.mjs.
+// The report reads only the stages of all chapters and their evidence: the full check is
+// build-capture-journey.mjs.
 const evidenceOk = (e) => isObject(e) && isText(e.repo) && isText(e.path) && isText(e.commit) && Array.isArray(e.names) && e.names.every(isText);
 const stages = readCaptureJourney(errors, "an id, a short title, and evidence entries (a repo, a path, a commit, and names)", (s) =>
   isText(s.id) && isText(s.short) && Array.isArray(s.evidence) && s.evidence.every(evidenceOk),
@@ -231,7 +232,8 @@ const SECTIONS = [
       `name comes back, or when you [check the stage again](${doc("docs/regenerating.md#the-drift-report")}) and update its evidence.`,
     unreadRepos: (n) => (n === 1 ? "their repo" : `${n} repos`),
     item: (f) => {
-      const stage = `**[${f.stage.short}](${estate.siteUrl}capture-journey.html#${f.stage.id})**`;
+      // The stage on the page of its chapter (readCaptureJourney gives the page).
+      const stage = `**[${f.stage.short}](${estate.siteUrl}${f.stage.page}#${f.stage.id})**`;
       return f.fileGone
         ? `- ${stage}: the file of the name \`${f.name}\` is not on the default branch (${f.source.branch}).\\\n  ${f.repo} ${fileLink(f, f.commit)} at the cited commit`
         : `- ${stage}: the name \`${f.name}\` is not in the file.\\\n  ${f.repo} ${fileLink(f, f.source.branch)}`;

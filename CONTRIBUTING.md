@@ -22,9 +22,10 @@ writes which file. A regeneration replaces a direct edit of a generated file. To
 generated file, change its input or the recipe. Text that is not generated is edited text.
 Change it directly in its file.
 
-The capture journey is generated from [`capture-journey.json`](./capture-journey.json): the text
-copy `docs/capture-journey.md` and the illustrated page on the Pages site. To change them, change
-the data file, then run `node .github/scripts/build-capture-journey.mjs`.
+The capture journey is generated from [`capture-journey.json`](./capture-journey.json). Each
+chapter has a text copy (`docs/capture-journey.md` for chapter 1, `docs/capture-journey-<id>.md`
+for a later chapter) and an illustrated page on the Pages site. To change them, change the data
+file, then run `node .github/scripts/build-capture-journey.mjs`.
 
 ## Change the docs
 
@@ -62,11 +63,12 @@ the data file, then run `node .github/scripts/build-capture-journey.mjs`.
    GITHUB_TOKEN="$(gh auth token)" node .github/scripts/build-capture-journey.mjs --evidence
    ```
 
-   Two drawings of the capture journey are in the site look: `bundle-chain.svg` and `reward.svg`.
-   Each holds a small copy of the Archivo font with only the characters of its words. If you change
-   their words, also run `.github/scripts/subset-drawing-font.py`. Its first lines tell you how to
-   get the font file and fontTools. `node .github/scripts/build-capture-journey.mjs` gives each
-   drawing the site colors.
+   Five drawings of the capture journey are in the site look: `bundle-chain.svg`, `reward.svg`,
+   `map-pins.svg`, `map-clusters.svg`, and `tree-page.svg`. Each holds a small copy of the
+   Archivo font with only the characters of its words. If you change their words, also run
+   `.github/scripts/subset-drawing-font.py`. Its first lines tell you how to get the font file and
+   fontTools. `node .github/scripts/build-capture-journey.mjs` gives each drawing the site
+   colors.
 
 6. Open a pull request. `main` accepts changes only through a pull request. The required checks
    must pass.
@@ -101,9 +103,9 @@ The page `docs/shared-resources.md` must hold no security detail. The same holds
 journey. A security detail is a fact that helps an attacker or shows a weak point of a shared
 resource or a code repo. Thus a pull request that changes `docs/shared-resources.md` or
 `shared-resources.json` needs a safety review. So does a pull request that changes
-`docs/capture-journey.md`, `capture-journey.json`, or a file in `docs/capture-journey/`. A
-reviewer who did not write the change checks the changed text against the local findings list,
-before the pull request opens. This list is private. If you do not have the list, ask a
+`capture-journey.json`, a text copy `docs/capture-journey*.md`, or a file in
+`docs/capture-journey/`. A reviewer who did not write the change checks the changed text against
+the local findings list, before the pull request opens. This list is private. If you do not have the list, ask a
 maintainer to do the review. When the text has no security detail, the reviewer gives you this
 line, and you add it to the pull request text:
 

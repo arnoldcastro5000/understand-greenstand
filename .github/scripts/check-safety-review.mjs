@@ -21,18 +21,19 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { CAPTURE_JOURNEY_COPY, CAPTURE_JOURNEY_DATA, CAPTURE_JOURNEY_IMAGES, SHARED_RESOURCES_DATA, SHARED_RESOURCES_PAGE, escapeRegExp, fencedLines, root } from "./estate.mjs";
+import { CAPTURE_JOURNEY_COPIES, CAPTURE_JOURNEY_DATA, CAPTURE_JOURNEY_IMAGES, CHAPTER_COPY, SHARED_RESOURCES_DATA, SHARED_RESOURCES_PAGE, escapeRegExp, fencedLines, root, wordList } from "./estate.mjs";
 
 // The pages, each with its files and its item of the pull request template. The item of the
-// shared-resource page keeps the words that the user accepted.
+// shared-resource page keeps the words that the user accepted. The capture journey has a text copy
+// for each chapter: a pattern covers them (the user's choice of capture-journey ticket 10).
 const PAGES = [
   {
     files: [SHARED_RESOURCES_PAGE, SHARED_RESOURCES_DATA],
     item: `If this pull request changes \`${SHARED_RESOURCES_PAGE}\` or \`${SHARED_RESOURCES_DATA}\`: I confirm that the page has no security detail.`,
   },
   {
-    files: [CAPTURE_JOURNEY_COPY, CAPTURE_JOURNEY_DATA, `${CAPTURE_JOURNEY_IMAGES}/`],
-    item: `If this pull request changes \`${CAPTURE_JOURNEY_COPY}\`, \`${CAPTURE_JOURNEY_DATA}\`, or \`${CAPTURE_JOURNEY_IMAGES}/\`: I confirm that the page has no security detail.`,
+    files: [CAPTURE_JOURNEY_DATA, CAPTURE_JOURNEY_COPIES, `${CAPTURE_JOURNEY_IMAGES}/`],
+    item: `If this pull request changes \`${CAPTURE_JOURNEY_DATA}\`, a text copy \`${CAPTURE_JOURNEY_COPIES}\`, or \`${CAPTURE_JOURNEY_IMAGES}/\`: I confirm that the pages have no security detail.`,
   },
 ];
 const TEMPLATE = ".github/pull_request_template.md";
@@ -78,11 +79,12 @@ function readText(markdown) {
 }
 const countItems = (items, text, ticked) => items.filter((item) => item.text === text && item.ticked === ticked).length;
 const realDate = (date) => !Number.isNaN(Date.parse(date)) && new Date(date).toISOString().slice(0, 10) === date;
-// The paths of a page that the pull request changes: a file path, or a directory path when a file
-// under the directory changes. Only these paths are printed, never the name of another file.
-const changedPaths = (page, changed) => page.files.filter((path) => changed.some((file) => (path.endsWith("/") ? file.startsWith(path) : file === path)));
-// "a", "a and b", "a, b, and c".
-const listed = (paths) => (paths.length < 3 ? paths.join(" and ") : `${paths.slice(0, -1).join(", ")}, and ${paths.at(-1)}`);
+// The paths of a page that the pull request changes: a file path, a directory path when a file
+// under the directory changes, or the text copies of the capture journey when a file is the text
+// copy of a chapter (CHAPTER_COPY, the rule of the chapter file names). Only these paths are
+// printed, never the name of another file.
+const touches = (path, file) => (path === CAPTURE_JOURNEY_COPIES ? CHAPTER_COPY.test(file) : path.endsWith("/") ? file.startsWith(path) : file === path);
+const changedPaths = (page, changed) => page.files.filter((path) => changed.some((file) => touches(path, file)));
 
 const errors = [];
 let hint = false;
@@ -113,13 +115,13 @@ if (process.env.GITHUB_EVENT_NAME === "pull_request" && !errors.length) {
     if (changed && !pages.length) {
       result = `the pull request changes no file of a page that needs a safety review (${changed.length} changed file${changed.length === 1 ? "" : "s"}): no safety review is needed`;
     } else if (changed) {
-      const files = listed(pages.flatMap((page) => page.paths));
+      const files = wordList(pages.flatMap((page) => page.paths));
       const { lines, items } = readText(body ?? "");
       if (!lines.some((line) => realDate(line.match(LINE)?.[1] ?? ""))) {
         errors.push(`the pull request changes ${files}, but its text has no line of this form: ${LINE_FORM}`);
       }
       for (const page of pages) {
-        if (!countItems(items, page.item, true)) errors.push(`the pull request changes ${listed(page.paths)}, but its text does not have this item ticked: - [x] ${page.item}`);
+        if (!countItems(items, page.item, true)) errors.push(`the pull request changes ${wordList(page.paths)}, but its text does not have this item ticked: - [x] ${page.item}`);
       }
       hint = errors.length > 0;
       if (!errors.length) result = `the pull request changes ${files}: the safety review line and the ticked item${pages.length > 1 ? "s" : ""} are there`;

@@ -274,9 +274,10 @@ jobs:
           # The shared-resource page, linked from the landing page, the ecosystem maps, the volunteer
           # guide, README.md, and each per-repo README.
           node .github/scripts/render-md.mjs docs/shared-resources.md "$OUT/shared-resources.html" "The shared resources of the code repos" "./" "All viewers"
-          # The capture journey: the illustrated page (capture-journey-page.mjs) and its images,
-          # built from capture-journey.json. Linked from the landing page, the ecosystem maps, the
-          # volunteer guide, and README.md.
+          # The capture journey: the illustrated page of each chapter (capture-journey-page.mjs) and
+          # the images, built from capture-journey.json. Chapter 1 (capture-journey.html) is linked
+          # from the landing page, the ecosystem maps, the volunteer guide, and README.md. Chapter 2
+          # (capture-journey-web-map.html) is linked from chapter 1 and the ecosystem maps.
           node .github/scripts/build-capture-journey.mjs --site "$OUT"
           # Moved pages: the old subpath of a renamed repo sends readers to the new subpath.
           node .github/scripts/build-moved.mjs "$OUT"

@@ -22,7 +22,8 @@ Second: Greenstand maintainers, who check the facts and keep the estate. Non-tec
 repository estate, with edited pages on top. Each documented repo has an interactive
 knowledge-graph viewer, an onboarding guide, a glossary, and a README. Cross-repo pages explain
 the whole system: the ecosystem maps, the shared-resource page, the estate glossary, and the
-capture journey (one tree photo from the grower's phone to the grower's reward).
+capture journey (one tree photo through the Greenstand system, in chapters: chapter 1 from the
+grower's phone to the grower's reward, chapter 2 onto the public web map).
 
 Success: a new volunteer finds the right repo and understands the big picture without a
 maintainer's help.

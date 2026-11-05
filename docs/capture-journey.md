@@ -115,9 +115,9 @@ On the public web map, the page of the tree can already show the badge "Waiting 
 
 An admin signs in to the admin panel and opens the Verify page. The page shows a grid of photos that wait for verification. The admin looks at each photo.
 
-The admin approves the photo, with the type of planting, the age of the tree, and the species if the admin knows it. Or the admin rejects it, with a reason, for example "Not a tree" or "Blurry photo". On the web map, an approved capture shows "Verified", and a rejected capture disappears.
+The admin approves the photo, with the type of planting, the age of the tree, and the species if the admin knows it. Or the admin rejects it, with a reason, for example "Not a tree" or "Blurry photo". On the web map, an approved capture shows "Verified". A rejected capture is not active any more, so the map hides it.
 
-> **Best guess:** Once a day, an automatic job copies the decision into the newer tables of the database.
+> **Best guess:** An automatic job copies the decision into the newer tables.
 
 <details>
 <summary>For developers</summary>
@@ -126,12 +126,9 @@ The admin approves the photo, with the type of planting, the age of the tree, an
   - [`treeTrackerApi.js` lines 71 to 121](https://github.com/Greenstand/treetracker-admin-client/blob/c2076e4/src/api/treeTrackerApi.js#L71-L121): sends the decision
   - [`SidePanel.js` lines 313 to 329](https://github.com/Greenstand/treetracker-admin-client/blob/c2076e4/src/components/SidePanel.js#L313-L329): the reasons to reject
 - treetracker-admin-api ([viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-admin-api/), [onboarding guide](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-admin-api/onboarding.html))
-  - [`trees.controller.ts` lines 155 to 214](https://github.com/Greenstand/treetracker-admin-api/blob/351db46/src/controllers/trees.controller.ts#L155-L214): saves the decision in the tree row
-- treetracker-query-api ([viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-query-api/), [onboarding guide](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-query-api/onboarding.html))
-  - [`treesRouter.ts` lines 56 to 58](https://github.com/Greenstand/treetracker-query-api/blob/0f2d00a/server/routers/treesRouter.ts#L56-L58): answers "not found" for a rejected capture
+  - [`trees.controller.ts` line 200](https://github.com/Greenstand/treetracker-admin-api/blob/351db46/src/controllers/trees.controller.ts#L200): saves the decision in the tree row
 - treetracker-airflow-dags ([viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-airflow-dags/), [onboarding guide](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-airflow-dags/onboarding.html))
-  - [`migrate_captures_dag.py` lines 37 to 45](https://github.com/Greenstand/treetracker-airflow-dags/blob/6ede7fe/migrate_captures_dag.py#L37-L45): runs the copy job once a day
-  - [`migrate_captures_dag.py` lines 133 to 168](https://github.com/Greenstand/treetracker-airflow-dags/blob/6ede7fe/migrate_captures_dag.py#L133-L168): the steps of the daily copy job
+  - [`migrate_captures_dag.py` lines 133 to 168](https://github.com/Greenstand/treetracker-airflow-dags/blob/6ede7fe/migrate_captures_dag.py#L133-L168): the steps of the copy job
 - images-api ([viewer](https://arnoldcastro5000.github.io/understand-greenstand/images-api/), [onboarding guide](https://arnoldcastro5000.github.io/understand-greenstand/images-api/onboarding.html)): resizes each photo for the admin panel
 
 </details>
@@ -148,7 +145,7 @@ Greenstand's guide to earnings and payments gives the next steps for a typical c
 
 > **Not working today:** The wallet app tells each new user "we will gift you 1 token". The token does not arrive today. See [treetracker-wallet-app #914](https://github.com/Greenstand/treetracker-wallet-app/issues/914).
 
-Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture of an organization's growers into a wallet that the operator names. Greenstand's white paper describes a goal, not the code of today. In that goal, each capture becomes a token in the wallet of the entity that is responsible for the tree. When claims conflict, the grower comes first. The token also holds a proof of the payment to the grower. The token job of today does not use the wallet of the grower, and no token holds payment data. Chapter 2 tells that story.
+Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture of an organization's growers into a wallet that the operator names. Greenstand's white paper describes a goal, not the code of today. In that goal, each capture becomes a token in the wallet of the entity that is responsible for the tree. When claims conflict, the grower comes first. The token also holds a proof of the payment to the grower. The token job of today does not use the wallet of the grower, and no token holds payment data. Chapter 3, the impact token, will tell that story.
 
 <details>
 <summary>For developers</summary>
@@ -173,8 +170,13 @@ Tokens are not a grower reward today. An operator can start a job that puts one 
 
 </details>
 
-## Next
+## Chapters
 
-Chapter 2 (not written yet) follows the capture further: the public web map, the token, and the data exports.
+Chapters 2 to 4 follow the same capture on different paths. Their numbers give only the reading order.
+
+- Chapter 1: From the grower's phone to the grower's reward (this page)
+- [Chapter 2: The capture on the public web map](capture-journey-web-map.md)
+
+Chapter 3 (the impact token) and chapter 4 (the data for organizations) are not written yet.
 
 Image credits: 4 images from [treetracker-android](https://github.com/Greenstand/treetracker-android) at commit [`9b7fa40`](https://github.com/Greenstand/treetracker-android/commit/9b7fa40) (license AGPL-3.0). The other images are from this docs repo.
