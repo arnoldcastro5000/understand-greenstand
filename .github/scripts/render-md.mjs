@@ -5,8 +5,9 @@
 // at the root, docs/contribute-to-greenstand.md, or docs/shared-resources.md.
 // Headings get GitHub's anchors, so "#anchor" links work as they do on GitHub. Relative links
 // to a page that the site renders point to that page (ONBOARDING.md -> onboarding.html, the top
-// README.md -> the landing page, and the text copy docs/capture-journey.md -> the illustrated page
-// capture-journey.html); other relative links point to the file on GitHub at this commit.
+// README.md -> the landing page, and the text copy of a chapter of the capture journey
+// docs/capture-journey*.md -> the illustrated page of the chapter); other relative links point to
+// the file on GitHub at this commit.
 // A repo name in a heading moves to the next line as one piece (see keepRepoNamesWhole).
 // A Mermaid block becomes a diagram, as on GitHub. The page loads the copy of Mermaid that the
 // deploy workflow puts on the site.
@@ -18,7 +19,7 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, posix } from "node:path";
 import { marked } from "marked";
-import { escapeRegExp, loadEstate } from "./estate.mjs";
+import { chapterPageOf, escapeRegExp, loadEstate } from "./estate.mjs";
 import { CODE_CHIP, DISPLAY, PLATE_EDGE, DISPLAY_FACE, READING_COLUMN, SITE_LOOK_FILES, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
 import { BACKGROUNDS, DIAGRAM_NODE_TINT, LINES, TEXTS } from "./site-colors.mjs";
 import { slugger } from "./slug.mjs";
@@ -34,9 +35,10 @@ function sitePath(path) {
   if (path === "ARCHITECTURE.md") return "architecture.html";
   if (path === "docs/contribute-to-greenstand.md") return "contribute.html";
   if (path === "docs/shared-resources.md") return "shared-resources.html";
-  // The text copy of the capture journey: on the site, a link to it opens the illustrated page,
-  // which build-capture-journey.mjs writes.
-  if (path === "docs/capture-journey.md") return "capture-journey.html";
+  // The text copy of a chapter of the capture journey (chapterPageOf of estate.mjs, the rule of the
+  // chapter file names): on the site, a link to it opens the illustrated page of the chapter, which
+  // build-capture-journey.mjs writes.
+  if (chapterPageOf(path)) return chapterPageOf(path);
   // The landing page shows the estate index of README.md.
   if (path === "README.md") return "index.html";
   return null;

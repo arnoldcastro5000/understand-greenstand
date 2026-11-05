@@ -1,9 +1,12 @@
 #!/usr/bin/env node
-// Build the capture journey from capture-journey.json (edited text): the text copy for GitHub
-// (docs/capture-journey.md, built text) and the illustrated page of the Pages site
-// (capture-journey.html, built by the deploy; its render is capture-journey-page.mjs). The images
-// are in docs/capture-journey/: the copy links them there, and the deploy copies them beside the
-// page.
+// Build the capture journey from capture-journey.json (edited text). The data file holds a list of
+// chapters; each chapter has a text copy for GitHub (built text) and an illustrated page of the
+// Pages site (built by the deploy; its render is capture-journey-page.mjs). Chapter 1 has
+// docs/capture-journey.md and capture-journey.html; a later chapter has the files of its id
+// (chapterFiles of estate.mjs), for example docs/capture-journey-web-map.md and
+// capture-journey-web-map.html. A later chapter starts at a stage of an earlier chapter; each copy
+// and each page links the other chapters. The images of all chapters are in docs/capture-journey/:
+// the copies link them there, and the deploy copies them beside the pages.
 // The data file holds the words of each stage, its flags ("Best guess" with the question it stands
 // for, "Not working today" with its public issue), its images, and its evidence: each entry cites
 // lines of a file of a public Greenstand repo at a commit, with 1 to 3 names that the lines hold
@@ -14,26 +17,26 @@
 // block into the drawing. --check fails when the block is stale. --site copies the drawing with the
 // current block. Each mode fails when such a drawing uses another color. Each mode also fails when
 // its drawing font has no glyph for a character of its text.
-// Usage: node build-capture-journey.mjs                  check the data, rewrite the copy, and
-//          write the current color block into each drawing in the site look
-//        node build-capture-journey.mjs --check          exit 1 on a data error, a stale copy, or a
-//          stale color block (CI)
+// Usage: node build-capture-journey.mjs                  check the data, rewrite the copy of each
+//          chapter, and write the current color block into each drawing in the site look
+//        node build-capture-journey.mjs --check          exit 1 on a data error, a stale copy, a
+//          copy of no chapter, or a stale color block (CI)
 //        node build-capture-journey.mjs --evidence       exit 1 when GitHub does not hold a fact.
 //          It reads each repo, cited file, issue, and image source through the GitHub API
 //          (GITHUB_TOKEN, if set). CI runs it only when the data, the images, or the code changes.
-//        node build-capture-journey.mjs --site <dir>     write <dir>/capture-journey.html and copy the
-//          images into <dir>/capture-journey/ (the deploy). The page is in the site look: <dir> must
-//          hold the font and the parcel field.
+//        node build-capture-journey.mjs --site <dir>     write the page of each chapter into <dir>
+//          and copy the images into <dir>/capture-journey/ (the deploy). The pages are in the site
+//          look: <dir> must hold the font and the parcel field.
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { CAPTURE_JOURNEY_COPY as COPY, CAPTURE_JOURNEY_DATA as DATA, CAPTURE_JOURNEY_IMAGES as IMAGES, EM_DASH, answerStatus, citedLines, githubApi, isObject, isRepoPath, lineAnchor, loadEstate, missingNames, parseJson, parseLines, plural, readDocsFile, root, urlPath } from "./estate.mjs";
-import { FLAGS, ICONS, NO_ISSUE, creditText, pageHtml } from "./capture-journey-page.mjs";
+import { CAPTURE_JOURNEY_DATA as DATA, CAPTURE_JOURNEY_IMAGES as IMAGES, CHAPTER_COPY, CHAPTER_ID, CHAPTER_PAGE, EM_DASH, answerStatus, chapterFiles, citedLines, githubApi, isObject, isRepoPath, lineAnchor, loadEstate, missingNames, parseJson, parseLines, plural, readDocsFile, root, urlPath, wordList } from "./estate.mjs";
+import { CHAPTERS_SENTENCE, FLAGS, ICONS, NO_ISSUE, creditText, pageHtml } from "./capture-journey-page.mjs";
+import { slugger } from "./slug.mjs";
 import { SITE_LOOK_FILES, undefinedProperties } from "./site-html.mjs";
 import { checkSubsetScript, drawingCheck } from "./site-drawings.mjs";
 
 const SCRIPT = ".github/scripts/build-capture-journey.mjs";
-const PAGE = "capture-journey.html";
 const USAGE = `use: node ${SCRIPT} [--check | --evidence | --site <dir>]`;
 
 const args = process.argv.slice(2);
@@ -50,15 +53,17 @@ else if (args.length) {
 const { estate, repos, errors } = loadEstate();
 if (mode === "site" && !(existsSync(siteDir) && statSync(siteDir).isDirectory())) errors.push(`${siteDir} is not a directory`);
 else if (mode === "site") {
-  for (const f of SITE_LOOK_FILES) if (!existsSync(join(siteDir, f))) errors.push(`${PAGE} needs ${join(siteDir, f)}, but it is missing`);
+  for (const f of SITE_LOOK_FILES) if (!existsSync(join(siteDir, f))) errors.push(`${chapterFiles(null, 0).page} needs ${join(siteDir, f)}, but it is missing`);
 }
 const estateRepos = new Set(repos.map((r) => r.name));
 
 // The fields of each object of the data file, in the order of their checks. A flag has the fields
 // of its kind.
 const FIELDS = {
-  top: ["title", "chapter", "subtitle", "intro", "legend", "stages", "next"],
+  top: ["title", "legend", "chapters", "later"],
   legend: ["guess", "broken", "dev"],
+  chapter: ["id", "subtitle", "start", "intro", "stages"],
+  start: ["chapter", "stage"],
   stage: ["id", "short", "title", "icon", "story", "flags", "note", "images", "evidence", "moreRepos"],
   guess: ["kind", "text", "question"],
   broken: ["kind", "text", "issue"],
@@ -143,42 +148,18 @@ function validData(data) {
     fail("", `must be an object with the fields ${FIELDS.top.join(", ")}`);
     return null;
   }
-  // The place of a stage in an error: its id, or its number when the id is not valid or not unique.
+  const chapters = Array.isArray(data.chapters) ? data.chapters : [];
+  const chapterAt = (n) => `chapter ${n}`;
+  // The place of a stage in an error: its id (unique in the whole file), or its chapter and its
+  // number when the id is not valid or not unique.
   const stageAt = [];
   const ids = new Set();
-  (Array.isArray(data.stages) ? data.stages : []).forEach((stage, i) => {
-    const id = stage?.id;
-    stageAt.push(typeof id === "string" && SLUG.test(id) && !ids.has(id) ? `stage ${id}` : `stage ${i + 1}`);
-    ids.add(id);
-  });
-  for (const [key, value] of Object.entries(data)) {
-    if (key !== "stages" || !Array.isArray(value)) checkString("", key, value);
-    else value.forEach((stage, i) => (isObject(stage) ? checkObjectStrings(stageAt[i], stage) : checkString("", `stage ${i + 1}`, stage)));
-  }
-
-  checkFields("", data, FIELDS.top);
-  checkText("", "title", data.title);
-  if (!Number.isInteger(data.chapter) || data.chapter < 1) fail("", "chapter must be a whole number from 1");
-  checkText("", "subtitle", data.subtitle);
-  checkParagraphs("", "intro", data.intro, Infinity);
-  if (!isObject(data.legend)) fail("", `legend must be an object with the fields ${FIELDS.legend.join(", ")}`);
-  else {
-    checkFields("legend", data.legend, FIELDS.legend);
-    for (const key of FIELDS.legend) checkText("", `legend.${key}`, data.legend[key]);
-  }
-  const stages = Array.isArray(data.stages) ? data.stages : [];
-  if (!stages.length) fail("", "stages must be a list of 1 or more stages");
-
-  const cited = new Map(); // "<repo> <path> <lines>" -> the place of its first entry
-  // The image directory holds only the images of the data file, each one used once.
-  const entries = existsSync(join(root, IMAGES)) ? readdirSync(join(root, IMAGES), { withFileTypes: true }) : [];
-  const imageFiles = new Set(entries.filter((f) => f.isFile()).map((f) => f.name));
-  const imageAt = new Map(); // file name -> its place
-  const seenIds = new Set();
-  stages.forEach((stage, i) => {
-    if (!isObject(stage)) return errors.push(`${DATA}: stage ${i + 1} must be an object`);
+  // Check one stage at its place in an error (at). cited and imageAt are the maps of its chapter
+  // (an evidence entry and an image are unique in a chapter); seenIds holds the ids of the whole
+  // file. Returns true when the id of the stage is valid and new.
+  const checkStage = (stage, at, cited, imageAt) => {
     const { id } = stage;
-    const at = stageAt[i];
+    const idOk = typeof id === "string" && SLUG.test(id) && !seenIds.has(id);
     checkFields(at, stage, FIELDS.stage);
     if (typeof id !== "string" || !SLUG.test(id)) fail(at, `the id ${shown(id)} must be lowercase words joined by "-"`);
     else if (seenIds.has(id)) fail(at, `the id ${id} is used twice`);
@@ -213,9 +194,10 @@ function validData(data) {
       if (!isObject(image)) return errors.push(`${DATA}: ${where} must be an object`);
       checkFields(where, image, FIELDS.image);
       if (typeof image.file !== "string" || !IMAGE_FILE.test(image.file)) fail(where, `file must be lowercase words joined by "-", with .png or .svg; it is ${shown(image.file)}`);
-      else if (imageAt.has(image.file)) fail(where, `${image.file} is also ${imageAt.get(image.file)}: use each image once`);
+      else if (imageAt.has(image.file)) fail(where, `${image.file} is also ${imageAt.get(image.file)}: use each image once in a chapter`);
       else {
         imageAt.set(image.file, `image ${j + 1} of ${at}`);
+        usedImages.add(image.file);
         const size = imageFiles.has(image.file) && imageSize(image.file);
         if (!imageFiles.has(image.file)) fail(where, `${IMAGES}/${image.file} is missing`);
         else if (!size) fail(where, `cannot read the size of ${IMAGES}/${image.file} (a PNG, or an SVG with a viewBox)`);
@@ -271,11 +253,94 @@ function validData(data) {
       seenMore.add(more.repo);
       checkText(where, "what", more.what);
     });
+    return idOk;
+  };
+  chapters.forEach((chapter, c) => {
+    stageAt.push([]);
+    (isObject(chapter) && Array.isArray(chapter.stages) ? chapter.stages : []).forEach((stage, i) => {
+      const id = stage?.id;
+      stageAt[c].push(typeof id === "string" && SLUG.test(id) && !ids.has(id) ? `stage ${id}` : `chapter ${c + 1}, stage ${i + 1}`);
+      ids.add(id);
+    });
   });
-  checkText("", "next", data.next);
+  for (const [key, value] of Object.entries(data)) {
+    if (key !== "chapters" || !Array.isArray(value)) checkString("", key, value);
+    else {
+      value.forEach((chapter, c) => {
+        if (!isObject(chapter)) return checkString("", chapterAt(c + 1), chapter);
+        for (const [k, v] of Object.entries(chapter)) {
+          if (k !== "stages" || !Array.isArray(v)) checkString(chapterAt(c + 1), k, v);
+          else v.forEach((stage, i) => (isObject(stage) ? checkObjectStrings(stageAt[c][i], stage) : checkString(chapterAt(c + 1), `stage ${i + 1}`, stage)));
+        }
+      });
+    }
+  }
+
+  checkFields("", data, FIELDS.top);
+  checkText("", "title", data.title);
+  if (!isObject(data.legend)) fail("", `legend must be an object with the fields ${FIELDS.legend.join(", ")}`);
+  else {
+    checkFields("legend", data.legend, FIELDS.legend);
+    for (const key of FIELDS.legend) checkText("", `legend.${key}`, data.legend[key]);
+  }
+  if (data.later !== undefined) checkText("", "later", data.later);
+  if (!chapters.length) fail("", "chapters must be a list of 1 or more chapters");
+
+  // The image directory holds only the images of the data file. A chapter uses each image once; an
+  // image can show in more than one chapter.
+  const entries = existsSync(join(root, IMAGES)) ? readdirSync(join(root, IMAGES), { withFileTypes: true }) : [];
+  const imageFiles = new Set(entries.filter((f) => f.isFile()).map((f) => f.name));
+  const usedImages = new Set();
+  const seenIds = new Set();
+  const chapterIds = new Set();
+  // The stage ids of each valid chapter, for the start of a later chapter.
+  const stageIds = [];
+  chapters.forEach((chapter, c) => {
+    const n = c + 1;
+    const at = chapterAt(n);
+    stageIds.push(new Set());
+    if (!isObject(chapter)) return errors.push(`${DATA}: ${at} must be an object`);
+    checkFields(at, chapter, FIELDS.chapter);
+    // Chapter 1 is the first page of the journey (chapterFiles): it has no id and no start. A later
+    // chapter has an id for its file names, and the stage of chapter 1 where it starts (CONTEXT.md,
+    // Chapter).
+    if (n === 1) {
+      if (chapter.id !== undefined) fail(at, "chapter 1 has no id: its page is capture-journey.html");
+      if (chapter.start !== undefined) fail(at, "chapter 1 has no start: it is the start of the journey");
+    } else {
+      if (typeof chapter.id !== "string" || !CHAPTER_ID.test(chapter.id)) fail(at, `the id ${shown(chapter.id)} must be lowercase words joined by "-"`);
+      else if (chapterIds.has(chapter.id)) fail(at, `the id ${chapter.id} is used twice`);
+      chapterIds.add(chapter.id);
+      const { start } = chapter;
+      if (!isObject(start)) fail(at, `start must be an object with the fields ${FIELDS.start.join(", ")} (the stage of chapter 1 where this chapter starts)`);
+      else {
+        checkFields(`${at}, start`, start, FIELDS.start);
+        if (start.chapter !== 1) fail(at, `start.chapter must be 1 (a later chapter starts at a stage of chapter 1); it is ${shown(start.chapter)}`);
+        else if (!stageIds[0].has(start.stage)) fail(at, `start.stage must be the id of a stage of chapter 1; it is ${shown(start.stage)}`);
+      }
+    }
+    checkText(at, "subtitle", chapter.subtitle);
+    checkParagraphs(at, "intro", chapter.intro, Infinity);
+    const stages = Array.isArray(chapter.stages) ? chapter.stages : [];
+    if (!stages.length) fail(at, "stages must be a list of 1 or more stages");
+    const cited = new Map(); // "<repo> <path> <lines>" -> the place of its first entry in the chapter
+    const imageAt = new Map(); // file name -> its place in the chapter
+    stages.forEach((stage, i) => {
+      if (!isObject(stage)) return errors.push(`${DATA}: ${chapterAt(n)}, stage ${i + 1} must be an object`);
+      if (checkStage(stage, stageAt[c][i], cited, imageAt)) stageIds[c].add(stage.id);
+    });
+  });
   for (const f of entries) {
     if (!f.isFile()) errors.push(`${IMAGES}/${f.name} is a directory: the image directory holds only the image files`);
-    else if (!imageAt.has(f.name)) errors.push(`${IMAGES}/${f.name} is in no stage of ${DATA}: add it to a stage, or remove it`);
+    else if (!usedImages.has(f.name)) errors.push(`${IMAGES}/${f.name} is in no stage of ${DATA}: add it to a stage, or remove it`);
+  }
+  // Each text copy in docs/ is the copy of a chapter (both directions: build writes the copy of
+  // each chapter, and a copy of a removed chapter must go).
+  const copies = new Set(chapters.map((chapter, c) => chapterFiles(chapter, c).copy));
+  const docs = existsSync(join(root, "docs")) ? readdirSync(join(root, "docs"), { withFileTypes: true }) : [];
+  for (const f of docs) {
+    const at = `docs/${f.name}`;
+    if (f.isFile() && CHAPTER_COPY.test(at) && !copies.has(at)) errors.push(`${at} is the text copy of no chapter of ${DATA}: remove it, or add its chapter`);
   }
   return errors.length > before ? null : data;
 }
@@ -311,16 +376,20 @@ const issueLink = ({ repo, number }) => `https://github.com/${estate.sourceOrg}/
 const commitLink = (repo, commit) => `https://github.com/${estate.sourceOrg}/${repo}/commit/${commit}`;
 const linesText = ({ first, last }) => (first === last ? `line ${first}` : `lines ${first} to ${last}`);
 
-// The view of the journey: the data, with the links of each repo, file, issue, and image source,
-// and the size of each image. A repo of the estate gets the path of its viewer on the Pages site;
-// a repo outside the estate gets its GitHub link. The developers of a stage are its repos in the
-// order of their first evidence entry, each with its files, then the repos with no cited file. The
-// link text of a file is its name and its lines: unique in the stage, so each link has its own name
-// for a screen reader (one repo can have two entries in one file).
-function viewOf() {
+// The view of a chapter: the data of the chapter, with the links of each repo, file, issue, and
+// image source, and the size of each image. A repo of the estate gets the path of its viewer on the
+// Pages site; a repo outside the estate gets its GitHub link. The developers of a stage are its
+// repos in the order of their first evidence entry, each with its files, then the repos with no
+// cited file. The link text of a file is its name and its lines: unique in the stage, so each link
+// has its own name for a screen reader (one repo can have two entries in one file).
+// The chapters part lists every chapter (the links between the pages): it is null when the data
+// file has one chapter and no later text. A later chapter has its start: the stage of an earlier
+// chapter where it starts.
+function viewOf(chapter, c) {
   const repoView = (repo) => (estateRepos.has(repo) ? { repo, site: `${repo}/` } : { repo, github: repoLink(repo) });
   const fileView = (e) => ({ name: e.path.split("/").pop(), lines: linesText(parseLines(e.lines)), url: fileLink(e), what: e.what });
-  const images = data.stages.flatMap((s) => s.images ?? []);
+  const filesOf = (k) => chapterFiles(data.chapters[k], k);
+  const images = chapter.stages.flatMap((s) => s.images ?? []);
   const groups = new Map(); // "<repo> <commit> <license>" -> a group of the credit line
   for (const { source } of images.filter((image) => image.source)) {
     const key = `${source.repo} ${source.commit} ${source.license}`;
@@ -328,15 +397,30 @@ function viewOf() {
     group.count++;
     groups.set(key, group);
   }
+  let start = null;
+  if (chapter.start) {
+    const k = chapter.start.chapter - 1;
+    const stages = data.chapters[k].stages;
+    const i = stages.findIndex((s) => s.id === chapter.start.stage);
+    // The anchor of the stage heading in the text copy, as GitHub makes it.
+    const anchor = slugger()(`${i + 1}. ${stages[i].title}`);
+    start = { chapter: k + 1, number: i + 1, id: stages[i].id, short: stages[i].short, anchor, ...filesOf(k) };
+  }
+  const hasChapterList = data.chapters.length > 1 || data.later !== undefined;
   return {
     title: data.title,
-    chapter: data.chapter,
-    subtitle: data.subtitle,
-    intro: data.intro,
+    chapter: c + 1,
+    subtitle: chapter.subtitle,
+    intro: chapter.intro,
     legend: data.legend,
-    next: data.next,
+    // The kinds of flag that the chapter has, in the order of the legend: the legend explains
+    // only these.
+    flagKinds: Object.keys(FLAGS).filter((kind) => chapter.stages.some((s) => (s.flags ?? []).some((f) => f.kind === kind))),
     imageDir,
-    stages: data.stages.map((stage) => ({
+    ...filesOf(c),
+    start,
+    chapters: hasChapterList ? { list: data.chapters.map((ch, k) => ({ number: k + 1, subtitle: ch.subtitle, current: k === c, ...filesOf(k) })), later: data.later ?? null } : null,
+    stages: chapter.stages.map((stage) => ({
       id: stage.id,
       short: stage.short,
       title: stage.title,
@@ -416,7 +500,24 @@ function imagesMd(stage) {
   return [`<p>${imgs.join(" ")}<br><sub>${stage.images.map((image) => esc(image.caption)).join(" · ")}</sub></p>`, ""];
 }
 
+// The file name of a text copy: the copies are in one directory, so a copy links another one by
+// its file name.
+const copyName = (copy) => copy.split("/").pop();
+
+// The chapters part of a copy: the sentence on the chapters (on chapter 1 only: a later chapter
+// has it in its start line), each chapter with a link to its copy (this page without a link), and
+// the later text.
+function chaptersMd(view) {
+  if (!view.chapters) return [];
+  const items = view.chapters.list.map((ch) => {
+    const name = `Chapter ${ch.number}: ${mdText(ch.subtitle)}`;
+    return ch.current ? `- ${name} (this page)` : `- [${name}](${copyName(ch.copy)})`;
+  });
+  return ["## Chapters", "", ...(view.start ? [] : [CHAPTERS_SENTENCE, ""]), ...items, "", ...(view.chapters.later ? [mdText(view.chapters.later), ""] : [])];
+}
+
 function copyText(view) {
+  const { start } = view;
   const out = [
     `<!-- Built by ${SCRIPT} from ${DATA}. Do not edit. -->`,
     "",
@@ -424,12 +525,13 @@ function copyText(view) {
     "",
     `**Chapter ${view.chapter}: ${mdText(view.subtitle)}**`,
     "",
-    `This is the text copy of the page for GitHub. The illustrated page is on the [Pages site](${estate.siteUrl}${PAGE}).`,
+    `This is the text copy of the page for GitHub. The illustrated page is on the [Pages site](${estate.siteUrl}${view.page}).`,
     "",
+    ...(start ? [`This chapter starts at [stage ${start.number} of chapter ${start.chapter}: ${mdText(start.short)}](${copyName(start.copy)}#${start.anchor}). ${CHAPTERS_SENTENCE}`, ""] : []),
     ...view.intro.flatMap((p) => [mdText(p), ""]),
     "How to read this page:",
     "",
-    ...Object.entries(FLAGS).map(([kind, flag]) => `- **${flag.label}:** ${mdText(view.legend[kind])}`),
+    ...view.flagKinds.map((kind) => `- **${FLAGS[kind].label}:** ${mdText(view.legend[kind])}`),
     `- **For developers:** ${mdText(view.legend.dev)}`,
     "",
     "```mermaid",
@@ -446,7 +548,7 @@ function copyText(view) {
     if (stage.note) out.push(mdText(stage.note), "");
     out.push(...developersMd(stage), "");
   });
-  out.push("## Next", "", mdText(view.next), "");
+  out.push(...chaptersMd(view));
   const credit = creditText(view.credits, {
     repo: (g) => `[${g.repo}](${g.repoUrl})`,
     commit: (g) => `[\`${g.commit}\`](${g.commitUrl})`,
@@ -456,17 +558,26 @@ function copyText(view) {
   return out.join("\n");
 }
 
-// A guard of the page render: each link to an anchor has its id, each id is unique, each image of
-// the page is an image of the data file, and each custom property that the page uses has a
+// A guard of the page renders: in each page, each link to an anchor of the page or of another
+// chapter page has its id, each link to another chapter page has its page, each id is unique, each
+// image of the page is an image of the data file, and each custom property that the page uses has a
 // definition (undefinedProperties of site-html.mjs). The data checks cannot see a defect of the
 // render.
-function checkPage(html) {
-  const where = `${PAGE} (built in memory)`;
-  const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
-  for (const id of new Set(ids.filter((id, i) => ids.indexOf(id) !== i))) errors.push(`${where}: the id ${id} is used twice`);
-  for (const [, id] of html.matchAll(/href="#([^"]*)"/g)) if (!ids.includes(id)) errors.push(`${where}: a link to #${id}, but no id ${id}`);
-  for (const [, src] of html.matchAll(/\ssrc="([^"]*)"/g)) if (!sizeOf.has(src.replace(`${imageDir}/`, ""))) errors.push(`${where}: an image ${src} that is not in ${DATA}`);
-  for (const n of undefinedProperties(html)) errors.push(`${where}: the page uses var(--${n}), but nothing defines --${n}`);
+function checkPages(pages) {
+  const idsOf = new Map([...pages].map(([page, html]) => [page, [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1])]));
+  for (const [page, html] of pages) {
+    const where = `${page} (built in memory)`;
+    const ids = idsOf.get(page);
+    for (const id of new Set(ids.filter((id, i) => ids.indexOf(id) !== i))) errors.push(`${where}: the id ${id} is used twice`);
+    for (const [, id] of html.matchAll(/href="#([^"]*)"/g)) if (!ids.includes(id)) errors.push(`${where}: a link to #${id}, but no id ${id}`);
+    for (const [, target, id] of html.matchAll(/href="([^"#:/]+\.html)(?:#([^"]*))?"/g)) {
+      if (!CHAPTER_PAGE.test(target)) continue;
+      if (!idsOf.has(target)) errors.push(`${where}: a link to ${target}, but no chapter has that page`);
+      else if (id !== undefined && !idsOf.get(target).includes(id)) errors.push(`${where}: a link to ${target}#${id}, but no id ${id} there`);
+    }
+    for (const [, src] of html.matchAll(/\ssrc="([^"]*)"/g)) if (!sizeOf.has(src.replace(`${imageDir}/`, ""))) errors.push(`${where}: an image ${src} that is not in ${DATA}`);
+    for (const n of undefinedProperties(html)) errors.push(`${where}: the page uses var(--${n}), but nothing defines --${n}`);
+  }
 }
 
 // ---------- The evidence (GitHub) ----------
@@ -492,7 +603,7 @@ async function checkEvidence() {
   const counts = { entries: 0, names: 0, images: 0, issues: 0 };
   const files = new Set(); // "<repo>@<commit>:<path>"
 
-  for (const stage of data.stages) {
+  for (const stage of data.chapters.flatMap((ch) => ch.stages)) {
     const at = `stage ${stage.id}`;
     for (const [j, flag] of (stage.flags ?? []).entries()) {
       if (!FLAGS[flag.kind].issue || !flag.issue) continue;
@@ -557,34 +668,42 @@ if (mode === "evidence") {
   console.log(`each capture journey fact holds (${counts})`);
   process.exit(0);
 }
-const view = viewOf();
-const copy = copyText(view);
 const { GITHUB_REPOSITORY: githubRepo, GITHUB_SHA: githubSha } = process.env;
-const page = pageHtml(view, githubRepo && githubSha ? `https://github.com/${githubRepo}/blob/${githubSha}/${COPY}` : null, estate.areas);
-checkPage(page);
+const views = data.chapters.map(viewOf);
+const copies = views.map((view) => ({ at: view.copy, text: copyText(view) }));
+const pages = new Map(views.map((view) => [view.page, pageHtml(view, githubRepo && githubSha ? `https://github.com/${githubRepo}/blob/${githubSha}/${view.copy}` : null, estate.areas)]));
+checkPages(pages);
 exitOnErrors();
 
-const images = data.stages.flatMap((s) => s.images ?? []);
-const summary = `${plural(data.stages.length, "stage")}, ${plural(data.stages.flatMap((s) => s.evidence).length, "evidence entry", "evidence entries")}, ${plural(images.length, "image")}`;
+// The image files of all chapters, once each, in the order of the data file.
+const imageFiles = [...new Set(data.chapters.flatMap((ch) => ch.stages.flatMap((s) => (s.images ?? []).map((image) => image.file))))];
+const stages = data.chapters.flatMap((ch) => ch.stages);
+const summary = [
+  ...(data.chapters.length > 1 ? [plural(data.chapters.length, "chapter")] : []),
+  plural(stages.length, "stage"),
+  plural(stages.flatMap((s) => s.evidence).length, "evidence entry", "evidence entries"),
+  plural(imageFiles.length, "image"),
+].join(", ");
 if (mode === "check") {
-  const staleNow = [...(readDocsFile(COPY, []) !== copy ? [`${COPY} is stale. Run: node ${SCRIPT}`] : []), ...staleErrors];
+  const staleNow = [...copies.filter((c) => readDocsFile(c.at, []) !== c.text).map((c) => `${c.at} is stale. Run: node ${SCRIPT}`), ...staleErrors];
   if (staleNow.length) {
     for (const s of staleNow) console.error(`error: ${s}`);
     process.exit(1);
   }
-  console.log(drawings.length ? `${COPY} and ${plural(drawings.length, "drawing")} are current (${summary})` : `${COPY} is current (${summary})`);
+  const current = [...copies.map((c) => c.at), ...(drawings.length ? [plural(drawings.length, "drawing")] : [])];
+  console.log(`${wordList(current)} ${current.length === 1 ? "is" : "are"} current (${summary})`);
 } else if (mode === "site") {
-  writeFileSync(join(siteDir, PAGE), page);
+  for (const [page, html] of pages) writeFileSync(join(siteDir, page), html);
   mkdirSync(join(siteDir, imageDir), { recursive: true });
   const current = new Map(drawings.map((d) => [d.file, d.next]));
-  for (const image of images) {
-    const to = join(siteDir, imageDir, image.file);
-    if (current.has(image.file)) writeFileSync(to, current.get(image.file));
-    else copyFileSync(join(root, IMAGES, image.file), to);
+  for (const file of imageFiles) {
+    const to = join(siteDir, imageDir, file);
+    if (current.has(file)) writeFileSync(to, current.get(file));
+    else copyFileSync(join(root, IMAGES, file), to);
   }
-  console.log(`wrote ${join(siteDir, PAGE)} and ${plural(images.length, "image")} (${summary})`);
+  console.log(`wrote ${wordList([...[...pages.keys()].map((page) => join(siteDir, page)), plural(imageFiles.length, "image")])} (${summary})`);
 } else {
-  writeFileSync(join(root, COPY), copy);
+  for (const c of copies) writeFileSync(join(root, c.at), c.text);
   for (const d of stale) writeFileSync(join(root, d.at), d.next);
-  console.log(`wrote ${COPY}${stale.length ? ` and ${plural(stale.length, "drawing")}` : ""} (${summary})`);
+  console.log(`wrote ${wordList([...copies.map((c) => c.at), ...(stale.length ? [plural(stale.length, "drawing")] : [])])} (${summary})`);
 }

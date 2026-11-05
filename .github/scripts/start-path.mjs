@@ -43,7 +43,7 @@ export function startPath(errors) {
     },
     {
       name: "Greenstand and the live map",
-      description: "The Greenstand website: the mission, how Treetracker works, and how to help. The live Treetracker map: every verified tree, from growers around the world.",
+      description: "The Greenstand website: the mission, how Treetracker works, and how to help. The live Treetracker map: the trees that growers around the world captured.",
       links: [
         { text: "Website", url: "https://greenstand.org" },
         { text: "Live map", url: "https://map.treetracker.org" },

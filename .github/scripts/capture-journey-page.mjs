@@ -1,8 +1,9 @@
-// The illustrated page of the capture journey on the Pages site (capture-journey.html): its style,
-// its script, and its render. It also holds the parts that the page and the text copy share: the
-// icons of the stages, the flags, and the credit line of the images. No CLI:
-// build-capture-journey.mjs checks the data file, makes the view (the data with its links), and
-// writes the page with --site. The page is in the site look (site-html.mjs, DESIGN.md).
+// The illustrated page of a chapter of the capture journey on the Pages site (capture-journey.html
+// for chapter 1, capture-journey-<id>.html for a later chapter): its style, its script, and its
+// render. It also holds the parts that the page and the text copy share: the icons of the stages,
+// the flags, the sentence on the chapters, and the credit line of the images. No CLI:
+// build-capture-journey.mjs checks the data file, makes the view of each chapter (the data with its
+// links), and writes the pages with --site. The page is in the site look (site-html.mjs, DESIGN.md).
 import { plural } from "./estate.mjs";
 import { CODE_CHIP, CONTENT_COLUMN as COLUMN, READING_COLUMN, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle } from "./site-html.mjs";
 
@@ -14,7 +15,14 @@ export const ICONS = {
   record: '<ellipse cx="24" cy="12" rx="14" ry="5"/><path d="M10 12v22c0 3 6 5 14 5s14-2 14-5V12M10 23c0 3 6 5 14 5s14-2 14-5"/>',
   verify: '<rect x="8" y="8" width="32" height="32" rx="6"/><path d="M16 24l6 6 11-12"/>',
   reward: '<circle cx="24" cy="24" r="16"/><path d="M24 14v20M29 18c-1-2-3-3-5-3-3 0-5 2-5 4s2 3 5 4 5 2 5 4-2 4-5 4c-2 0-4-1-5-3"/>',
+  pin: '<path d="M24 43S11 30 11 19a13 13 0 0 1 26 0c0 11-13 24-13 24z"/><circle cx="24" cy="19" r="5"/>',
+  cluster: '<circle cx="24" cy="24" r="17"/><circle cx="18" cy="20" r="2.5"/><circle cx="29" cy="19" r="2.5"/><circle cx="24" cy="30" r="2.5"/>',
+  page: '<rect x="9" y="5" width="30" height="38" rx="2"/><rect x="15" y="11" width="18" height="13"/><path d="M15 31h18M15 37h11"/>',
 };
+
+// The sentence on the chapters: on chapter 1 with the list of chapters, and on a later chapter with
+// its start line. Chapters 2 to 4 are parallel branches of chapter 1 (CONTEXT.md, Chapter).
+export const CHAPTERS_SENTENCE = "Chapters 2 to 4 follow the same capture on different paths. Their numbers give only the reading order.";
 
 // The flags of a stage, in the order of the legend: the label on the page and in the text copy,
 // and the class of the page. A flag with an issue names its public issue, or says that there is
@@ -106,7 +114,7 @@ ${CODE_CHIP}
   .now { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
     font: 600 .9rem/1.3 var(--display); font-stretch: 87.5%; font-variant-numeric: tabular-nums; }
   .intro { padding-top: 1.5rem; }
-  .intro > p, .next > p { max-width: ${READING_COLUMN}; }
+  .intro > p, .page-end > p, .chapters > p { max-width: ${READING_COLUMN}; }
   .legend { margin-block: .5rem; font-size: .92rem; line-height: 1.5; color: var(--muted); }
   /* A tag is inline, so find-in-page matches a phrase across the tag and the text after it. The
      mark of its state comes before its label. */
@@ -162,7 +170,23 @@ ${CODE_CHIP}
   details.dev ul { margin: .5rem 0; padding-left: 1.2rem; }
   details.dev li { margin-block: .3rem; }
   details.dev p { margin: .4rem 0 0; }
-  .next { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--line); color: var(--muted); }
+  /* A code in "For developers" stays on one line when it fits (a reader copies it). A code wider
+     than the box (a long file name) breaks inside its own box: an inline block is never wider than
+     the box. Its top meets the top of the line, so a list marker stays beside its first line. The
+     code in a link keeps the line of the link. */
+  details.dev code { display: inline-block; max-width: 100%; box-sizing: border-box; white-space: normal; vertical-align: top; }
+  details.dev a code { text-decoration: inherit; }
+  .page-end { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--line); color: var(--muted); }
+  /* The chapters: one row for each chapter, between hairlines, with its number in a margin column,
+     as the Start here steps. The row of this page has no link. */
+  .chapters { margin-bottom: 1.5rem; }
+  .chapters h2 { margin: 0 0 .5rem; font-size: 1.15rem; font-weight: 660; color: var(--ink); }
+  .chapters ul { max-width: ${READING_COLUMN}; margin: 0 0 1rem; padding: 0; list-style: none; }
+  .chapters li { display: grid; grid-template-columns: 5rem minmax(0, 1fr); column-gap: .9rem; align-items: baseline;
+    margin: 0; padding-block: .55rem; border-top: 1px solid var(--line); }
+  .chapters li:last-child { border-bottom: 1px solid var(--line); }
+  .chapters .cn { font: 600 .82rem/1.4 var(--display); font-stretch: 87.5%; font-variant-numeric: tabular-nums; }
+  .chapters .ct { color: var(--ink); }
   @media ${WIDE} {
     main { --pad: clamp(1.5rem, 4vw, 4.5rem); }
     main > * { margin-inline: 0; }
@@ -173,9 +197,11 @@ ${CODE_CHIP}
     .stage, .stage.flip { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
     .stage.flip .media { order: 0; }
   }
+  /* In a narrow main the track has the columns of trackColumns; a track in more than one row has
+     no line. */
   @container (max-width: 34rem) {
-    .track { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 1.25rem; }
-    .track::before { display: none; }
+    .track { grid-template-columns: repeat(var(--narrow), minmax(0, 1fr)); row-gap: 1.25rem; }
+    .track.wraps::before { display: none; }
     figure.phone { width: 130px; }
   }
   /* On a small phone the image plate spans the width of the screen, with a thin side padding, so
@@ -189,9 +215,10 @@ ${CODE_CHIP}
     .text > .num { grid-row: 1; margin-bottom: .9rem; font-size: .74rem; }
     .text > .num .icon { width: 1.5rem; height: 1.5rem; padding: .22rem; margin-bottom: .3rem; }
   }
-  /* On the narrowest phones a long code (a file name) can break, so it stays in its box. */
-  @container (max-width: 20rem) {
-    details.dev code { white-space: normal; }
+  /* Below 20rem, a track of 4 stations is 2 rows of 2 (trackColumns). */
+  @container (width < 20rem) {
+    .track { grid-template-columns: repeat(var(--small), minmax(0, 1fr)); }
+    .track.wraps-small::before { display: none; }
   }`;
 
 // The script of the page: the sticky progress bar follows the stage in view. Without JavaScript the
@@ -265,6 +292,37 @@ function stageHtml(stage, i, view) {
   ].join("\n");
 }
 
+// The columns of the track in a narrow main (narrow: 34rem or less) and in a main below 20rem
+// (small). Up to 4 stations sit in one row in a narrow main; more stations sit in rows of 3. Below
+// 20rem, 4 stations sit as 2 rows of 2. So 4 and 6 stations never leave one station alone in a row.
+export function trackColumns(n) {
+  return { narrow: n <= 4 ? n : 3, small: n === 4 ? 2 : Math.min(n, 3) };
+}
+
+// The chapters in the footer: a heading, the sentence on the chapters (on chapter 1 only: a later
+// chapter has it in its start line), one row for each chapter (a link, or "this page"), and the
+// later text. Empty when the view has no chapters part.
+function chaptersHtml(view) {
+  if (!view.chapters) return "";
+  const rows = view.chapters.list.map((ch) => {
+    const name = `<span class="cn">Chapter ${ch.number}</span>`;
+    return ch.current
+      ? `<li>${name}<span><span class="ct">${htmlText(ch.subtitle)}</span> (this page)</span></li>`
+      : `<li>${name}<a href="${ch.page}">${htmlText(ch.subtitle)}</a></li>`;
+  });
+  return [
+    "",
+    '<nav class="chapters" aria-labelledby="chapters">',
+    '<h2 id="chapters">Chapters</h2>',
+    ...(view.start ? [] : [`<p>${CHAPTERS_SENTENCE}</p>`]),
+    "<ul>",
+    ...rows,
+    "</ul>",
+    ...(view.chapters.later ? [`<p>${htmlText(view.chapters.later)}</p>`] : []),
+    "</nav>",
+  ].join("\n");
+}
+
 // The page of a view. copyUrl is the link to the text copy on GitHub, or null. areas are the areas
 // of estate.json, for the estate mark. The page is at the root of the site.
 export function pageHtml(view, copyUrl, areas) {
@@ -273,10 +331,12 @@ export function pageHtml(view, copyUrl, areas) {
     commit: (g) => `<a href="${g.commitUrl}"><code>${esc(g.commit)}</code></a>`,
     text: htmlText,
   });
-  const legend = Object.entries(FLAGS)
-    .map(([kind, flag]) => `<p class="legend"><span class="tag ${flag.class}">${flag.label}</span> ${htmlText(view.legend[kind])}</p>`)
+  // The legend explains the flags that the chapter has (view.flagKinds).
+  const legend = view.flagKinds
+    .map((kind) => `<p class="legend"><span class="tag ${FLAGS[kind].class}">${FLAGS[kind].label}</span> ${htmlText(view.legend[kind])}</p>`)
     .join("\n");
   const first = view.stages[0];
+  const columns = trackColumns(view.stages.length);
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -298,18 +358,17 @@ ${masthead(areas, `<nav><a href="./">&larr; All viewers</a></nav>\n<p class="cha
 <header class="hero">
 <h1>${titleText(view.title)}</h1>
 <p class="sub">${htmlText(view.subtitle)}</p>
-<ol class="track" aria-label="The stages" style="--stages: ${view.stages.length}">
+<ol class="${["track", ...(columns.narrow < view.stages.length ? ["wraps"] : []), ...(columns.small < view.stages.length ? ["wraps-small"] : [])].join(" ")}" aria-label="The stages" style="--stages: ${view.stages.length}; --narrow: ${columns.narrow}; --small: ${columns.small}">
 ${view.stages.map((s, i) => `<li><a href="#${s.id}">${icon(s.icon, 40)}<span class="n">${i + 1}</span><span class="l">${htmlText(s.short)}</span></a></li>`).join("\n")}
 </ol>
 </header>
 <div class="progress" aria-hidden="true"><span class="dots">${view.stages.map(() => "<span></span>").join("")}</span><span class="now">1 of ${view.stages.length}: ${htmlText(first.short)}</span></div>
 <section class="intro">
-${view.intro.map((p) => `<p>${htmlText(p)}</p>`).join("\n")}
+${view.start ? `<p class="start">This chapter starts at <a href="${view.start.page}#${view.start.id}">stage ${view.start.number} of chapter ${view.start.chapter}: ${htmlText(view.start.short)}</a>. ${CHAPTERS_SENTENCE}</p>\n` : ""}${view.intro.map((p) => `<p>${htmlText(p)}</p>`).join("\n")}
 ${legend}
 </section>
 ${view.stages.map((stage, i) => stageHtml(stage, i, view)).join("\n")}
-<footer class="next">
-<p><strong>Next:</strong> ${htmlText(view.next)}</p>${credit ? `\n<p class="credit">${credit}</p>` : ""}${copyUrl ? `\n<p class="copy"><a href="${copyUrl}">Read the text copy of this page on GitHub</a></p>` : ""}
+<footer class="page-end">${chaptersHtml(view)}${credit ? `\n<p class="credit">${credit}</p>` : ""}${copyUrl ? `\n<p class="copy"><a href="${copyUrl}">Read the text copy of this page on GitHub</a></p>` : ""}
 </footer>
 </main>
 <script type="module">

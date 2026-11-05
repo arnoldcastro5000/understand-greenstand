@@ -15,7 +15,8 @@
 // missingNames), the evidence form (isRepoPath, parseLines, lineAnchor, citedLines), the GitHub API
 // of the evidence checks (githubApi, RAW, answerStatus), the readers of the data files for scripts
 // that use only some fields (readSharedResources, readCaptureJourney), and the paths of the
-// shared-resource page and of the capture journey.
+// shared-resource page and of the capture journey (chapterFiles, CHAPTER_COPY, CHAPTER_PAGE), and
+// wordList.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -266,23 +267,47 @@ export function readDocsFile(at, errors, parse = (text) => text) {
 export const SHARED_RESOURCES_DATA = "shared-resources.json";
 export const SHARED_RESOURCES_PAGE = "docs/shared-resources.md";
 
-// The data file of the capture journey, its text copy for GitHub, and its image directory.
-// build-capture-journey.mjs builds the copy and the page of the Pages site from the data file,
-// and checks all of the data file.
+// The data file of the capture journey, the text copy of chapter 1 for GitHub, and the image
+// directory. build-capture-journey.mjs builds the text copy and the page of the Pages site of each
+// chapter from the data file, and checks all of the data file.
 export const CAPTURE_JOURNEY_DATA = "capture-journey.json";
 export const CAPTURE_JOURNEY_COPY = "docs/capture-journey.md";
 export const CAPTURE_JOURNEY_IMAGES = "docs/capture-journey";
+// The file names of the chapters, from one rule: chapter 1 (index 0) has docs/capture-journey.md
+// and capture-journey.html; a later chapter adds "-" and its id (lowercase words joined by "-"),
+// for example docs/capture-journey-web-map.md and capture-journey-web-map.html. chapterFiles gives
+// the files of a chapter; CHAPTER_COPY and CHAPTER_PAGE match each name that it can give (the build
+// check, the safety check, render-md.mjs, and the links between the pages use them).
+const JOURNEY = "capture-journey";
+const ID = "[a-z0-9]+(?:-[a-z0-9]+)*";
+export const CHAPTER_ID = new RegExp(`^${ID}$`);
+export const CHAPTER_COPY = new RegExp(`^docs/${JOURNEY}(?:-${ID})?\\.md$`);
+export const CHAPTER_PAGE = new RegExp(`^${JOURNEY}(?:-${ID})?\\.html$`);
+export function chapterFiles(chapter, index) {
+  const name = index === 0 ? JOURNEY : `${JOURNEY}-${chapter.id}`;
+  return { page: `${name}.html`, copy: `docs/${name}.md` };
+}
+// The page of a text copy of a chapter, or null for another path.
+export const chapterPageOf = (path) => (CHAPTER_COPY.test(path) ? `${path.slice("docs/".length, -".md".length)}.html` : null);
+// The text copies of all chapters in words, as the item of the pull request template says it (the
+// words that the user accepted). CHAPTER_COPY is the rule that matches them.
+export const CAPTURE_JOURNEY_COPIES = "docs/capture-journey*.md";
+
+// A list in a sentence: "a", "a and b", "a, b, and c".
+export const wordList = (items) => (items.length < 3 ? items.join(" and ") : `${items.slice(0, -1).join(", ")}, and ${items.at(-1)}`);
 
 // Read the stages of the capture journey's data file for a script that uses only some of their
-// fields. readable checks the shape of those fields in one stage, and fields names them in the
-// error. Return the stages, or record in errors what is wrong and return null.
+// fields: the stages of all chapters, in order, each with the page of its chapter (page).
+// readable checks the shape of those fields in one stage, and fields names them in the error.
+// Return the stages, or record in errors what is wrong and return null.
 export function readCaptureJourney(errors, fields, readable) {
   return readDocsFile(CAPTURE_JOURNEY_DATA, errors, (text) => {
     const data = parseJson(text);
-    if (!isObject(data) || !Array.isArray(data.stages) || !data.stages.every((s) => isObject(s) && readable(s))) {
-      throw new Error(`must have a list of stages, each with ${fields}. Run: node .github/scripts/build-capture-journey.mjs --check`);
+    const valid = (c, i) => isObject(c) && (i === 0 || isText(c.id)) && Array.isArray(c.stages) && c.stages.every((s) => isObject(s) && readable(s));
+    if (!isObject(data) || !Array.isArray(data.chapters) || !data.chapters.every(valid)) {
+      throw new Error(`must have a list of chapters, each with a list of stages, each with ${fields}. Run: node .github/scripts/build-capture-journey.mjs --check`);
     }
-    return data.stages;
+    return data.chapters.flatMap((c, i) => c.stages.map((s) => ({ ...s, page: chapterFiles(c, i).page })));
   });
 }
 
