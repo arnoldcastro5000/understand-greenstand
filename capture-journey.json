@@ -7,10 +7,10 @@
   },
   "chapters": [
     {
-      "subtitle": "From the grower's phone to the grower's reward",
+      "subtitle": "From the grower’s phone to the grower’s reward",
       "intro": [
         "This page follows one capture through the Greenstand system. A capture is one photo of a tree, with its GPS point and some data. A grower takes it with the Treetracker app.",
-        "Chapter 1 follows the capture from the grower's phone to the grower's reward. This page says \"grower\". Older code and tables say \"planter\" for the same person."
+        "Chapter 1 follows the capture from the grower’s phone to the grower’s reward. This page says \"grower\". Older code and tables say \"planter\" for the same person."
       ],
       "stages": [
         {
@@ -125,19 +125,19 @@
           "title": "The reward: the grower earns money",
           "icon": "reward",
           "story": [
-            "In the code, one organization has a payment rule. Every day, an automatic job counts the approved captures of each of its growers. It pays in steps of 100 captures: 100 captures give 120,000 leones, and 1,000 captures or more give the maximum, 1,200,000 leones. The job writes an \"earning\" with the status \"calculated\".",
-            "Greenstand's guide to earnings and payments gives the next steps for a typical case. In that case, a funder does them. A funder is the person or the organization that pays for the captures. The funder opens the Earnings page of the admin panel and downloads the list. Then the funder pays each grower outside the Greenstand system. Last, the funder logs the payments. The funder logs one earning in its detail panel, or many earnings with a file upload on the Payments page. Each logged earning becomes \"paid\". The guide says that the growers can see the payment data. But the Treetracker app and the wallet app have no earnings screen. So the grower learns about the money from the payment itself."
+            "In the code, one organization has a payment rule. An automatic job counts the approved captures of each of its growers. It pays in steps of 100 captures: 100 captures give 120,000 leones, and 1,000 captures or more give the maximum, 1,200,000 leones. The job writes an \"earning\" with the status \"calculated\".",
+            "Greenstand’s guide to earnings and payments gives the next steps for a typical case. In that case, a funder does them. A funder is the person or the organization that pays for the captures. The funder opens the Earnings page of the admin panel and downloads the list. Then the funder pays each grower outside the Greenstand system. Last, the funder logs the payments. The funder logs one earning in its detail panel, or many earnings with a file upload on the Payments page. Each logged earning becomes \"paid\". The guide says that the growers can see the payment data. But the Treetracker app and the wallet app have no earnings screen. So the grower learns about the money from the payment itself."
           ],
           "flags": [
-            {"kind": "guess", "text": "The organization is FCC, which we think is Freetown City Council. The job and the payments still run today. (The code shows no change since 2023.)", "question": "Is FCC the Freetown City Council, does the daily FCC earnings job still run, and do the funders still pay the growers and log the payments this way?"},
+            {"kind": "guess", "text": "The organization is FCC, which we think is Freetown City Council. The job and the payments still run today. (The code shows no change since 2023.)", "question": "Is FCC the Freetown City Council, does the FCC earnings job still run, and do the funders still pay the growers and log the payments this way?"},
             {"kind": "broken", "text": "The wallet app tells each new user \"we will gift you 1 token\". The token does not arrive today.", "issue": {"repo": "treetracker-wallet-app", "number": 914}}
           ],
-          "note": "Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture of an organization's growers into a wallet that the operator names. Greenstand's white paper describes a goal, not the code of today. In that goal, each capture becomes a token in the wallet of the entity that is responsible for the tree. When claims conflict, the grower comes first. The token also holds a proof of the payment to the grower. The token job of today does not use the wallet of the grower, and no token holds payment data. Chapter 3, the impact token, will tell that story.",
+          "note": "Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture of an organization’s growers into a wallet that the operator names. Greenstand’s white paper describes a goal, not the code of today. In that goal, each capture becomes a token in the wallet of the entity that is responsible for the tree. When claims conflict, the grower comes first. The token also holds a proof of the payment to the grower. The token job of today does not use the wallet of the grower, and no token holds payment data.",
+          "seeChapter": "token",
           "images": [
             {"file": "reward.svg", "alt": "A drawing of the reward steps", "caption": "A drawing of the reward steps"}
           ],
           "evidence": [
-            {"repo": "treetracker-airflow-dags", "path": "contracts-earnings-fcc.py", "lines": "41-48", "commit": "6ede7fe", "names": ["'contract-earnings-fcc'", "'@daily'", "'freetown'"], "what": "runs the earnings job once a day"},
             {"repo": "treetracker-airflow-dags", "path": "lib/contracts_earnings_fcc.py", "lines": "71-133", "commit": "6ede7fe", "names": ["% 100", "maxPayout = 1200000", "'calculated'"], "what": "computes and writes the earnings"},
             {"repo": "treetracker-admin-client", "path": "src/components/EarningsTable/EarningsTable.js", "lines": "252-253", "commit": "c2076e4", "names": ["actionButtonType=\"export\"", "getEarningsReal"], "what": "the download of the Earnings page"},
             {"repo": "treetracker-admin-client", "path": "src/components/PaymentsTable/PaymentsTable.js", "lines": "163-180", "commit": "c2076e4", "names": ["uploadCsvFile", "batchPatchEarnings"], "what": "the upload of the Payments page"},
@@ -159,7 +159,7 @@
       "start": {"chapter": 1, "stage": "the-record"},
       "intro": [
         "This chapter follows one capture onto the public web map, map.treetracker.org. Anyone can open the map and see the trees that growers captured.",
-        "The web map shows a capture in two ways: close up as a pin, and from further away as a part of the number on a cluster. A click on a pin opens the tree page."
+        "The web map shows a capture in two ways. Close up, it is a pin. From further away, it is a part of the number on a cluster. A click on a pin opens the tree page."
       ],
       "stages": [
         {
@@ -171,7 +171,7 @@
             "When the field data service stores the capture (chapter 1, stage 4), the database also keeps an older tree record of it. This record is \"active\" at once. It is not \"approved\" yet.",
             "The map is a set of small square images, the tiles. The browser asks the tile server for each tile. The mark \"active\" shows a capture on the map. So close up, the new capture is a pin at once, before an admin verifies it."
           ],
-          "note": "Greenstand's product page says that the web map shows verified trees. Today, the map shows each active capture, also before verification.",
+          "note": "Greenstand’s product page says that the web map shows verified trees. Today, the map shows each active capture, also before verification.",
           "images": [
             {"file": "map-pins.svg", "alt": "A drawing of the map close up: a pin for each active capture, and one new pin with the label \"New: not verified yet\"", "caption": "A drawing of the map close up"}
           ],
@@ -257,7 +257,123 @@
           ]
         }
       ]
+    },
+    {
+      "id": "token",
+      "subtitle": "The capture as an impact token",
+      "start": {"chapter": 1, "stage": "verification"},
+      "intro": [
+        "This chapter follows one capture to an impact token. An impact token is a record in a wallet. It points to one capture. It is not money: it has no price, and it does not pay the grower.",
+        "Greenstand’s white paper and its model pages describe a goal for tokens. This chapter shows the code of today. A note at a stage says where the goal and the code differ."
+      ],
+      "stages": [
+        {
+          "id": "no-token-yet",
+          "short": "No token yet",
+          "title": "The approval: no token yet",
+          "icon": "verify",
+          "story": [
+            "An admin approves the capture (chapter 1, stage 5). The older tree record has a field for a token, but the field stays empty. Nothing makes a token at this step. An open issue in Greenstand’s wallet code asks for a token at the approval.",
+            "So the screens say that no token exists. In the admin panel, the capture detail says \"Impact token not issued\", and a filter of the Captures page shows \"Not Tokenized\". On the web map, the tree page shows the badge \"Token not issued\"."
+          ],
+          "images": [
+            {"file": "no-token.svg", "alt": "A drawing of the two screens after the approval, with made-up data: the admin panel shows Capture #1234 as \"Approved\" with \"Impact token not issued\", and the web map shows Tree #1234 as \"Verified\" with \"Token not issued\"", "caption": "A drawing of an approved capture with no token"}
+          ],
+          "evidence": [
+            {"repo": "treetracker-admin-api", "path": "src/models/trees.model.ts", "lines": "380-384", "commit": "351db46", "names": ["columnName: 'token_id'"], "what": "the older tree record has a token field"},
+            {"repo": "treetracker-admin-client", "path": "src/components/CaptureDetailDialog.js", "lines": "386-394", "commit": "c2076e4", "names": ["getTokenStatus", "Impact token not issued"], "what": "the capture detail says that no token exists"},
+            {"repo": "treetracker-admin-client", "path": "src/common/variables.js", "lines": "9-12", "commit": "c2076e4", "names": ["Tokenized", "Not Tokenized"], "what": "the token filter of the Captures page"},
+            {"repo": "treetracker-web-map-client", "path": "src/pages/trees/[treeid].js", "lines": "196-199", "commit": "1529888", "names": ["Token issued", "Token not issued"], "what": "the token badge of the tree page"}
+          ],
+          "issues": [
+            {"repo": "treetracker-wallet-api", "number": 556, "what": "asks for a token at the approval"}
+          ]
+        },
+        {
+          "id": "the-mint",
+          "short": "The mint",
+          "title": "The mint: an operator makes the tokens",
+          "icon": "mint",
+          "story": [
+            "Later, a Greenstand operator starts a job by hand. No timer starts it. The operator names an organization and a wallet. The job finds each approved capture of the growers of that organization that has no token yet.",
+            "For each of these captures, the job makes one impact token in the named wallet. A token is a small record: it points to one capture and to one wallet. A capture can have only one token. The operator picks the wallet, not the grower."
+          ],
+          "flags": [
+            {"kind": "guess", "text": "An operator still starts this job today. The wallet is usually the wallet of the organization.", "question": "Does an operator still run the create_tokens job, when was the last run, for which organizations, and who picks the wallet?"}
+          ],
+          "note": "Greenstand’s white paper describes a goal. In that goal, a capture holds its first wallet, and the grower comes first. The system makes a token only when no other claim conflicts. Today, the field data service stores a target wallet with each session of the app, but the token job does not read it.",
+          "images": [
+            {"file": "token-mint.svg", "alt": "A drawing of the mint: an operator starts the job by hand, and the job makes one token for each approved capture in the named wallet, usually the organization’s wallet. The grower gets no token", "caption": "A drawing of the mint"}
+          ],
+          "evidence": [
+            {"repo": "treetracker-airflow-dags", "path": "create-tokens.py", "lines": "40-48", "commit": "6ede7fe", "names": ["create_tokens", "None"], "what": "the job runs only when an operator starts it"},
+            {"repo": "treetracker-wallet-api", "path": "database/migrations/20200901213253-CreateTableToken.js", "lines": "18-21", "commit": "e95c15a", "names": ["capture_id", "wallet_id"], "what": "a token points to one capture and one wallet"},
+            {"repo": "treetracker-wallet-api", "path": "database/migrations/20210304014730-AddUniqueConstraintCaptureId.js", "lines": "18", "commit": "e95c15a", "names": ["create unique index capture_id_idx"], "what": "a capture has one token at most"},
+            {"repo": "treetracker-field-data", "path": "server/models/SessionModel.js", "lines": "13-14", "commit": "8ffb53c", "names": ["target_wallet"], "what": "each session of the app has a target wallet"},
+            {"repo": "greenstand-documentation", "path": "docs/introduction/the-model/white-paper.md", "lines": "204", "commit": "6f415de", "names": ["minting trigger"], "what": "the white paper: when a token is made"},
+            {"repo": "greenstand-documentation", "path": "docs/introduction/the-model/white-paper.md", "lines": "208-210", "commit": "6f415de", "names": ["initial wallet", "originating wallet"], "what": "the white paper: the first wallet comes from the capture"},
+            {"repo": "greenstand-documentation", "path": "docs/introduction/the-model/white-paper.md", "lines": "214", "commit": "6f415de", "names": ["highest priority goes to the individual growers"], "what": "the white paper: the grower comes first"}
+          ]
+        },
+        {
+          "id": "the-transfers",
+          "short": "Transfers",
+          "title": "Transfers: the holder sends tokens to other wallets",
+          "icon": "transfer",
+          "story": [
+            "The holder of a wallet can send tokens to another wallet, for example the wallet of a funder. If the holder controls both wallets, or the two wallets trust each other, the tokens move at once. Otherwise, the other side must accept the transfer first. The wallet service records each move of a token.",
+            "An organization uses the wallet admin panel to send a number of tokens. A person can use the newer wallet app. It shows the tokens, accepts transfers, and makes share links with a QR code. Anyone who opens a share link can claim its tokens into a new wallet. A transfer can also mark tokens as \"claimed\". A claimed token cannot move again."
+          ],
+          "flags": [
+            {"kind": "guess", "text": "The wallet admin panel and the wallet app both work in production today. They use two versions of the wallet service that share one set of wallets.", "question": "Which versions of treetracker-wallet-api run in production today, and which one does the wallet admin panel use?"}
+          ],
+          "note": "The white paper describes five token states and trade on a blockchain. The code has no blockchain. It marks a token only as \"in a transfer\" or \"claimed\". A claimed token is the nearest to a retired token of the white paper.",
+          "images": [
+            {"file": "token-transfer.svg", "alt": "A drawing of the transfers: with trust, or with one holder of both wallets, the tokens move from wallet A to wallet B at once. With no trust, they wait for Accept. A claimed token stays where it is, and the wallet service records each move of a token", "caption": "A drawing of the transfers"}
+          ],
+          "evidence": [
+            {"repo": "treetracker-wallet-api", "path": "server/models/Transfer.js", "lines": "200-214", "commit": "e95c15a", "names": ["hasTrust", "TransferEnums.STATE.completed"], "what": "both wallets, or a trust: the transfer is complete at once"},
+            {"repo": "treetracker-wallet-api", "path": "server/models/Transfer.js", "lines": "222-237", "commit": "e95c15a", "names": ["hasControlOverSender", "TransferEnums.STATE.pending"], "what": "otherwise the transfer waits"},
+            {"repo": "treetracker-wallet-api", "path": "server/models/Transfer.js", "lines": "367-384", "commit": "e95c15a", "names": ["acceptTransfer", "TransferEnums.STATE.completed"], "what": "the receiver accepts"},
+            {"repo": "treetracker-wallet-api", "path": "server/models/Token.js", "lines": "55-75", "commit": "e95c15a", "names": ["completeTransfer", "batchCreate"], "what": "each token moves, and each move is recorded"},
+            {"repo": "treetracker-wallet-api", "path": "server/models/Transfer.js", "lines": "174-178", "commit": "e95c15a", "names": ["is claimed, cannot be transferred"], "what": "a claimed token cannot move"},
+            {"repo": "treetracker-wallet-admin-client", "path": "src/pages/SendTokens/SendTokens.js", "lines": "174-181", "commit": "81b71cb", "names": ["bundle_size", "receiver_wallet"], "what": "the wallet admin panel sends a number of tokens"},
+            {"repo": "treetracker-wallet-app", "path": "apps/web/src/app/(protected)/transfers/page.tsx", "lines": "68-80", "commit": "a7ea1cd", "names": ["onAccept", "Accept"], "what": "the wallet app accepts a transfer"},
+            {"repo": "treetracker-wallet-app", "path": "apps/web/src/app/(protected)/send/page.tsx", "lines": "138-152", "commit": "a7ea1cd", "names": ["can claim the tokens", "QRCodeSVG", "Share link"], "what": "the wallet app makes a share link with a QR code"},
+            {"repo": "greenstand-documentation", "path": "docs/introduction/the-model/white-paper.md", "lines": "157", "commit": "6f415de", "names": ["five distinct states"], "what": "the white paper: five token states"},
+            {"repo": "greenstand-documentation", "path": "docs/introduction/the-model/white-paper.md", "lines": "251", "commit": "6f415de", "names": ["Exporting tokens"], "what": "the white paper: trade on a blockchain"}
+          ]
+        },
+        {
+          "id": "the-token-page",
+          "short": "The token page",
+          "title": "The token page: anyone can see the token",
+          "icon": "token",
+          "story": [
+            "On the web map, the badge of the tree page now says \"Token issued\". The token page shows the token number, the date, the tree, and the wallet that holds the token. It also shows the claim status, and if the token can move. A timeline shows each transfer between wallets. The wallet app links to the same page.",
+            "A wallet page shows the name of the wallet and how many tokens it holds. No page shows a price. A token holds no money and no payment data."
+          ],
+          "note": "Greenstand’s product page says that investors and consumers can buy, sell, and trade impact tokens, and that this pays the grower. The white paper gives each token a value. The business model on Greenstand’s model page names an impact token fee of 3% of the uploaded captures. The code of today has none of these. A token has no price and no value, and it moves only by transfer. The token job takes no fee, and a token does not pay the grower.",
+          "seeLink": {"text": "Greenstand’s model page", "url": "https://docs.greenstand.org/overview/introduction/the-model"},
+          "images": [
+            {"file": "token-page.svg", "alt": "A drawing of the token page with made-up data: Token #a1b2, the date, the wallet Example Org, a tree, Not claimed yet, Can be transferred, and a timeline of 2 transfers. The grower is a plain block with no name and no face", "caption": "A drawing of the token page"}
+          ],
+          "evidence": [
+            {"repo": "treetracker-wallet-app", "path": "apps/web/src/app/(protected)/token/details/page.tsx", "lines": "61-64", "commit": "a7ea1cd", "names": ["View on map", "/tokens/${id}"], "what": "the wallet app links the token page of the web map"},
+            {"repo": "treetracker-web-map-client", "path": "src/pages/tokens/[tokenid].js", "lines": "450-466", "commit": "1529888", "names": ["Created At", "Token ID"], "what": "the date and the token number"},
+            {"repo": "treetracker-web-map-client", "path": "src/pages/tokens/[tokenid].js", "lines": "486-503", "commit": "1529888", "names": ["Claim Status", "Not claimed yet", "Transferability"], "what": "the claim status, and if the token can move"},
+            {"repo": "treetracker-web-map-client", "path": "src/pages/tokens/[tokenid].js", "lines": "578-586", "commit": "1529888", "names": ["Transfer token between:", "transaction.source_wallet_id"], "what": "the timeline of the transfers"},
+            {"repo": "treetracker-web-map-client", "path": "src/pages/wallets/[walletid].js", "lines": "312-313", "commit": "1529888", "names": ["title=\"Tokens\"", "tokens?.total"], "what": "the wallet page counts the tokens"},
+            {"repo": "greenstand-documentation", "path": "docs/introduction/products.md", "lines": "20", "commit": "6f415de", "names": ["buy, sell, and trade", "ensures compensation"], "what": "the product page: buy, sell, and pay the grower"},
+            {"repo": "greenstand-documentation", "path": "docs/introduction/the-model/white-paper.md", "lines": "122", "commit": "6f415de", "names": ["Relative Value Index"], "what": "the white paper: a token has a value"},
+            {"repo": "greenstand-documentation", "path": "docs/introduction/the-model/README.md", "lines": "15", "commit": "6f415de", "names": ["Business Model Solution"], "what": "the model page links the business model, which names the token fee"}
+          ],
+          "moreRepos": [
+            {"repo": "treetracker-query-api", "what": "gives the data of the token page and the wallet page"}
+          ]
+        }
+      ]
     }
   ],
-  "later": "Chapter 3 (the impact token) and chapter 4 (the data for organizations) are not written yet."
+  "later": "Chapter 4 (the data for organizations) is not written yet."
 }

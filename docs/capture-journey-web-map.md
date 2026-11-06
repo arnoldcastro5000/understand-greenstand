@@ -10,7 +10,7 @@ This chapter starts at [stage 4 of chapter 1: The record](capture-journey.md#4-t
 
 This chapter follows one capture onto the public web map, map.treetracker.org. Anyone can open the map and see the trees that growers captured.
 
-The web map shows a capture in two ways: close up as a pin, and from further away as a part of the number on a cluster. A click on a pin opens the tree page.
+The web map shows a capture in two ways. Close up, it is a pin. From further away, it is a part of the number on a cluster. A click on a pin opens the tree page.
 
 How to read this page:
 
@@ -34,7 +34,7 @@ When the field data service stores the capture (chapter 1, stage 4), the databas
 
 The map is a set of small square images, the tiles. The browser asks the tile server for each tile. The mark "active" shows a capture on the map. So close up, the new capture is a pin at once, before an admin verifies it.
 
-Greenstand's product page says that the web map shows verified trees. Today, the map shows each active capture, also before verification.
+Greenstand’s product page says that the web map shows verified trees. Today, the map shows each active capture, also before verification.
 
 <details>
 <summary>For developers</summary>
@@ -123,7 +123,8 @@ The web map reads only the older tree records. The job of chapter 1 that copies 
 
 ## Chapters
 
-- [Chapter 1: From the grower's phone to the grower's reward](capture-journey.md)
+- [Chapter 1: From the grower’s phone to the grower’s reward](capture-journey.md)
 - Chapter 2: The capture on the public web map (this page)
+- [Chapter 3: The capture as an impact token](capture-journey-token.md)
 
-Chapter 3 (the impact token) and chapter 4 (the data for organizations) are not written yet.
+Chapter 4 (the data for organizations) is not written yet.
