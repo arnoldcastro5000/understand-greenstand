@@ -25,7 +25,10 @@ Change it directly in its file.
 The capture journey is generated from [`capture-journey.json`](./capture-journey.json). Each
 chapter has a text copy (`docs/capture-journey.md` for chapter 1, `docs/capture-journey-<id>.md`
 for a later chapter) and an illustrated page on the Pages site. To change them, change the data
-file, then run `node .github/scripts/build-capture-journey.mjs`.
+file, then run `node .github/scripts/build-capture-journey.mjs`. The note of a stage can end with
+one link: `seeChapter` (the id of another chapter) or `seeLink` (a public page, for a claim that no
+file of a repo holds). `issues` cites an open public issue for a sentence of the story. The prose
+of the page uses the curly apostrophe (’); the check refuses a straight one there.
 
 ## Change the docs
 
@@ -63,9 +66,10 @@ file, then run `node .github/scripts/build-capture-journey.mjs`.
    GITHUB_TOKEN="$(gh auth token)" node .github/scripts/build-capture-journey.mjs --evidence
    ```
 
-   Five drawings of the capture journey are in the site look: `bundle-chain.svg`, `reward.svg`,
-   `map-pins.svg`, `map-clusters.svg`, and `tree-page.svg`. Each holds a small copy of the
-   Archivo font with only the characters of its words. If you change their words, also run
+   Nine drawings of the capture journey are in the site look: `bundle-chain.svg` and
+   `reward.svg` (chapter 1), `map-pins.svg`, `map-clusters.svg`, and `tree-page.svg` (chapter 2),
+   and `no-token.svg`, `token-mint.svg`, `token-transfer.svg`, and `token-page.svg` (chapter 3).
+   Each holds a small copy of the Archivo font with only the characters of its words. If you change their words, also run
    `.github/scripts/subset-drawing-font.py`. Its first lines tell you how to get the font file and
    fontTools. `node .github/scripts/build-capture-journey.mjs` gives each drawing the site
    colors.

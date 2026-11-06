@@ -7,17 +7,24 @@
 import { plural } from "./estate.mjs";
 import { CODE_CHIP, CONTENT_COLUMN as COLUMN, READING_COLUMN, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle } from "./site-html.mjs";
 
-// The icons of the stages: the inside of an SVG with the view box 0 0 48 48, drawn with lines.
+// The icons of the stages: the inside of an SVG with the view box 0 0 48 48, drawn with lines, with
+// square corners (DESIGN.md): no rect has rx. An ellipse keeps rx and ry: they are its radii.
 export const ICONS = {
-  phone: '<rect x="14" y="4" width="20" height="40" rx="4"/><path d="M21 38h6"/>',
-  upload: '<rect x="14" y="4" width="20" height="40" rx="4"/><path d="M24 30V14M18 20l6-6 6 6"/>',
-  chain: '<rect x="4" y="18" width="12" height="12" rx="2"/><rect x="18" y="18" width="12" height="12" rx="2"/><rect x="32" y="18" width="12" height="12" rx="2"/><path d="M16 24h2M30 24h2"/>',
+  phone: '<rect x="14" y="4" width="20" height="40"/><path d="M21 38h6"/>',
+  upload: '<rect x="14" y="4" width="20" height="40"/><path d="M24 30V14M18 20l6-6 6 6"/>',
+  chain: '<rect x="4" y="18" width="12" height="12"/><rect x="18" y="18" width="12" height="12"/><rect x="32" y="18" width="12" height="12"/><path d="M16 24h2M30 24h2"/>',
   record: '<ellipse cx="24" cy="12" rx="14" ry="5"/><path d="M10 12v22c0 3 6 5 14 5s14-2 14-5V12M10 23c0 3 6 5 14 5s14-2 14-5"/>',
-  verify: '<rect x="8" y="8" width="32" height="32" rx="6"/><path d="M16 24l6 6 11-12"/>',
+  verify: '<rect x="8" y="8" width="32" height="32"/><path d="M16 24l6 6 11-12"/>',
   reward: '<circle cx="24" cy="24" r="16"/><path d="M24 14v20M29 18c-1-2-3-3-5-3-3 0-5 2-5 4s2 3 5 4 5 2 5 4-2 4-5 4c-2 0-4-1-5-3"/>',
   pin: '<path d="M24 43S11 30 11 19a13 13 0 0 1 26 0c0 11-13 24-13 24z"/><circle cx="24" cy="19" r="5"/>',
   cluster: '<circle cx="24" cy="24" r="17"/><circle cx="18" cy="20" r="2.5"/><circle cx="29" cy="19" r="2.5"/><circle cx="24" cy="30" r="2.5"/>',
-  page: '<rect x="9" y="5" width="30" height="38" rx="2"/><rect x="15" y="11" width="18" height="13"/><path d="M15 31h18M15 37h11"/>',
+  page: '<rect x="9" y="5" width="30" height="38"/><rect x="15" y="11" width="18" height="13"/><path d="M15 31h18M15 37h11"/>',
+  // A stamp over its print: the job that makes the tokens.
+  mint: '<circle cx="24" cy="9" r="4"/><path d="M21 13v7M27 13v7"/><rect x="10" y="20" width="28" height="9"/><path d="M8 38h32"/>',
+  // Two wallets, and an arrow each way between them.
+  transfer: '<rect x="4" y="10" width="13" height="28"/><rect x="31" y="10" width="13" height="28"/><path d="M20 19h8M25 16l3 3-3 3M28 29h-8M23 26l-3 3 3 3"/>',
+  // A tag with a hole and 2 label lines, not a coin: a token is not money.
+  token: '<path d="M6 24l10-12h26v24H16z"/><circle cx="15" cy="24" r="2"/><path d="M24 20h12M24 28h8"/>',
 };
 
 // The sentence on the chapters: on chapter 1 with the list of chapters, and on a later chapter with
@@ -32,6 +39,11 @@ export const FLAGS = {
   broken: { label: "Not working today", class: "broken", issue: true },
 };
 export const NO_ISSUE = "No public issue yet.";
+
+// The sentence at the end of a note that links another page (the "see" of the view: its text, and
+// its target from the text copy and from the page). link turns the text and the see into a link of
+// the output (Markdown or HTML).
+export const seeText = (see, link) => ` See ${link(see.text, see)}.`;
 
 // The credit line of the images that come from other repos: one part for each repo, commit, and
 // license, in the order of the images. format turns a repo, a commit, and a data text into the
@@ -269,7 +281,10 @@ function repoHtml(dev) {
 
 function developersHtml(stage, legend) {
   const items = stage.developers.map((dev) => {
-    const files = dev.files.map((file) => `<li><a href="${esc(file.url)}"><code>${esc(file.name)}</code> ${file.lines}</a>: ${htmlText(file.what)}</li>`);
+    const files = [
+      ...dev.files.map((file) => `<li><a href="${esc(file.url)}"><code>${esc(file.name)}</code> ${file.lines}</a>: ${htmlText(file.what)}</li>`),
+      ...dev.issues.map((issue) => `<li><a href="${esc(issue.url)}">${issue.label}</a>: ${htmlText(issue.what)}</li>`),
+    ];
     return `<li>${repoHtml(dev)}${dev.what ? `: ${htmlText(dev.what)}` : ""}${files.length ? `\n<ul>\n${files.join("\n")}\n</ul>` : ""}</li>`;
   });
   return [`<details class="dev"><summary>For developers</summary>`, `<p class="muted">${htmlText(legend.dev)}</p>`, "<ul>", ...items, "</ul>", "</details>"].join("\n");
@@ -285,7 +300,7 @@ function stageHtml(stage, i, view) {
     `<h2>${titleText(stage.title)}</h2>`,
     ...stage.story.map((p) => `<p>${htmlText(p)}</p>`),
     ...stage.flags.map(flagHtml),
-    ...(stage.note ? [`<p class="note">${htmlText(stage.note)}</p>`] : []),
+    ...(stage.note ? [`<p class="note">${htmlText(stage.note)}${stage.see ? seeText(stage.see, (text, see) => `<a href="${see.page}">${htmlText(text)}</a>`) : ""}</p>`] : []),
     developersHtml(stage, view.legend),
     "</div>",
     "</section>",

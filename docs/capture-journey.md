@@ -2,13 +2,13 @@
 
 # The journey of a capture
 
-**Chapter 1: From the grower's phone to the grower's reward**
+**Chapter 1: From the grower’s phone to the grower’s reward**
 
 This is the text copy of the page for GitHub. The illustrated page is on the [Pages site](https://arnoldcastro5000.github.io/understand-greenstand/capture-journey.html).
 
 This page follows one capture through the Greenstand system. A capture is one photo of a tree, with its GPS point and some data. A grower takes it with the Treetracker app.
 
-Chapter 1 follows the capture from the grower's phone to the grower's reward. This page says "grower". Older code and tables say "planter" for the same person.
+Chapter 1 follows the capture from the grower’s phone to the grower’s reward. This page says "grower". Older code and tables say "planter" for the same person.
 
 How to read this page:
 
@@ -137,21 +137,20 @@ The admin approves the photo, with the type of planting, the age of the tree, an
 
 <p><img src="capture-journey/reward.svg" width="360" alt="A drawing of the reward steps"><br><sub>A drawing of the reward steps</sub></p>
 
-In the code, one organization has a payment rule. Every day, an automatic job counts the approved captures of each of its growers. It pays in steps of 100 captures: 100 captures give 120,000 leones, and 1,000 captures or more give the maximum, 1,200,000 leones. The job writes an "earning" with the status "calculated".
+In the code, one organization has a payment rule. An automatic job counts the approved captures of each of its growers. It pays in steps of 100 captures: 100 captures give 120,000 leones, and 1,000 captures or more give the maximum, 1,200,000 leones. The job writes an "earning" with the status "calculated".
 
-Greenstand's guide to earnings and payments gives the next steps for a typical case. In that case, a funder does them. A funder is the person or the organization that pays for the captures. The funder opens the Earnings page of the admin panel and downloads the list. Then the funder pays each grower outside the Greenstand system. Last, the funder logs the payments. The funder logs one earning in its detail panel, or many earnings with a file upload on the Payments page. Each logged earning becomes "paid". The guide says that the growers can see the payment data. But the Treetracker app and the wallet app have no earnings screen. So the grower learns about the money from the payment itself.
+Greenstand’s guide to earnings and payments gives the next steps for a typical case. In that case, a funder does them. A funder is the person or the organization that pays for the captures. The funder opens the Earnings page of the admin panel and downloads the list. Then the funder pays each grower outside the Greenstand system. Last, the funder logs the payments. The funder logs one earning in its detail panel, or many earnings with a file upload on the Payments page. Each logged earning becomes "paid". The guide says that the growers can see the payment data. But the Treetracker app and the wallet app have no earnings screen. So the grower learns about the money from the payment itself.
 
 > **Best guess:** The organization is FCC, which we think is Freetown City Council. The job and the payments still run today. (The code shows no change since 2023.)
 
 > **Not working today:** The wallet app tells each new user "we will gift you 1 token". The token does not arrive today. See [treetracker-wallet-app #914](https://github.com/Greenstand/treetracker-wallet-app/issues/914).
 
-Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture of an organization's growers into a wallet that the operator names. Greenstand's white paper describes a goal, not the code of today. In that goal, each capture becomes a token in the wallet of the entity that is responsible for the tree. When claims conflict, the grower comes first. The token also holds a proof of the payment to the grower. The token job of today does not use the wallet of the grower, and no token holds payment data. Chapter 3, the impact token, will tell that story.
+Tokens are not a grower reward today. An operator can start a job that puts one token for each approved capture of an organization’s growers into a wallet that the operator names. Greenstand’s white paper describes a goal, not the code of today. In that goal, each capture becomes a token in the wallet of the entity that is responsible for the tree. When claims conflict, the grower comes first. The token also holds a proof of the payment to the grower. The token job of today does not use the wallet of the grower, and no token holds payment data. See [chapter 3: The capture as an impact token](capture-journey-token.md).
 
 <details>
 <summary>For developers</summary>
 
 - treetracker-airflow-dags ([viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-airflow-dags/), [onboarding guide](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-airflow-dags/onboarding.html))
-  - [`contracts-earnings-fcc.py` lines 41 to 48](https://github.com/Greenstand/treetracker-airflow-dags/blob/6ede7fe/contracts-earnings-fcc.py#L41-L48): runs the earnings job once a day
   - [`contracts_earnings_fcc.py` lines 71 to 133](https://github.com/Greenstand/treetracker-airflow-dags/blob/6ede7fe/lib/contracts_earnings_fcc.py#L71-L133): computes and writes the earnings
 - treetracker-admin-client ([viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-admin-client/), [onboarding guide](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-admin-client/onboarding.html))
   - [`EarningsTable.js` lines 252 to 253](https://github.com/Greenstand/treetracker-admin-client/blob/c2076e4/src/components/EarningsTable/EarningsTable.js#L252-L253): the download of the Earnings page
@@ -174,9 +173,10 @@ Tokens are not a grower reward today. An operator can start a job that puts one 
 
 Chapters 2 to 4 follow the same capture on different paths. Their numbers give only the reading order.
 
-- Chapter 1: From the grower's phone to the grower's reward (this page)
+- Chapter 1: From the grower’s phone to the grower’s reward (this page)
 - [Chapter 2: The capture on the public web map](capture-journey-web-map.md)
+- [Chapter 3: The capture as an impact token](capture-journey-token.md)
 
-Chapter 3 (the impact token) and chapter 4 (the data for organizations) are not written yet.
+Chapter 4 (the data for organizations) is not written yet.
 
 Image credits: 4 images from [treetracker-android](https://github.com/Greenstand/treetracker-android) at commit [`9b7fa40`](https://github.com/Greenstand/treetracker-android/commit/9b7fa40) (license AGPL-3.0). The other images are from this docs repo.

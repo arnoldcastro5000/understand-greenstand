@@ -31,7 +31,7 @@ import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { CAPTURE_JOURNEY_DATA as DATA, CAPTURE_JOURNEY_IMAGES as IMAGES, CHAPTER_COPY, CHAPTER_ID, CHAPTER_PAGE, EM_DASH, answerStatus, chapterFiles, citedLines, githubApi, isObject, isRepoPath, lineAnchor, loadEstate, missingNames, parseJson, parseLines, plural, readDocsFile, root, urlPath, wordList } from "./estate.mjs";
-import { CHAPTERS_SENTENCE, FLAGS, ICONS, NO_ISSUE, creditText, pageHtml } from "./capture-journey-page.mjs";
+import { CHAPTERS_SENTENCE, FLAGS, ICONS, NO_ISSUE, creditText, pageHtml, seeText } from "./capture-journey-page.mjs";
 import { slugger } from "./slug.mjs";
 import { SITE_LOOK_FILES, undefinedProperties } from "./site-html.mjs";
 import { checkSubsetScript, drawingCheck } from "./site-drawings.mjs";
@@ -64,12 +64,14 @@ const FIELDS = {
   legend: ["guess", "broken", "dev"],
   chapter: ["id", "subtitle", "start", "intro", "stages"],
   start: ["chapter", "stage"],
-  stage: ["id", "short", "title", "icon", "story", "flags", "note", "images", "evidence", "moreRepos"],
+  stage: ["id", "short", "title", "icon", "story", "flags", "note", "seeChapter", "seeLink", "images", "evidence", "issues", "moreRepos"],
   guess: ["kind", "text", "question"],
   broken: ["kind", "text", "issue"],
   image: ["file", "frame", "alt", "caption", "source"],
   source: ["repo", "path", "commit", "license"],
   evidence: ["repo", "path", "lines", "commit", "names", "what"],
+  issue: ["repo", "number", "what"],
+  seeLink: ["text", "url"],
   moreRepo: ["repo", "what"],
 };
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -93,10 +95,13 @@ function imageSize(file) {
 }
 // The size of each image of the data file, read once by validData.
 const sizeOf = new Map();
+// The index of each chapter with a valid id (a later chapter), filled once by validData: the check
+// and the view of "seeChapter" use it.
+const chapterById = new Map();
 
 // The objects of a stage that have their own place in an error ("stage <id>, image 2"), and the
 // lists of plain strings, with the word of one item ("story paragraph 2", "name 1").
-const PLACES = { flags: "flag", images: "image", evidence: "evidence", moreRepos: "more repo" };
+const PLACES = { flags: "flag", images: "image", evidence: "evidence", issues: "issue", moreRepos: "more repo" };
 const ITEMS = { intro: "intro paragraph", story: "story paragraph", names: "name" };
 
 // Check capture-journey.json, and return it only if it is valid. Every error is recorded at once,
@@ -125,6 +130,12 @@ function validData(data) {
     if (typeof value !== "string" || !value.trim()) return fail(where, `${label} must be text that is not empty`);
     if (/^[^\S\r\n]|[^\S\r\n]$/.test(value)) fail(where, `${label} has a space at its start or end`);
   };
+  // The prose of the page (the story, the flags, the note, the intro, the later text, and the
+  // subtitle) uses the curly apostrophe, as the curly quotes of the page. A name, a path, or the
+  // "what" of an evidence entry keeps its own text.
+  const checkProse = (where, label, value) => {
+    if (typeof value === "string" && value.includes("'")) fail(where, `${label} has a straight apostrophe: use ’ (U+2019)`);
+  };
   const checkFields = (where, object, allowed) => {
     for (const key of Object.keys(object)) if (!allowed.includes(key)) fail(where, `unknown field "${key}" (use: ${allowed.join(", ")})`);
   };
@@ -132,7 +143,10 @@ function validData(data) {
     if (!Array.isArray(list) || !list.length || list.length > max) {
       return fail(where, `${label} must be a list of ${max === Infinity ? "1 or more" : `1 or ${max}`} paragraphs`);
     }
-    list.forEach((p, i) => checkText(where, `${label} paragraph ${i + 1}`, p));
+    list.forEach((p, i) => {
+      checkText(where, `${label} paragraph ${i + 1}`, p);
+      checkProse(where, `${label} paragraph ${i + 1}`, p);
+    });
   };
   const checkRepoName = (where, repo) => {
     if (typeof repo !== "string" || !REPO.test(repo)) fail(where, `repo must be a repo name; it is ${shown(repo)}`);
@@ -176,15 +190,35 @@ function validData(data) {
       if (!Object.hasOwn(FLAGS, flag.kind)) return fail(where, `unknown kind ${shown(flag.kind)} (use ${Object.keys(FLAGS).join(" or ")})`);
       checkFields(where, flag, FIELDS[flag.kind]);
       checkText(where, "text", flag.text);
+      checkProse(where, "text", flag.text);
       if (FLAGS[flag.kind].issue) {
         const { issue } = flag;
         const valid = issue === null || (isObject(issue) && Object.keys(issue).length === 2 && typeof issue.repo === "string" && REPO.test(issue.repo) && Number.isInteger(issue.number) && issue.number >= 1);
         if (!valid) fail(where, 'issue must be null (no public issue yet) or { "repo": a repo name, "number": a whole number from 1 }');
       } else if (typeof flag.question !== "string" || !flag.question.trim().endsWith("?")) {
         fail(where, 'a guess needs a question that ends with "?" (the question for the maintainer review)');
-      } else checkText(where, "question", flag.question);
+      } else {
+        checkText(where, "question", flag.question);
+        checkProse(where, "question", flag.question);
+      }
     });
-    if (stage.note !== undefined) checkText(at, "note", stage.note);
+    if (stage.note !== undefined) {
+      checkText(at, "note", stage.note);
+      checkProse(at, "note", stage.note);
+    }
+    // "seeLink": a link at the end of the note to a public page, for a claim that no file of a repo
+    // holds. A note ends with one link at most.
+    if (stage.seeLink !== undefined) {
+      const link = stage.seeLink;
+      if (stage.seeChapter !== undefined) fail(at, "a note ends with one link: use seeChapter or seeLink");
+      if (!isObject(link)) fail(at, `seeLink must be an object with the fields ${FIELDS.seeLink.join(", ")}`);
+      else {
+        checkFields(`${at}, seeLink`, link, FIELDS.seeLink);
+        checkText(`${at}, seeLink`, "text", link.text);
+        if (typeof link.url !== "string" || !/^https:\/\/[^\s"<>]+$/.test(link.url)) fail(`${at}, seeLink`, `url must be an https address; it is ${shown(link.url)}`);
+      }
+      if (stage.note === undefined) fail(at, "seeLink needs a note: the link ends the note");
+    }
 
     // An image with a source comes from another repo (the credit line names it); an image with no
     // source was made for this page.
@@ -240,14 +274,32 @@ function validData(data) {
       else cited.set(key, where);
     });
 
+    // An issue backs a sentence of the story: an open issue of a public repo (--evidence checks it),
+    // linked in "For developers" under its repo.
+    if (stage.issues !== undefined && !Array.isArray(stage.issues)) fail(at, "issues must be a list");
+    const issueAt = new Map(); // "<repo> #<number>" -> its number in the list
+    (Array.isArray(stage.issues) ? stage.issues : []).forEach((issue, j) => {
+      const where = `${at}, issue ${j + 1}`;
+      if (!isObject(issue)) return errors.push(`${DATA}: ${where} must be an object`);
+      checkFields(where, issue, FIELDS.issue);
+      checkRepoName(where, issue.repo);
+      if (!Number.isInteger(issue.number) || issue.number < 1) fail(where, `number must be a whole number from 1; it is ${shown(issue.number)}`);
+      checkText(where, "what", issue.what);
+      const key = `${issue.repo} #${issue.number}`;
+      if (issueAt.has(key)) fail(where, `${key} is also issue ${issueAt.get(key)}`);
+      else issueAt.set(key, j + 1);
+    });
+
     if (stage.moreRepos !== undefined && !Array.isArray(stage.moreRepos)) fail(at, "moreRepos must be a list");
     const evidenceRepos = new Set((Array.isArray(stage.evidence) ? stage.evidence : []).map((entry) => entry?.repo));
+    const issueRepos = new Set((Array.isArray(stage.issues) ? stage.issues : []).map((issue) => issue?.repo));
     const seenMore = new Set();
     (Array.isArray(stage.moreRepos) ? stage.moreRepos : []).forEach((more, j) => {
       const where = `${at}, more repo ${j + 1}`;
       if (!isObject(more)) return errors.push(`${DATA}: ${where} must be an object`);
       checkFields(where, more, FIELDS.moreRepo);
       if (evidenceRepos.has(more.repo)) fail(where, `${more.repo} has an evidence entry on this stage: remove it here`);
+      else if (issueRepos.has(more.repo)) fail(where, `${more.repo} has an issue on this stage: remove it here`);
       else if (seenMore.has(more.repo)) fail(where, `${more.repo} is there twice`);
       else checkRepoName(where, more.repo);
       seenMore.add(more.repo);
@@ -283,7 +335,10 @@ function validData(data) {
     checkFields("legend", data.legend, FIELDS.legend);
     for (const key of FIELDS.legend) checkText("", `legend.${key}`, data.legend[key]);
   }
-  if (data.later !== undefined) checkText("", "later", data.later);
+  if (data.later !== undefined) {
+    checkText("", "later", data.later);
+    checkProse("", "later", data.later);
+  }
   if (!chapters.length) fail("", "chapters must be a list of 1 or more chapters");
 
   // The image directory holds only the images of the data file. A chapter uses each image once; an
@@ -293,6 +348,8 @@ function validData(data) {
   const usedImages = new Set();
   const seenIds = new Set();
   const chapterIds = new Set();
+  // The stages with a "seeChapter" field, checked when every chapter id is known.
+  const seeChapterStages = [];
   // The stage ids of each valid chapter, for the start of a later chapter.
   const stageIds = [];
   chapters.forEach((chapter, c) => {
@@ -310,6 +367,7 @@ function validData(data) {
     } else {
       if (typeof chapter.id !== "string" || !CHAPTER_ID.test(chapter.id)) fail(at, `the id ${shown(chapter.id)} must be lowercase words joined by "-"`);
       else if (chapterIds.has(chapter.id)) fail(at, `the id ${chapter.id} is used twice`);
+      else chapterById.set(chapter.id, c);
       chapterIds.add(chapter.id);
       const { start } = chapter;
       if (!isObject(start)) fail(at, `start must be an object with the fields ${FIELDS.start.join(", ")} (the stage of chapter 1 where this chapter starts)`);
@@ -320,6 +378,7 @@ function validData(data) {
       }
     }
     checkText(at, "subtitle", chapter.subtitle);
+    checkProse(at, "subtitle", chapter.subtitle);
     checkParagraphs(at, "intro", chapter.intro, Infinity);
     const stages = Array.isArray(chapter.stages) ? chapter.stages : [];
     if (!stages.length) fail(at, "stages must be a list of 1 or more stages");
@@ -328,8 +387,16 @@ function validData(data) {
     stages.forEach((stage, i) => {
       if (!isObject(stage)) return errors.push(`${DATA}: ${chapterAt(n)}, stage ${i + 1} must be an object`);
       if (checkStage(stage, stageAt[c][i], cited, imageAt)) stageIds[c].add(stage.id);
+      if (stage.seeChapter !== undefined) seeChapterStages.push({ at: stageAt[c][i], stage, c });
     });
   });
+  // "seeChapter": a link at the end of the note of a stage to another chapter (by its id). Chapter 1
+  // has no id: another chapter links it with its start line.
+  for (const { at, stage, c } of seeChapterStages) {
+    if (stage.note === undefined) fail(at, "seeChapter needs a note: the link ends the note");
+    else if (!chapterById.has(stage.seeChapter)) fail(at, `seeChapter must be the id of another chapter; it is ${shown(stage.seeChapter)}`);
+    else if (chapterById.get(stage.seeChapter) === c) fail(at, "seeChapter names the chapter of this stage: link another chapter");
+  }
   for (const f of entries) {
     if (!f.isFile()) errors.push(`${IMAGES}/${f.name} is a directory: the image directory holds only the image files`);
     else if (!usedImages.has(f.name)) errors.push(`${IMAGES}/${f.name} is in no stage of ${DATA}: add it to a stage, or remove it`);
@@ -379,9 +446,10 @@ const linesText = ({ first, last }) => (first === last ? `line ${first}` : `line
 // The view of a chapter: the data of the chapter, with the links of each repo, file, issue, and
 // image source, and the size of each image. A repo of the estate gets the path of its viewer on the
 // Pages site; a repo outside the estate gets its GitHub link. The developers of a stage are its
-// repos in the order of their first evidence entry, each with its files, then the repos with no
-// cited file. The link text of a file is its name and its lines: unique in the stage, so each link
-// has its own name for a screen reader (one repo can have two entries in one file).
+// repos in the order of their first evidence entry or issue, each with its files and its issues,
+// then the repos with nothing cited. The link text of a file is its name and its lines, and of an
+// issue its number: unique in the stage, so each link has its own name for a screen reader (one
+// repo can have two entries in one file).
 // The chapters part lists every chapter (the links between the pages): it is null when the data
 // file has one chapter and no later text. A later chapter has its start: the stage of an earlier
 // chapter where it starts.
@@ -389,6 +457,14 @@ function viewOf(chapter, c) {
   const repoView = (repo) => (estateRepos.has(repo) ? { repo, site: `${repo}/` } : { repo, github: repoLink(repo) });
   const fileView = (e) => ({ name: e.path.split("/").pop(), lines: linesText(parseLines(e.lines)), url: fileLink(e), what: e.what });
   const filesOf = (k) => chapterFiles(data.chapters[k], k);
+  // The link at the end of a note: its text, and its target from the text copy and from the page.
+  const seeOf = (stage) => {
+    if (stage.seeLink) return { text: stage.seeLink.text, copy: stage.seeLink.url, page: stage.seeLink.url };
+    if (stage.seeChapter === undefined) return null;
+    const k = chapterById.get(stage.seeChapter);
+    const { copy, page } = filesOf(k);
+    return { text: `chapter ${k + 1}: ${data.chapters[k].subtitle}`, copy: copyName(copy), page };
+  };
   const images = chapter.stages.flatMap((s) => s.images ?? []);
   const groups = new Map(); // "<repo> <commit> <license>" -> a group of the credit line
   for (const { source } of images.filter((image) => image.source)) {
@@ -427,15 +503,23 @@ function viewOf(chapter, c) {
       icon: stage.icon,
       story: stage.story,
       note: stage.note,
+      // The link at the end of the note, or null.
+      see: seeOf(stage),
       flags: (stage.flags ?? []).map((flag) => ({
         kind: flag.kind,
         text: flag.text,
         issue: flag.issue && { label: `${flag.issue.repo} #${flag.issue.number}`, url: issueLink(flag.issue) },
       })),
       images: (stage.images ?? []).map((image) => ({ ...image, ...sizeOf.get(image.file) })),
+      // The repos of the evidence entries, then the repos of the issues, each with its files and
+      // its issues; then the repos with nothing cited.
       developers: [
-        ...[...new Set(stage.evidence.map((e) => e.repo))].map((repo) => ({ ...repoView(repo), files: stage.evidence.filter((e) => e.repo === repo).map(fileView) })),
-        ...(stage.moreRepos ?? []).map(({ repo, what }) => ({ ...repoView(repo), what, files: [] })),
+        ...[...new Set([...stage.evidence, ...(stage.issues ?? [])].map((e) => e.repo))].map((repo) => ({
+          ...repoView(repo),
+          files: stage.evidence.filter((e) => e.repo === repo).map(fileView),
+          issues: (stage.issues ?? []).filter((i) => i.repo === repo).map((i) => ({ label: `issue #${i.number}`, url: issueLink(i), what: i.what })),
+        })),
+        ...(stage.moreRepos ?? []).map(({ repo, what }) => ({ ...repoView(repo), what, files: [], issues: [] })),
       ],
     })),
     credits: { groups: [...groups.values()], own: images.some((image) => !image.source) },
@@ -479,6 +563,7 @@ function developersMd(stage) {
   const lines = stage.developers.flatMap((dev) => [
     `- ${repoMd(dev)}${dev.what ? `: ${mdText(dev.what)}` : ""}`,
     ...dev.files.map((file) => `  - [\`${file.name}\` ${file.lines}](${file.url}): ${mdText(file.what)}`),
+    ...dev.issues.map((issue) => `  - [${issue.label}](${issue.url}): ${mdText(issue.what)}`),
   ]);
   return ["<details>", "<summary>For developers</summary>", "", ...lines, "", "</details>"];
 }
@@ -545,7 +630,7 @@ function copyText(view) {
   ];
   view.stages.forEach((stage, i) => {
     out.push(`## ${i + 1}. ${mdText(stage.title)}`, "", ...imagesMd(stage), ...stage.story.flatMap((p) => [mdText(p), ""]), ...flagsMd(stage));
-    if (stage.note) out.push(mdText(stage.note), "");
+    if (stage.note) out.push(`${mdText(stage.note)}${stage.see ? seeText(stage.see, (text, see) => `[${mdText(text)}](${see.copy})`) : ""}`, "");
     out.push(...developersMd(stage), "");
   });
   out.push(...chaptersMd(view));
@@ -646,6 +731,16 @@ async function checkEvidence() {
       }
       counts.names += entry.names.length;
       for (const name of missingNames(cited.text, entry.names)) fail(where, `${name} is not in the cited lines`);
+    }
+    for (const [j, issue] of (stage.issues ?? []).entries()) {
+      const where = `${at}, issue ${j + 1}`;
+      if (!(await publicRepo(where, issue.repo))) continue;
+      counts.issues++;
+      const name = `${issue.repo} #${issue.number}`;
+      const answer = await api.get(`${issue.repo}/issues/${issue.number}`);
+      if (!answer.body) fail(where, `${name} is not found (${answerStatus(answer)})`);
+      else if (answer.body.pull_request) fail(where, `${name} is a pull request, not an issue`);
+      else if (answer.body.state !== "open") fail(where, `${name} is closed: check the story, then remove the issue or its sentence`);
     }
     for (const [j, { repo }] of (stage.moreRepos ?? []).entries()) await publicRepo(`${at}, more repo ${j + 1}`, repo);
   }
