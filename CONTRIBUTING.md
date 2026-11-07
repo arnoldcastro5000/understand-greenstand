@@ -66,9 +66,10 @@ of the page uses the curly apostrophe (’); the check refuses a straight one th
    GITHUB_TOKEN="$(gh auth token)" node .github/scripts/build-capture-journey.mjs --evidence
    ```
 
-   Nine drawings of the capture journey are in the site look: `bundle-chain.svg` and
+   Thirteen drawings of the capture journey are in the site look: `bundle-chain.svg` and
    `reward.svg` (chapter 1), `map-pins.svg`, `map-clusters.svg`, and `tree-page.svg` (chapter 2),
-   and `no-token.svg`, `token-mint.svg`, `token-transfer.svg`, and `token-page.svg` (chapter 3).
+   `no-token.svg`, `token-mint.svg`, `token-transfer.svg`, and `token-page.svg` (chapter 3), and
+   `org-account.svg`, `org-export.svg`, `org-numbers.svg`, and `org-cards.svg` (chapter 4).
    Each holds a small copy of the Archivo font with only the characters of its words. If you change their words, also run
    `.github/scripts/subset-drawing-font.py`. Its first lines tell you how to get the font file and
    fontTools. `node .github/scripts/build-capture-journey.mjs` gives each drawing the site

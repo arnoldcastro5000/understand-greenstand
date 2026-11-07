@@ -25,6 +25,14 @@ export const ICONS = {
   transfer: '<rect x="4" y="10" width="13" height="28"/><rect x="31" y="10" width="13" height="28"/><path d="M20 19h8M25 16l3 3-3 3M28 29h-8M23 26l-3 3 3 3"/>',
   // A tag with a hole and 2 label lines, not a coin: a token is not money.
   token: '<path d="M6 24l10-12h26v24H16z"/><circle cx="15" cy="24" r="2"/><path d="M24 20h12M24 28h8"/>',
+  // A card with a person and 3 lines: the account of a person of an organization.
+  account: '<rect x="5" y="9" width="38" height="30"/><circle cx="16" cy="20" r="4"/><path d="M9 33c1-4 4-6 7-6s6 2 7 6M28 19h9M28 25h9M28 31h5"/>',
+  // A sheet with rows and a column, and an arrow down: a file to download.
+  export: '<rect x="5" y="5" width="25" height="31"/><path d="M5 15h25M5 25h25M15 5v31M39 18v24M33 36l6 6 6-6"/>',
+  // 4 small tiles, each with a number line: the four numbers of the Home page.
+  numbers: '<rect x="6" y="6" width="15" height="15"/><rect x="27" y="6" width="15" height="15"/><rect x="6" y="27" width="15" height="15"/><rect x="27" y="27" width="15" height="15"/><path d="M10 14h7M31 14h7M10 35h7M31 35h7"/>',
+  // A card with a title line and 3 bars: a reporting card.
+  cards: '<rect x="5" y="7" width="38" height="34"/><path d="M11 14h14M14 34V26M22 34V19M30 34V23M37 34h-26"/>',
 };
 
 // The sentence on the chapters: on chapter 1 with the list of chapters, and on a later chapter with

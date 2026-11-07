@@ -21,7 +21,7 @@ svg { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; -
 .head { fill: var(--muted); }
 .nb { fill: var(--ink); }
 .tag { fill: var(--ground); stroke: var(--ink); stroke-width: 1.5; }
-.badge { fill: var(--ground); stroke: var(--muted); stroke-width: 1.5; }
+.inkbox { fill: var(--ground); stroke: var(--ink); stroke-width: 1.5; }
 text { font-family: "Archivo Drawing", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif; text-rendering: geometricPrecision; }
 .t { font-size: 18px; font-weight: 600; fill: var(--ink); }
 .s { font-size: 15.5px; font-weight: 400; fill: var(--muted); }
@@ -34,11 +34,11 @@ text { font-family: "Archivo Drawing", system-ui, -apple-system, "Segoe UI", Rob
 <path class="line" d="M200 174V192"/><path class="head" d="M193 191l7 9 7-9z"/>
 <rect class="card" x="12" y="200" width="376" height="68"/><rect class="nb" x="26" y="219" width="30" height="30"/><text class="num" x="41" y="240" text-anchor="middle">3</text><text class="t" x="68" y="229">One token for each capture</text><text class="s" x="68" y="252">Into the wallet that the operator names</text>
 <path class="line" d="M126 268V286"/><path class="head" d="M119 285l7 9 7-9z"/>
-<rect class="tag" x="12" y="294" width="228" height="100"/>
+<rect class="inkbox" x="12" y="294" width="228" height="100"/>
 <text class="t" x="28" y="322">The named wallet</text>
 <text class="s" x="28" y="344">usually the organization’s</text>
 <path class="tag" d="M28 368l10-12h36v24H38z"/><circle class="lead" cx="38" cy="368" r="2.5"/><path class="tag" d="M98 368l10-12h36v24H108z"/><circle class="lead" cx="108" cy="368" r="2.5"/><path class="tag" d="M168 368l10-12h36v24H178z"/><circle class="lead" cx="178" cy="368" r="2.5"/>
-<rect class="badge" x="252" y="294" width="136" height="100"/>
+<rect class="card" x="252" y="294" width="136" height="100"/>
 <text class="t" x="268" y="322">The grower</text>
 <text class="s" x="268" y="346">gets no token</text>
 </svg>

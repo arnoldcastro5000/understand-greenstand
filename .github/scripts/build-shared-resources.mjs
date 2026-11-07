@@ -19,7 +19,7 @@
 //          set). CI runs it only when shared-resources.json changes.
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { EM_DASH, SHARED_RESOURCES_DATA as DATA, SHARED_RESOURCES_PAGE as PAGE, answerStatus, citedLines, escapeRegExp, expandRepoName, fencedLines, githubApi, isObject, isRepoPath, lineAnchor, loadEstate, missingNames, parseJson, parseLines, plural, readDocsFile, replaceMarked, root, urlPath } from "./estate.mjs";
+import { EM_DASH, SHARED_RESOURCES_DATA as DATA, SHARED_RESOURCES_PAGE as PAGE, answerStatus, citedLines, escapeRegExp, expandRepoName, fencedLines, githubApi, isObject, isRepoPath, lineAnchor, linesLink, loadEstate, missingNames, parseJson, parseLines, plural, readDocsFile, replaceMarked, root } from "./estate.mjs";
 import { slugger } from "./slug.mjs";
 
 const SCRIPT = ".github/scripts/build-shared-resources.mjs";
@@ -141,7 +141,7 @@ function usesTable(resource) {
       const repeats = entries.filter((other) => other.label === e.label).length;
       seen.set(e.label, (seen.get(e.label) ?? 0) + 1);
       const text = repeats > 1 ? `${e.label}&nbsp;${seen.get(e.label)}` : e.label;
-      return `[${text}](https://github.com/${estate.sourceOrg}/${repo}/blob/${data.checkedAt[repo]}/${urlPath(e.path)}${lineAnchor(rangeOf.get(e))})`;
+      return `[${text}](${linesLink(estate.sourceOrg, repo, data.checkedAt[repo], e.path, rangeOf.get(e))})`;
     });
     return `| ${repo} | ${usesOf(resource, repo).map(markdownUse).join(", ")} | ${links.join(", ")} |`;
   });

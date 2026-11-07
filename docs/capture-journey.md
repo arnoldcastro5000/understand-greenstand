@@ -159,11 +159,11 @@ Tokens are not a grower reward today. An operator can start a job that puts one 
 - [treetracker-earnings-api](https://github.com/Greenstand/treetracker-earnings-api) (outside the docs repo)
   - [`Earnings.js` lines 238 to 283](https://github.com/Greenstand/treetracker-earnings-api/blob/7b89333/server/models/Earnings.js#L238-L283): marks an earning as paid
 - [greenstand-documentation](https://github.com/Greenstand/greenstand-documentation) (outside the docs repo)
-  - [`earningshow.md` line 14](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/user-guides/earningshow.md#L14): Greenstand's guide: the funder downloads the earnings, pays the growers, and logs the payments
-  - [`white-paper.md` line 13](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L13): the white paper: the model is a goal
-  - [`white-paper.md` line 114](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L114): the white paper: a token goes into the wallet of the responsible entity
-  - [`white-paper.md` line 214](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L214): the white paper: the grower comes first
-  - [`white-paper.md` line 290](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L290): the white paper: a token holds a proof of the payment
+  - [`earningshow.md` line 14](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/user-guides/earningshow.md?plain=1#L14): Greenstand's guide: the funder downloads the earnings, pays the growers, and logs the payments
+  - [`white-paper.md` line 13](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md?plain=1#L13): the white paper: the model is a goal
+  - [`white-paper.md` line 114](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md?plain=1#L114): the white paper: a token goes into the wallet of the responsible entity
+  - [`white-paper.md` line 214](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md?plain=1#L214): the white paper: the grower comes first
+  - [`white-paper.md` line 290](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md?plain=1#L290): the white paper: a token holds a proof of the payment
 - treetracker-wallet-app ([viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-wallet-app/), [onboarding guide](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-wallet-app/onboarding.html))
   - [`page.tsx` line 82](https://github.com/Greenstand/treetracker-wallet-app/blob/2c11089/apps/web/src/app/%28protected%29/wallet/page.tsx#L82): the gift message
 
@@ -176,7 +176,6 @@ Chapters 2 to 4 follow the same capture on different paths. Their numbers give o
 - Chapter 1: From the grower’s phone to the grower’s reward (this page)
 - [Chapter 2: The capture on the public web map](capture-journey-web-map.md)
 - [Chapter 3: The capture as an impact token](capture-journey-token.md)
-
-Chapter 4 (the data for organizations) is not written yet.
+- [Chapter 4: The capture in the data for organizations](capture-journey-organizations.md)
 
 Image credits: 4 images from [treetracker-android](https://github.com/Greenstand/treetracker-android) at commit [`9b7fa40`](https://github.com/Greenstand/treetracker-android/commit/9b7fa40) (license AGPL-3.0). The other images are from this docs repo.

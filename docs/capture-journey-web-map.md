@@ -46,7 +46,7 @@ Greenstand’s product page says that the web map shows verified trees. Today, t
 - [treetracker-web-map-core](https://github.com/Greenstand/treetracker-web-map-core) (outside the docs repo)
   - [`Map.js` lines 259 to 262](https://github.com/Greenstand/treetracker-web-map-core/blob/506a5db/src/Map.js#L259-L262): the map asks for the tiles
 - [greenstand-documentation](https://github.com/Greenstand/greenstand-documentation) (outside the docs repo)
-  - [`products.md` line 18](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/products.md#L18): the product page says "verified trees"
+  - [`products.md` line 18](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/products.md?plain=1#L18): the product page says "verified trees"
 - treetracker-tile-server ([viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-tile-server/), [onboarding guide](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-tile-server/onboarding.html)): draws the tiles of the map from the database
 
 </details>
@@ -126,5 +126,4 @@ The web map reads only the older tree records. The job of chapter 1 that copies 
 - [Chapter 1: From the grower’s phone to the grower’s reward](capture-journey.md)
 - Chapter 2: The capture on the public web map (this page)
 - [Chapter 3: The capture as an impact token](capture-journey-token.md)
-
-Chapter 4 (the data for organizations) is not written yet.
+- [Chapter 4: The capture in the data for organizations](capture-journey-organizations.md)
