@@ -65,6 +65,9 @@ logs the payments through an earnings API outside the estate.
 For the story of one capture, from the grower's phone to the grower's reward, with pictures, see
 [The journey of a capture](./docs/capture-journey.md).
 
+For the data that an organization gets from its captures, with pictures, see
+[chapter 4 of the capture journey](./docs/capture-journey-organizations.md).
+
 ## Web map
 
 The web map (treetracker-web-map-client) reads trees, wallets, and tokens from

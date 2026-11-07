@@ -373,7 +373,109 @@
           ]
         }
       ]
+    },
+    {
+      "id": "organizations",
+      "subtitle": "The capture in the data for organizations",
+      "start": {"chapter": 1, "stage": "the-record"},
+      "intro": [
+        "This chapter follows one capture into the data that an organization gets. A grower works with an organization, for example a group that plants trees. The captures of the grower belong to that organization.",
+        "Greenstand sends no report to an organization. A person of the organization signs in to the admin panel to see the data. One organization gets cards with more numbers."
+      ],
+      "stages": [
+        {
+          "id": "the-account",
+          "short": "The account",
+          "title": "The account: a person of the organization signs in",
+          "icon": "account",
+          "story": [
+            "A Greenstand maintainer gives a person of the organization an account in the admin panel. The role of the account names the organization.",
+            "When the person signs in, the admin panel asks only for the data of that organization. So the person sees the captures and the growers of that organization."
+          ],
+          "flags": [
+            {"kind": "guess", "text": "Some organizations have such accounts today, and their people use the Captures page and the export.", "question": "Which organizations have admin panel accounts with an organization role today? Do their people use the Captures page and the export?"}
+          ],
+          "images": [
+            {"file": "org-account.svg", "alt": "A drawing of an organization account with made-up data. A person of Example Org signs in. The admin panel asks only for the captures and the growers of Example Org", "caption": "A drawing of an organization account"}
+          ],
+          "evidence": [
+            {"repo": "treetracker-admin-api", "path": "src/js/auth.js", "lines": "141-143", "commit": "351db46", "names": ["policyObj.organization", "compositePolicy.organization"], "what": "the role of an account can name an organization"},
+            {"repo": "treetracker-admin-client", "path": "src/api/apiUtils.js", "lines": "30-33", "commit": "c2076e4", "names": ["getOrganization", "limiting organization access"], "what": "the admin panel asks for the data of the organization of the account"},
+            {"repo": "treetracker-admin-client", "path": "src/context/CapturesContext.js", "lines": "58-61", "commit": "c2076e4", "names": ["getOrganization", "trees"], "what": "the admin panel asks for the captures of the organization of the account"},
+            {"repo": "treetracker-admin-client", "path": "src/api/growers.js", "lines": "45-47", "commit": "c2076e4", "names": ["getOrganization", "planter"], "what": "the admin panel asks for the growers of the organization of the account"}
+          ]
+        },
+        {
+          "id": "the-export",
+          "short": "The export",
+          "title": "The export: the person downloads a spreadsheet",
+          "icon": "export",
+          "story": [
+            "On the Captures page, the person sees the captures of the organization. By default, the list shows the captures that no admin approved yet and the captures that an admin approved. A filter can make the list smaller.",
+            "The button “Export Captures” opens a dialog. The person picks the columns, and the admin panel downloads a spreadsheet file with one row for each capture. The file holds up to 20,000 captures."
+          ],
+          "note": "Greenstand’s product page says that the web map and the admin panel show the trees on a map. An organization can then confirm the place and the health of each tree. The admin panel of today shows the data in a list, in numbers, and in a file. The public web map shows the trees on a map.",
+          "seeChapter": "web-map",
+          "images": [
+            {"file": "org-export.svg", "alt": "A drawing of the export: the Captures page with made-up captures, and the Export Captures dialog with a list of columns to pick", "caption": "A drawing of the export"}
+          ],
+          "evidence": [
+            {"repo": "treetracker-admin-client", "path": "src/components/Captures/CaptureTable.js", "lines": "260-270", "commit": "c2076e4", "names": ["Export Captures", "ExportCaptures"], "what": "the Captures page has the Export Captures button and dialog"},
+            {"repo": "treetracker-admin-client", "path": "src/context/CapturesContext.js", "lines": "38-45", "commit": "c2076e4", "names": ["verifyStatus", "approved: true", "approved: false"], "what": "the list shows the captures that wait and the captures that are approved"},
+            {"repo": "treetracker-admin-client", "path": "src/context/CapturesContext.js", "lines": "99-110", "commit": "c2076e4", "names": ["getAllCaptures", "limit: 20000"], "what": "the export takes up to 20,000 captures"},
+            {"repo": "greenstand-documentation", "path": "general/overview/introduction/products.md", "lines": "12", "commit": "6f415de", "names": ["Admin Panel", "confirm placement"], "what": "Greenstand’s product page: the admin panel shows the trees on a map"}
+          ]
+        },
+        {
+          "id": "the-home-numbers",
+          "short": "The numbers",
+          "title": "The Home page: four numbers",
+          "icon": "numbers",
+          "story": [
+            "The Home page of the admin panel shows four numbers for the organization. They are “Total Captures”, “Untagged Captures” (the captures that no admin approved yet), “Verified Captures”, and “Growers”.",
+            "The numbers count the captures and the growers that the admin panel asks for (stage 1). When an admin approves a capture, the capture moves from “Untagged Captures” to “Verified Captures”."
+          ],
+          "note": "Greenstand does not send these numbers to the organization: no report, no email, and no message. A person must sign in to see them. The impact tokens of the organization are in its wallet.",
+          "seeChapter": "token",
+          "images": [
+            {"file": "org-numbers.svg", "alt": "A drawing of the Home page with made-up values: Total Captures, Untagged Captures, Verified Captures, and Growers. An arrow goes from Untagged Captures to Verified Captures", "caption": "A drawing of the four numbers"}
+          ],
+          "evidence": [
+            {"repo": "treetracker-admin-client", "path": "src/components/DashStat.container.js", "lines": "37-66", "commit": "c2076e4", "names": ["Total Captures", "Untagged Captures", "approved: false"], "what": "the numbers of all captures and of the captures that wait"},
+            {"repo": "treetracker-admin-client", "path": "src/components/DashStat.container.js", "lines": "95-122", "commit": "c2076e4", "names": ["Verified Captures", "Growers"], "what": "the numbers of the verified captures and of the growers"},
+            {"repo": "treetracker-admin-client", "path": "src/api/treeTrackerApi.js", "lines": "122-124", "commit": "c2076e4", "names": ["getCaptureCount", "getOrganization"], "what": "the admin panel asks for the counts of the organization of the account"}
+          ]
+        },
+        {
+          "id": "the-reporting-cards",
+          "short": "The reporting cards",
+          "title": "The reporting cards: one organization sees more",
+          "icon": "cards",
+          "story": [
+            "One organization, Freetown City Council, sees reporting cards on its Home page. A job copies the captures of the council’s growers into separate tables of the database. A reporting service counts the captures of these tables for the cards.",
+            "The cards show counts and short lists, for example the top growers, the catchment areas, and the trees that survive."
+          ],
+          "flags": [
+            {"kind": "guess", "text": "The copy job and the reporting service run in production today, and the council still uses the cards.", "question": "Do the copy job and the reporting service run in production today? Does the council still use the reporting cards?"}
+          ],
+          "images": [
+            {"file": "org-cards.svg", "alt": "A drawing of the reporting cards with made-up numbers. The top growers card shows each grower as a plain block with only the word Grower, with no name", "caption": "A drawing of the reporting cards"}
+          ],
+          "evidence": [
+            {"repo": "treetracker-airflow-dags", "path": "populate-reports-schema.py", "lines": "98", "commit": "6ede7fe", "names": ["getEntityRelationshipChildren"], "what": "the job takes only the growers of one organization and its member groups"},
+            {"repo": "treetracker-airflow-dags", "path": "populate-reports-schema.py", "lines": "105", "commit": "6ede7fe", "names": ["reporting.capture_denormalized"], "what": "the job writes the copies to separate tables"},
+            {"repo": "treetracker-admin-client", "path": "src/components/Home/Home.js", "lines": "208-221", "commit": "c2076e4", "names": ["ReportingCard10", "ReportingCard12"], "what": "the reporting cards on the Home page"},
+            {"repo": "treetracker-admin-client", "path": "src/components/reportingCards/ReportingCard4.js", "lines": "20-22", "commit": "c2076e4", "names": ["Top Growers"], "what": "the card of the top growers"},
+            {"repo": "treetracker-admin-client", "path": "src/components/reportingCards/ReportingCard7.js", "lines": "20-22", "commit": "c2076e4", "names": ["Catchments"], "what": "the card of the catchment areas"},
+            {"repo": "treetracker-admin-client", "path": "src/components/reportingCards/ReportingCard10.js", "lines": "20-22", "commit": "c2076e4", "names": ["Surviving Trees"], "what": "the card of the trees that survive"},
+            {"repo": "greenstand-documentation", "path": "admin-panel/development/admin-panel/freetown-phase-2-admin-panel/overview-and-requirements.md", "lines": "9", "commit": "6f415de", "names": ["Freetown City Council"], "what": "a Greenstand design page names Freetown City Council"},
+            {"repo": "treetracker-reporting", "path": "deployment/overlays/production/kustomization.yaml", "lines": "6-7", "commit": "6b5f2e8", "names": ["greenstand/treetracker-reporting", "1.10.8"], "what": "the production setup of the reporting service"}
+          ],
+          "issues": [
+            {"repo": "treetracker-admin-client", "number": 654, "what": "asks for the reporting cards for all organizations"}
+          ]
+        }
+      ]
     }
-  ],
-  "later": "Chapter 4 (the data for organizations) is not written yet."
+  ]
 }

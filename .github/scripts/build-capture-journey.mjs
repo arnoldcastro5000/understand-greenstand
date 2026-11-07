@@ -30,7 +30,7 @@
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { CAPTURE_JOURNEY_DATA as DATA, CAPTURE_JOURNEY_IMAGES as IMAGES, CHAPTER_COPY, CHAPTER_ID, CHAPTER_PAGE, EM_DASH, answerStatus, chapterFiles, citedLines, githubApi, isObject, isRepoPath, lineAnchor, loadEstate, missingNames, parseJson, parseLines, plural, readDocsFile, root, urlPath, wordList } from "./estate.mjs";
+import { CAPTURE_JOURNEY_DATA as DATA, CAPTURE_JOURNEY_IMAGES as IMAGES, CHAPTER_COPY, CHAPTER_ID, CHAPTER_PAGE, EM_DASH, answerStatus, chapterFiles, citedLines, githubApi, isObject, isRepoPath, lineAnchor, linesLink, loadEstate, missingNames, parseJson, parseLines, plural, readDocsFile, root, urlPath, wordList } from "./estate.mjs";
 import { CHAPTERS_SENTENCE, FLAGS, ICONS, NO_ISSUE, creditText, pageHtml, seeText } from "./capture-journey-page.mjs";
 import { slugger } from "./slug.mjs";
 import { SITE_LOOK_FILES, undefinedProperties } from "./site-html.mjs";
@@ -437,7 +437,7 @@ const staleErrors = mode === "check" ? stale.map((d) => `${d.at}: the site color
 
 // The directory of the images, as a relative path from the copy and from the page.
 const imageDir = IMAGES.split("/").pop();
-const fileLink = (e) => `https://github.com/${estate.sourceOrg}/${e.repo}/blob/${e.commit}/${urlPath(e.path)}${lineAnchor(parseLines(e.lines))}`;
+const fileLink = (e) => linesLink(estate.sourceOrg, e.repo, e.commit, e.path, parseLines(e.lines));
 const repoLink = (repo) => `https://github.com/${estate.sourceOrg}/${repo}`;
 const issueLink = ({ repo, number }) => `https://github.com/${estate.sourceOrg}/${repo}/issues/${number}`;
 const commitLink = (repo, commit) => `https://github.com/${estate.sourceOrg}/${repo}/commit/${commit}`;

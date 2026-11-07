@@ -72,9 +72,9 @@ Greenstand’s white paper describes a goal. In that goal, a capture holds its f
 - treetracker-field-data ([viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-field-data/), [onboarding guide](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-field-data/onboarding.html))
   - [`SessionModel.js` lines 13 to 14](https://github.com/Greenstand/treetracker-field-data/blob/8ffb53c/server/models/SessionModel.js#L13-L14): each session of the app has a target wallet
 - [greenstand-documentation](https://github.com/Greenstand/greenstand-documentation) (outside the docs repo)
-  - [`white-paper.md` line 204](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L204): the white paper: when a token is made
-  - [`white-paper.md` lines 208 to 210](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L208-L210): the white paper: the first wallet comes from the capture
-  - [`white-paper.md` line 214](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L214): the white paper: the grower comes first
+  - [`white-paper.md` line 204](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md?plain=1#L204): the white paper: when a token is made
+  - [`white-paper.md` lines 208 to 210](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md?plain=1#L208-L210): the white paper: the first wallet comes from the capture
+  - [`white-paper.md` line 214](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md?plain=1#L214): the white paper: the grower comes first
 
 </details>
 
@@ -105,8 +105,8 @@ The white paper describes five token states and trade on a blockchain. The code 
   - [`page.tsx` lines 68 to 80](https://github.com/Greenstand/treetracker-wallet-app/blob/a7ea1cd/apps/web/src/app/%28protected%29/transfers/page.tsx#L68-L80): the wallet app accepts a transfer
   - [`page.tsx` lines 138 to 152](https://github.com/Greenstand/treetracker-wallet-app/blob/a7ea1cd/apps/web/src/app/%28protected%29/send/page.tsx#L138-L152): the wallet app makes a share link with a QR code
 - [greenstand-documentation](https://github.com/Greenstand/greenstand-documentation) (outside the docs repo)
-  - [`white-paper.md` line 157](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L157): the white paper: five token states
-  - [`white-paper.md` line 251](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L251): the white paper: trade on a blockchain
+  - [`white-paper.md` line 157](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md?plain=1#L157): the white paper: five token states
+  - [`white-paper.md` line 251](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md?plain=1#L251): the white paper: trade on a blockchain
 
 </details>
 
@@ -131,9 +131,9 @@ Greenstand’s product page says that investors and consumers can buy, sell, and
   - [`[tokenid].js` lines 578 to 586](https://github.com/Greenstand/treetracker-web-map-client/blob/1529888/src/pages/tokens/%5Btokenid%5D.js#L578-L586): the timeline of the transfers
   - [`[walletid].js` lines 312 to 313](https://github.com/Greenstand/treetracker-web-map-client/blob/1529888/src/pages/wallets/%5Bwalletid%5D.js#L312-L313): the wallet page counts the tokens
 - [greenstand-documentation](https://github.com/Greenstand/greenstand-documentation) (outside the docs repo)
-  - [`products.md` line 20](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/products.md#L20): the product page: buy, sell, and pay the grower
-  - [`white-paper.md` line 122](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md#L122): the white paper: a token has a value
-  - [`README.md` line 15](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/README.md#L15): the model page links the business model, which names the token fee
+  - [`products.md` line 20](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/products.md?plain=1#L20): the product page: buy, sell, and pay the grower
+  - [`white-paper.md` line 122](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/white-paper.md?plain=1#L122): the white paper: a token has a value
+  - [`README.md` line 15](https://github.com/Greenstand/greenstand-documentation/blob/6f415de/docs/introduction/the-model/README.md?plain=1#L15): the model page links the business model, which names the token fee
 - treetracker-query-api ([viewer](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-query-api/), [onboarding guide](https://arnoldcastro5000.github.io/understand-greenstand/treetracker-query-api/onboarding.html)): gives the data of the token page and the wallet page
 
 </details>
@@ -143,5 +143,4 @@ Greenstand’s product page says that investors and consumers can buy, sell, and
 - [Chapter 1: From the grower’s phone to the grower’s reward](capture-journey.md)
 - [Chapter 2: The capture on the public web map](capture-journey-web-map.md)
 - Chapter 3: The capture as an impact token (this page)
-
-Chapter 4 (the data for organizations) is not written yet.
+- [Chapter 4: The capture in the data for organizations](capture-journey-organizations.md)

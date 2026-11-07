@@ -20,8 +20,6 @@ svg { --ground: #f3f5f0; --surface: #e8ece5; --ink: #1b2420; --muted: #56625a; -
 .line { fill: none; stroke: var(--muted); stroke-width: 2; }
 .head { fill: var(--muted); }
 .nb { fill: var(--ink); }
-.icon { fill: var(--ground); stroke: var(--muted); stroke-width: 1.5; }
-.mark { stroke: var(--muted); stroke-width: 2; }
 text { font-family: "Archivo Drawing", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif; text-rendering: geometricPrecision; }
 .t { font-size: 18px; font-weight: 600; fill: var(--ink); }
 .s { font-size: 15.5px; font-weight: 400; fill: var(--muted); }

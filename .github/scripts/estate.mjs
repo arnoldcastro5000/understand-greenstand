@@ -73,6 +73,12 @@ export function parseLines(lines) {
 }
 // The line anchor of a GitHub file link: #L7 or #L3-L5.
 export const lineAnchor = ({ first, last }) => (first === last ? `#L${first}` : `#L${first}-L${last}`);
+// The files that GitHub renders (github/markup): GitHub shows them in a Preview tab, where a line
+// anchor marks no line. ?plain=1 opens the code view, which marks the lines.
+const RENDERED_FILE = /\.(md|markdown|mdown|mkdn|textile|rdoc|org|creole|mediawiki|wiki|rst|asciidoc|adoc|asc|pod)$/i;
+// The GitHub link to the cited lines of a file at a commit, for a reader: the code view of a
+// rendered file, and the line anchor.
+export const linesLink = (owner, repo, ref, path, range) => `https://github.com/${owner}/${repo}/blob/${ref}/${urlPath(path)}${RENDERED_FILE.test(path) ? "?plain=1" : ""}${lineAnchor(range)}`;
 
 // The GitHub API of the evidence checks (build-shared-resources.mjs and
 // build-capture-journey.mjs), for the repos of one owner: each request once. get(path, accept)
@@ -102,9 +108,10 @@ export function githubApi(owner, token) {
 // The status of an answer with no body, for an error: "HTTP 404", or "no answer: <error>".
 export const answerStatus = (answer) => (answer.status === null ? `no answer: ${answer.error}` : `HTTP ${answer.status}`);
 // The cited lines of a file: { text } with the lines, or { count } (the lines of the file) when the
-// file is shorter than the range. CRLF counts as one line end.
+// file is shorter than the range. The lines are the lines that GitHub numbers, because a page links
+// them as #L<n>: CRLF counts as one line end, and a lone CR does not end a line.
 export function citedLines(fileText, { first, last }) {
-  const lines = fileText.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n");
+  const lines = fileText.replace(/\r\n/g, "\n").replace(/\n$/, "").split("\n");
   return last > lines.length ? { count: lines.length } : { text: lines.slice(first - 1, last).join("\n") };
 }
 // The names that a text does not hold, by the name rule (hasWholeName), in their order.
