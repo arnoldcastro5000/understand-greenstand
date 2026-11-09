@@ -30,6 +30,13 @@ one link: `seeChapter` (the id of another chapter) or `seeLink` (a public page, 
 file of a repo holds). `issues` cites an open public issue for a sentence of the story. The prose
 of the page uses the curly apostrophe (’); the check refuses a straight one there.
 
+The roadmap page is generated from [`roadmap.json`](./roadmap.json) and the pinned copy of the
+roadmap, [`sources/Greenstand-Overview/Roadmap.md`](./sources/Greenstand-Overview/Roadmap.md). It
+has a text copy (`docs/roadmap.md`) and a page on the Pages site (`roadmap.html`). The items stay
+word for word: do not edit the pinned copy or the text copy. To place a section in another area,
+change the data file, then run `node .github/scripts/build-roadmap.mjs`. To follow a newer roadmap,
+[move the snapshot](./docs/regenerating.md#move-the-roadmap-snapshot).
+
 ## Change the docs
 
 1. Follow [Set up your clone](./docs/private-names.md#set-up-your-clone) in
@@ -45,6 +52,7 @@ of the page uses the curly apostrophe (’); the check refuses a straight one th
    node .github/scripts/build-ecosystem-maps.mjs --check
    node .github/scripts/build-shared-resources.mjs --check
    node .github/scripts/build-capture-journey.mjs --check
+   node .github/scripts/build-roadmap.mjs --check
    node .github/scripts/build-glossary.mjs --check
    node .github/scripts/build-repo-readmes.mjs --check
    node .github/scripts/build-onboarding.mjs --check
@@ -64,6 +72,14 @@ of the page uses the curly apostrophe (’); the check refuses a straight one th
 
    ```
    GITHUB_TOKEN="$(gh auth token)" node .github/scripts/build-capture-journey.mjs --evidence
+   ```
+
+   If you change `roadmap.json` or the pinned copy of the roadmap, also run the command below. It
+   reads the source file at the snapshot on GitHub and needs `marked@12`
+   (`npm install --no-save marked@12`). The pull request runs it too.
+
+   ```
+   GITHUB_TOKEN="$(gh auth token)" node .github/scripts/build-roadmap.mjs --evidence
    ```
 
    Thirteen drawings of the capture journey are in the site look: `bundle-chain.svg` and

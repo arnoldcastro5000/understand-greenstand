@@ -7,9 +7,11 @@
 // and asks the GitHub compare API what changed since. It also reads each file that
 // shared-resources.json or capture-journey.json cites, on the default branch, and lists the facts
 // that are gone: the shared-resource facts and the capture journey facts. The capture journey can
-// cite a repo outside the estate. Set GITHUB_TOKEN for the 5000/hour API limit: a run makes about
-// 2 requests per source repo, 1 per repo outside the estate, and 1 per cited file, and the
-// anonymous limit is 60/hour.
+// cite a repo outside the estate. It also asks for the last commit that changed the roadmap
+// (roadmap.json: Roadmap.md of Greenstand-Overview) on the default branch, and lists a roadmap
+// change when that commit is not the snapshot of the roadmap page. Set GITHUB_TOKEN for the
+// 5000/hour API limit: a run makes about 2 requests per source repo, 1 per repo outside the estate,
+// 1 per cited file, and 1 for the roadmap, and the anonymous limit is 60/hour.
 // The report is public (job summary, log, issue). It shows repo names, counts, compare links, the
 // names that the shared-resource page and the capture journey show, and the files that they link:
 // commit messages and other file paths of a source repo can mirror a private repo name. In GitHub
@@ -19,7 +21,7 @@ import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { appendFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { CAPTURE_JOURNEY_DATA, SHARED_RESOURCES_DATA, expandRepoName, hasWholeName, isObject, isText, loadEstate, parseJson, plural, readCaptureJourney, readDocsFile, root, urlPath } from "./estate.mjs";
+import { CAPTURE_JOURNEY_DATA, ROADMAP_DATA, SHARED_RESOURCES_DATA, expandRepoName, hasWholeName, isObject, isText, loadEstate, parseJson, plural, readCaptureJourney, readDocsFile, root, urlPath } from "./estate.mjs";
 
 // A repo is due when any described file was removed or renamed. It is also due when at least
 // DUE_MIN_FILES described files changed, and they are at least DUE_PERCENT% of its described
@@ -30,11 +32,11 @@ const DUE_MIN_FILES = 2;
 // The compare API lists at most 300 changed files.
 const MAX_FILES = 300;
 const TITLE = "Docs drift report";
-// The first line of the issue body. It records the due repos and the gone facts of the last run,
-// so the next run can say what changed:
-// "<!-- drift-report due: <repo> ... facts: <hash> ... journey: <hash> ... -->". "facts:" holds
-// the shared-resource facts, and "journey:" the capture journey facts. A part with no gone fact
-// is not on the line.
+// The first line of the issue body. It records the due repos and the gone facts of the last run, so
+// the next run can say what changed: "<!-- drift-report due: <repo> ... facts: <hash> ... journey:
+// <hash> ... roadmap: <commit> -->". "facts:" holds the shared-resource facts, "journey:" the
+// capture journey facts, and "roadmap:" the short commit of the last change of the roadmap when it
+// is not the snapshot. A part with no gone fact is not on the line.
 const MARKER = "<!-- drift-report due:";
 // GitHub refuses an issue body of more than 65536 characters.
 const MAX_BODY = 65536;
@@ -53,6 +55,14 @@ const evidenceOk = (e) => isObject(e) && isText(e.repo) && isText(e.path) && isT
 const stages = readCaptureJourney(errors, "an id, a short title, and evidence entries (a repo, a path, a commit, and names)", (s) =>
   isText(s.id) && isText(s.short) && Array.isArray(s.evidence) && s.evidence.every(evidenceOk),
 );
+// The report reads only the snapshot of the roadmap: the full check is build-roadmap.mjs.
+const roadmap = readDocsFile(ROADMAP_DATA, errors, (text) => {
+  const source = parseJson(text)?.source;
+  if (!isObject(source) || !isText(source.repo) || !isText(source.path) || !/^[0-9a-f]{40}$/.test(source.commit ?? "")) {
+    throw new Error("must have a source with a repo, a path, and a full commit. Run: node .github/scripts/build-roadmap.mjs --check");
+  }
+  return source;
+});
 if (errors.length) fail(errors);
 // The issue belongs to github-actions: a local sync would open a second one under your name.
 if (syncIssue && !inActions) fail(["--sync-issue runs only in GitHub Actions"]);
@@ -193,12 +203,29 @@ async function goneFacts({ facts, holds }, found) {
 
 const fileLink = (f, ref) => `[\`${f.path}\`](https://github.com/${estate.sourceOrg}/${f.repo}/blob/${ref}/${urlPath(f.path)})`;
 
+// The roadmap: one fact, the snapshot of the roadmap page. Its file is not read: a request asks for
+// the last commit that changed the file on the default branch. When that commit is another commit,
+// the roadmap changed: the gone item has that short commit as its hash, so a newer change is a new
+// item. While the repo is not found, the change of the last run stays on the list.
+const roadmapFact = { key: [ROADMAP_DATA, roadmap.repo, roadmap.path, roadmap.commit].join("\n"), repo: roadmap.repo };
+async function roadmapChange(found) {
+  const source = found.get(roadmap.repo);
+  if (!source) return [];
+  const commits = await api("GET", `/repos/${estate.sourceOrg}/${roadmap.repo}/commits?path=${encodeURIComponent(roadmap.path)}&sha=${encodeURIComponent(source.branch)}&per_page=1`);
+  const head = commits?.[0]?.sha;
+  if (!head) throw new Error(`the commits of ${roadmap.path} in ${roadmap.repo} were not found`);
+  return head === roadmap.commit ? [] : [{ ...roadmapFact, head, hash: head.slice(0, 7) }];
+}
+
 // The sections of facts, in the order of the report. holds is the name rule of the evidence check
 // of the page: build-shared-resources.mjs counts the repo name expression of a workflow as the
 // repo name, and build-capture-journey.mjs does not. A gone fact links its file on the default
 // branch. When the file is not there, a shared-resource fact links it at the snapshot (with the
 // short commit, as the links of the page do), and a capture journey fact at the commit that it
-// cites. A run adds the gone facts (gone) and the facts that it could not read (unread).
+// cites. A run adds the gone facts (gone) and the facts that it could not read (unread). A section
+// can find its gone facts in its own way (goneOf), keep the facts of the last run while its repo is
+// not found (keepUnread), and have its own words for no gone fact (none) and for an unread repo
+// (unreadText).
 const SECTIONS = [
   {
     heading: "Shared-resource facts to check",
@@ -239,6 +266,23 @@ const SECTIONS = [
         : `- ${stage}: the name \`${f.name}\` is not in the file.\\\n  ${f.repo} ${fileLink(f, f.source.branch)}`;
     },
   },
+  {
+    heading: "Roadmap to check",
+    label: "roadmap:",
+    term: "roadmap change",
+    facts: [roadmapFact],
+    goneOf: roadmapChange,
+    keepUnread: true,
+    none: "The roadmap is current.",
+    intro: () =>
+      `The [roadmap page](${estate.siteUrl}roadmap.html) copies \`${roadmap.path}\` of ${roadmap.repo} at a snapshot: the last commit ` +
+      "that changed the file. The roadmap changed when the last commit that changes the file on the default branch is " +
+      `another commit. It leaves this list when you [move the snapshot](${doc("docs/regenerating.md#move-the-roadmap-snapshot")}).`,
+    unreadText: () => "The report did not check the roadmap, because it could not read its repo (see \"Not found\" below).",
+    item: (f) =>
+      `- **[The Greenstand roadmap](${estate.siteUrl}roadmap.html)**: \`${roadmap.path}\` changed after the snapshot \`${roadmap.commit.slice(0, 7)}\`: its last change is \`${f.head.slice(0, 7)}\`.\\\n` +
+      `  ${f.repo} [Compare](https://github.com/${estate.sourceOrg}/${f.repo}/compare/${roadmap.commit}...${f.head})`,
+  },
 ];
 function reasons(r) {
   if (r.broken) return [r.broken];
@@ -263,7 +307,7 @@ let results, outsideRepos;
 try {
   [results, outsideRepos] = await Promise.all([Promise.all(repos.map(measure)), Promise.all(outsideNames.map(lookUp))]);
   const found = new Map([...results, ...outsideRepos].filter((r) => !r.missing).map((r) => [r.name, r]));
-  for (const section of SECTIONS) section.gone = await goneFacts(section, found);
+  for (const section of SECTIONS) section.gone = section.goneOf ? await section.goneOf(found) : await goneFacts(section, found);
 } catch (e) {
   fail([e.message, "no issue was changed"]);
 }
@@ -320,10 +364,10 @@ function reportOf(shown) {
       "",
       section.intro(),
       "",
-      ...(section.gone.length ? section.gone.slice(0, shown[i]).map(section.item) : ["No fact is gone."]),
+      ...(section.gone.length ? section.gone.slice(0, shown[i]).map(section.item) : [section.none ?? "No fact is gone."]),
       ...(shown[i] < section.gone.length ? [`- And ${plural(section.gone.length - shown[i], "more fact")}: see the [job summary of this run](${runUrl}).`] : []),
       ...(section.unread.length
-        ? ["", `The report did not check ${plural(section.unread.length, "fact")}, because it could not read ${section.unreadRepos(unreadRepos)} (see "Not found" below).`]
+        ? ["", section.unreadText?.() ?? `The report did not check ${plural(section.unread.length, "fact")}, because it could not read ${section.unreadRepos(unreadRepos)} (see "Not found" below).`]
         : []),
     );
   });
@@ -395,7 +439,7 @@ async function sync() {
     // A fact of the last run that was not read now stays on the list: its hash names no repo.
     const unreadHashes = new Set(section.unread.map((f) => f.hash));
     const goneHashes = section.gone.map((f) => f.hash);
-    const hashes = [...goneHashes, ...factsBefore.filter((h) => unreadHashes.has(h))];
+    const hashes = [...goneHashes, ...factsBefore.filter((h) => unreadHashes.has(h) || (section.keepUnread && section.unread.length))];
     const factsAdded = goneHashes.filter((h) => !factsBefore.includes(h));
     const factsDropped = factsBefore.filter((h) => !hashes.includes(h));
     notes.push(

@@ -68,7 +68,8 @@ Learn the mission and the big picture of the platform before you read the code.
 1. **[The journey of a capture](docs/capture-journey.md)**: How one capture travels from the grower's phone to the grower's reward, step by step, with pictures.
 2. **[Ecosystem maps](ARCHITECTURE.md)**: How the code repos work together at run time: which app calls which API, and which data they share.
 3. **[Shared resources](docs/shared-resources.md)**: What the code repos share to build, deploy, and run, for example the container registry, the clusters, and the shared database.
-4. **Greenstand and the live map**: The Greenstand website: the mission, how Treetracker works, and how to help. The live Treetracker map: the trees that growers around the world captured.\
+4. **[Roadmap](docs/roadmap.md)**: What Greenstand plans to build next: the milestones and the work for each area.
+5. **Greenstand and the live map**: The Greenstand website: the mission, how Treetracker works, and how to help. The live Treetracker map: the trees that growers around the world captured.\
    [Website](https://greenstand.org) · [Live map](https://map.treetracker.org)
 
 Go deeper: [Documentation](https://github.com/Greenstand/greenstand-documentation) · [Architecture decisions](https://github.com/Greenstand/treetracker-decisions)

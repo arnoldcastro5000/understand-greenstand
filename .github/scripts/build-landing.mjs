@@ -16,7 +16,7 @@
 import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { formerNamesText, loadEstate } from "./estate.mjs";
-import { PLATE_EDGE, SITE_LOOK_FILES, WIDE, areaGroup, areaStyle, esc, estateMark, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
+import { CHIP_STYLE, PLATE_EDGE, SITE_LOOK_FILES, WIDE, areaGroup, areaStyle, esc, estateMark, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
 import { startPath } from "./start-path.mjs";
 
 const site = process.argv[2];
@@ -184,8 +184,7 @@ ${siteStyle(".")}
   p { margin: 0; }
   .lede, .welcome { max-width: 42rem; margin-bottom: .9rem; font-size: 1.06rem; }
   .welcome { margin-bottom: 2.25rem; }
-  .chip { display: inline-block; width: .8em; height: .8em; margin-right: .45em; vertical-align: -.02em;
-    background: var(--area); box-shadow: inset 0 0 0 1px var(--edge); }
+${CHIP_STYLE}
   .featured { padding: 1.6rem 1.75rem 1.4rem; border: ${PLATE_EDGE}; background: var(--surface); }
   .featured h2 { margin: 0 0 .35rem; font-size: 1.55rem; font-weight: 680; }
   .featured .intro { margin-bottom: 1rem; color: var(--muted); }

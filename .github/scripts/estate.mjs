@@ -274,6 +274,14 @@ export function readDocsFile(at, errors, parse = (text) => text) {
 export const SHARED_RESOURCES_DATA = "shared-resources.json";
 export const SHARED_RESOURCES_PAGE = "docs/shared-resources.md";
 
+// The data file of the roadmap page, its text copy for GitHub, and the directory of the pinned
+// copies of source files. build-roadmap.mjs builds the text copy and the page of the Pages site
+// (roadmap.html) from the data file and the pinned copy of the roadmap at sources/<repo>/<path>
+// (the repo and the path of the source in the data file).
+export const ROADMAP_DATA = "roadmap.json";
+export const ROADMAP_COPY = "docs/roadmap.md";
+export const SOURCES = "sources";
+
 // The data file of the capture journey, the text copy of chapter 1 for GitHub, and the image
 // directory. build-capture-journey.mjs builds the text copy and the page of the Pages site of each
 // chapter from the data file, and checks all of the data file.

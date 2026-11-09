@@ -56,11 +56,19 @@ pull request needs a safety review (see
 The job fails when it cannot read a repo outside the estate that the capture journey cites, as
 for a source repo: the repo can be private now, and the capture journey names it.
 
+The report also says whether the roadmap changed. The [roadmap page](./roadmap.md) copies
+`Roadmap.md` of Greenstand-Overview at a snapshot: the last commit that changed the file
+(`source.commit` in [`roadmap.json`](../roadmap.json)). The report asks for the last commit that
+changed the file on the default branch. When it is another commit, the report lists a roadmap
+change with a compare link. A newer change replaces it on the list. It stays on the list until
+you [move the snapshot](#move-the-roadmap-snapshot).
+
 The report goes to the job summary and to one issue, "Docs drift report". The workflow opens
-the issue when a repo is due or a fact is gone. It edits the issue on each run. It comments when
-the list of due repos or the list of gone facts changes. It closes the issue when no repo is due
-and no fact is gone. Do not close the issue yourself: the next run opens it again while a repo is
-due or a fact is gone. A repo stays due until you regenerate it.
+the issue when a repo is due, a fact is gone, or the roadmap changed. It edits the issue on each
+run. It comments when the list of due repos, the list of gone facts, or the new roadmap commit
+changes. It closes the issue when no repo is due, no fact is gone, and the roadmap is current. Do
+not close the issue yourself: the next run opens it again while a repo is due, a fact is gone, or
+the roadmap changed. A repo stays due until you regenerate it.
 
 The report shows only repo names, counts, compare links, the names that the shared-resource page
 and the capture journey show, and the files that they link. Before the job prints or posts any
@@ -74,8 +82,8 @@ GITHUB_TOKEN="$(gh auth token)" node .github/scripts/drift-report.mjs
 ```
 
 A run makes about 2 GitHub API requests for each source repo, 1 for each repo outside the estate
-that the capture journey cites, and 1 for each file that `shared-resources.json` or
-`capture-journey.json` cites. Without a token, the limit is 60 requests an hour. That is not
+that the capture journey cites, 1 for each file that `shared-resources.json` or
+`capture-journey.json` cites, and 1 for the roadmap. Without a token, the limit is 60 requests an hour. That is not
 enough for one run.
 
 Limits:
@@ -283,6 +291,50 @@ site: `<former-name>/`, `<former-name>/onboarding.html`, and the other pages
 new name, with its `#anchor`. Links to other files of the site (the graphs, the raw Markdown)
 under the former name stop working. Links to `repos/<former-name>/` on GitHub also stop
 working.
+
+## Move the roadmap snapshot
+
+The [roadmap page](./roadmap.md) copies the roadmap at a snapshot. When the drift report lists a
+roadmap change, move the snapshot to the new last change of the file:
+
+1. Find the last commit that changed the file:
+
+   ```
+   gh api 'repos/Greenstand/Greenstand-Overview/commits?path=Roadmap.md&per_page=1' --jq '.[0] | .sha + " " + .commit.committer.date'
+   ```
+
+2. Copy the file at that commit, byte for byte, over the pinned copy
+   [`sources/Greenstand-Overview/Roadmap.md`](../sources/Greenstand-Overview/Roadmap.md):
+
+   ```
+   gh api 'repos/Greenstand/Greenstand-Overview/contents/Roadmap.md?ref=<commit>' -H 'Accept: application/vnd.github.raw' > sources/Greenstand-Overview/Roadmap.md
+   ```
+
+3. In [`roadmap.json`](../roadmap.json), set `source.commit` to the full commit and `source.date`
+   to the day of its commit date (UTC). Set the commit and the date in the notice
+   [`sources/Greenstand-Overview/README.md`](../sources/Greenstand-Overview/README.md) too: the
+   full commit in each link, the short commit, and the date. The script fails until the notice names
+   the snapshot of `roadmap.json`. If the license of Greenstand-Overview changed, set
+   `source.license` and the notice.
+4. Run `node .github/scripts/build-roadmap.mjs`. It fails on each new section of the roadmap with
+   no entry, and on each entry whose section is gone. Give each new section a group: an area of
+   [`estate.json`](../estate.json), or `"Across the estate"`, `"Outside the documented estate"`,
+   `"Milestones"`, or `"Intro"`. A section that names no product of an area, but that you place
+   in an area, gets a `bestGuess`: the reason, with no period at the end. Remove the entries of
+   gone sections. Run the script again until it writes `docs/roadmap.md`.
+5. Run the checks. `--evidence` needs `marked@12` (`npm install --no-save marked@12`):
+
+   ```
+   node .github/scripts/build-roadmap.mjs --check
+   GITHUB_TOKEN="$(gh auth token)" node .github/scripts/build-roadmap.mjs --evidence
+   ```
+
+   `--evidence` fails when marked counts a different number of items in a section than the page
+   does. Then the roadmap has a list form that the item rule (`countItems` in
+   `.github/scripts/roadmap-source.mjs`) does not know: fix the rule.
+6. Look at the page: `node .github/scripts/build-roadmap.mjs --site <dir>` (the directory needs the
+   files of the site look; see [`DESIGN.md`](../DESIGN.md)).
+7. Open a pull request. The pull request runs `--evidence` too.
 
 ## Notes
 

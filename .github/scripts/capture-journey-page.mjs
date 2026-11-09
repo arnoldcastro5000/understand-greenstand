@@ -5,7 +5,7 @@
 // build-capture-journey.mjs checks the data file, makes the view of each chapter (the data with its
 // links), and writes the pages with --site. The page is in the site look (site-html.mjs, DESIGN.md).
 import { plural } from "./estate.mjs";
-import { CODE_CHIP, CONTENT_COLUMN as COLUMN, READING_COLUMN, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle } from "./site-html.mjs";
+import { CODE_CHIP, CONTENT_COLUMN as COLUMN, PAGE_END_STYLE, READING_COLUMN, STATE_STYLE, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle } from "./site-html.mjs";
 
 // The icons of the stages: the inside of an SVG with the view box 0 0 48 48, drawn with lines, with
 // square corners (DESIGN.md): no rect has rx. An ellipse keeps rx and ry: they are its radii.
@@ -75,16 +75,10 @@ const icon = (name, size) =>
 // COLUMN, the content column of the page (CONTENT_COLUMN): the stages put the images and the text
 // side by side in it. Running text outside the stages stays in the reading column (READING_COLUMN).
 
-// The marks of the states (DESIGN.md): a square with a hatch for a best guess, a square with a
-// cross for a part that does not work. Each one is a mask that the state color paints, so a state
-// never shows by its color alone.
-const stateMark = (lines) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" fill="none" stroke="#000" stroke-width="1.2"><rect x=".6" y=".6" width="10.8" height="10.8"/><path d="${lines}"/></svg>`)}")`;
-const HATCH = stateMark("M.6 6.6l6-6M.6 11.4L11.4.6M5.4 11.4l6-6");
-const CROSS = stateMark("M3.2 3.2l5.6 5.6M8.8 3.2l-5.6 5.6");
-
 // The page rules after siteStyle and mastheadStyle (site-html.mjs). The colors come from
 // site-colors.mjs: the track, its stations, and the icons are ink; a best guess has the best-guess
-// color and the hatch; a part that does not work has the not-working color and the cross. The
+// color and the hatch; a part that does not work has the not-working color and the cross (the state
+// marks, STATE_STYLE of site-html.mjs). The
 // layout of the stages follows the width of main (a container query), not of the screen, because
 // the legend rail takes a part of a wide screen.
 const PAGE_STYLE = `  /* A long word breaks anywhere, so no text makes the page wider than the screen. Code (a repo
@@ -136,21 +130,11 @@ ${CODE_CHIP}
   .intro { padding-top: 1.5rem; }
   .intro > p, .page-end > p, .chapters > p { max-width: ${READING_COLUMN}; }
   .legend { margin-block: .5rem; font-size: .92rem; line-height: 1.5; color: var(--muted); }
-  /* A tag is inline, so find-in-page matches a phrase across the tag and the text after it. The
-     mark of its state comes before its label. */
-  .tag { display: inline; font: 600 .82rem/1.7 var(--display); font-stretch: 87.5%; white-space: nowrap; }
-  .tag::before { content: ""; display: inline-block; width: .9em; height: .9em; margin-right: .4em; vertical-align: -.1em;
-    background-color: currentColor; -webkit-mask: var(--state-mark) center / 100% 100% no-repeat;
-    mask: var(--state-mark) center / 100% 100% no-repeat; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .tag.guess, .flag.guess .tag { --state-mark: ${HATCH}; color: var(--best-guess); }
-  .tag.broken, .flag.broken .tag { --state-mark: ${CROSS}; color: var(--not-working); }
+${STATE_STYLE}
   @media (forced-colors: active) {
-    .tag::before, .dots span.on { forced-color-adjust: none; background-color: CanvasText; } }
+    .dots span.on { forced-color-adjust: none; background-color: CanvasText; } }
   /* The sticky bar follows the screen: it does not print. */
   @media print { .js .progress { display: none; } }
-  .flag { margin: 1rem 0; padding: .6rem .85rem; border: 1px solid; }
-  .flag.guess { border-color: var(--best-guess); }
-  .flag.broken { border-color: var(--not-working); }
   /* The issue of a flag (a repo name and a number) stays on one line. */
   .flag a { white-space: nowrap; }
   /* The text has the wider column on both sides: a flipped stage mirrors the columns. */
@@ -196,7 +180,7 @@ ${CODE_CHIP}
      code in a link keeps the line of the link. */
   details.dev code { display: inline-block; max-width: 100%; box-sizing: border-box; white-space: normal; vertical-align: top; }
   details.dev a code { text-decoration: inherit; }
-  .page-end { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--line); color: var(--muted); }
+${PAGE_END_STYLE}
   /* The chapters: one row for each chapter, between hairlines, with its number in a margin column,
      as the Start here steps. The row of this page has no link. */
   .chapters { margin-bottom: 1.5rem; }
