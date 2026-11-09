@@ -49,6 +49,16 @@ name: Estate index
 # its cited lines at the commit of the entry, a repo is not public, the issue of a "Not working
 # today" flag is not open, or an image is not the file of its source. Fix the entry that the
 # error names.
+# Also fails when the text copy of the roadmap page (docs/roadmap.md) is stale, when roadmap.json has
+# an error, when a section of the pinned copy of the roadmap (sources/<repo>/<path>) has no entry in
+# roadmap.json or an entry names no section, when a shown section has a relative link or an HTML
+# tag, or when the notice of the pinned copy (sources/<repo>/README.md) does not name the snapshot.
+# Fix: run `node .github/scripts/build-roadmap.mjs` and follow its errors.
+# When a push or a pull request changes roadmap.json, the pinned copy, or the code that builds and
+# checks them, also fails when GitHub does not hold the snapshot: the pinned copy is not the file at
+# the commit, the commit is not the last change of the file there, the date or the license is
+# different, or marked counts a different number of items in a section. Fix the entry that the
+# error names, or move the snapshot (docs/regenerating.md, "Move the roadmap snapshot").
 # Also fails when a color of the site look (.github/scripts/site-colors.mjs) is missing or not
 # readable: a text color has a contrast below 4.5:1 on a background or on the parcel field, an
 # area color is near a state color, two area colors look alike, also for readers with red-green
@@ -115,6 +125,9 @@ jobs:
       - name: Check the capture journey
         run: node .github/scripts/build-capture-journey.mjs --check
 
+      - name: Check the roadmap page
+        run: node .github/scripts/build-roadmap.mjs --check
+
       - name: Check the colors of the site look
         run: node .github/scripts/check-site-colors.mjs
 
@@ -154,6 +167,26 @@ jobs:
             echo "the capture journey data, images, and code did not change since ${BASE:0:7}: no evidence check"
           else
             node .github/scripts/build-capture-journey.mjs --evidence
+          fi
+
+      # Only when the data, the pinned copy, or the code that builds and checks them changes: the step
+      # reads GitHub, and it needs marked (the renderer of the page) to compare the item counts. BASE
+      # as in the steps above; when it is not known (a new branch), the step runs.
+      - name: Check the roadmap snapshot on GitHub
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [[ "$BASE" =~ ^[0-9a-f]{40}$ && "$BASE" != 0000000000000000000000000000000000000000 ]] \
+            && git fetch --quiet --no-tags --depth=1 origin "$BASE" \
+            && git diff --quiet "$BASE" HEAD -- roadmap.json sources \
+              .github/scripts/build-roadmap.mjs .github/scripts/roadmap-page.mjs .github/scripts/roadmap-source.mjs \
+              .github/scripts/estate.mjs; then
+            echo "the roadmap data, the pinned copy, and the code did not change since ${BASE:0:7}: no snapshot check"
+          else
+            npm install --no-save --no-audit --no-fund marked@12
+            node .github/scripts/build-roadmap.mjs --evidence
           fi
 
       # Only when recognition.json changes: the step reads GitHub. BASE as in the steps above; when

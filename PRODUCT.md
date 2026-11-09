@@ -21,10 +21,11 @@ Second: Greenstand maintainers, who check the facts and keep the estate. Non-tec
 `understand-greenstand` is machine-generated documentation for the core-active Greenstand
 repository estate, with edited pages on top. Each documented repo has an interactive
 knowledge-graph viewer, an onboarding guide, a glossary, and a README. Cross-repo pages explain
-the whole system: the ecosystem maps, the shared-resource page, the estate glossary, and the
+the whole system: the ecosystem maps, the shared-resource page, the estate glossary, the
 capture journey (one tree photo through the Greenstand system, in chapters: chapter 1 from the
 grower's phone to the grower's reward, chapter 2 onto the public web map, chapter 3 to an impact
-token in a wallet, chapter 4 into the data for organizations).
+token in a wallet, chapter 4 into the data for organizations), and the roadmap page (the Greenstand
+roadmap at a snapshot, by the areas of the estate).
 
 Success: a new volunteer finds the right repo and understands the big picture without a
 maintainer's help.
@@ -39,8 +40,9 @@ best guess or when code does not work today.
 
 - A static GitHub Pages site, built by Node scripts in `.github/scripts/` (no framework). Pages:
   the landing page, markdown pages rendered by `render-md.mjs`, the capture journey page
-  (`capture-journey-page.mjs`), the moved pages, the contributors page (`contributors-page.mjs`,
-  built from public GitHub data on each deploy), and one viewer per repo.
+  (`capture-journey-page.mjs`), the roadmap page (`roadmap-page.mjs`), the moved pages, the
+  contributors page (`contributors-page.mjs`, built from public GitHub data on each deploy), and
+  one viewer per repo.
 - Each page but the contributors page also has a markdown text copy on GitHub; GitHub draws that
   copy with its own look.
 - Readers use light and dark color schemes; the site follows `prefers-color-scheme`.
@@ -48,7 +50,7 @@ best guess or when code does not work today.
 ## Capabilities and Constraints
 
 - Scope of the visual work (user, 2026-11-02): the built pages (landing, text pages, capture
-  journey, moved pages; the contributors page since 2026-11-03). The knowledge-graph viewer is a third-party app (Understand-Anything,
+  journey, moved pages; the contributors page since 2026-11-03; the roadmap page since 2026-11-09). The knowledge-graph viewer is a third-party app (Understand-Anything,
   changed only by a patch) and keeps its own theme.
 - No hosted third-party assets at run time: vendored files only, each hash-checked (as Mermaid
   is today).

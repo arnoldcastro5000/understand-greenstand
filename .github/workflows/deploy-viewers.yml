@@ -21,6 +21,9 @@ on:
       - "ARCHITECTURE.md"
       - "docs/contribute-to-greenstand.md"
       - "docs/shared-resources.md"
+      - "docs/roadmap.md"
+      - "roadmap.json"
+      - "sources/**"
       - "capture-journey.json"
       - "docs/capture-journey/**"
       - "viewer/**"
@@ -29,8 +32,11 @@ on:
       - ".github/scripts/build-landing.mjs"
       - ".github/scripts/build-moved.mjs"
       - ".github/scripts/build-parcel-field.mjs"
+      - ".github/scripts/build-roadmap.mjs"
       - ".github/scripts/estate.mjs"
       - ".github/scripts/render-md.mjs"
+      - ".github/scripts/roadmap-page.mjs"
+      - ".github/scripts/roadmap-source.mjs"
       - ".github/scripts/site-colors.mjs"
       - ".github/scripts/site-drawings.mjs"
       - ".github/scripts/site-html.mjs"
@@ -280,6 +286,9 @@ jobs:
           # chapter (capture-journey-<id>.html, for example chapter 3, capture-journey-token.html)
           # is linked from the chapters list of each chapter page and from the ecosystem maps.
           node .github/scripts/build-capture-journey.mjs --site "$OUT"
+          # The roadmap page (roadmap.html, roadmap-page.mjs), built from roadmap.json and the pinned
+          # copy of the roadmap, linked from the landing page and README.md (Start here step 4).
+          node .github/scripts/build-roadmap.mjs --site "$OUT"
           # Moved pages: the old subpath of a renamed repo sends readers to the new subpath.
           node .github/scripts/build-moved.mjs "$OUT"
           # The contributors page of the contributors job: the recognition of the last quarter and

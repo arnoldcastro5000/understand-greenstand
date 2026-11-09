@@ -9,15 +9,18 @@
 //   so the check reads it.
 // - estate.json, which records the former names, and GLOSSARY.md, which is generated from the
 //   domain graphs and shared-resources.json.
+// - the mirrored text of a source repo: the pinned copies of sources/ and the text copy of the
+//   roadmap page (docs/roadmap.md), which keep the words of the source.
 // - the generated blocks between BEGIN and END markers (the README index shows the former name).
 // Usage: node check-former-names.mjs   exit 1 and show each line that contains a former name (CI)
 import { execFileSync } from "node:child_process";
 import { readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { loadEstate, root } from "./estate.mjs";
+import { ROADMAP_COPY, SOURCES, loadEstate, root } from "./estate.mjs";
 
 const checkedFile = (file) =>
-  (!file.startsWith("repos/") || /^repos\/[^/]+\/README\.md$/.test(file)) && file !== "estate.json" && file !== "GLOSSARY.md";
+  (!file.startsWith("repos/") || /^repos\/[^/]+\/README\.md$/.test(file)) &&
+  file !== "estate.json" && file !== "GLOSSARY.md" && !file.startsWith(`${SOURCES}/`) && file !== ROADMAP_COPY;
 // A generated block keeps its line breaks, so the line numbers of the rest stay true.
 const GENERATED = /<!-- BEGIN [^\n]*-->[\s\S]*?<!-- END [^\n]*-->/g;
 const withoutBuiltBlocks = (text) => text.replace(GENERATED, (block) => block.replace(/[^\n]/g, ""));

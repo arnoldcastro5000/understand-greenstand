@@ -20,7 +20,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, posix } from "node:path";
 import { marked } from "marked";
 import { chapterPageOf, escapeRegExp, loadEstate } from "./estate.mjs";
-import { CODE_CHIP, DISPLAY, PLATE_EDGE, DISPLAY_FACE, READING_COLUMN, SITE_LOOK_FILES, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
+import { DISPLAY, DISPLAY_FACE, READING_COLUMN, SITE_LOOK_FILES, TEXT_STYLE, WIDE, esc, masthead, mastheadStyle, siteHead, siteStyle, undefinedProperties } from "./site-html.mjs";
 import { BACKGROUNDS, DIAGRAM_NODE_TINT, LINES, TEXTS } from "./site-colors.mjs";
 import { slugger } from "./slug.mjs";
 
@@ -35,6 +35,9 @@ function sitePath(path) {
   if (path === "ARCHITECTURE.md") return "architecture.html";
   if (path === "docs/contribute-to-greenstand.md") return "contribute.html";
   if (path === "docs/shared-resources.md") return "shared-resources.html";
+  // The text copy of the roadmap page: on the site, a link to it opens the page that
+  // build-roadmap.mjs writes.
+  if (path === "docs/roadmap.md") return "roadmap.html";
   // The text copy of a chapter of the capture journey (chapterPageOf of estate.mjs, the rule of the
   // chapter file names): on the site, a link to it opens the illustrated page of the chapter, which
   // build-capture-journey.mjs writes.
@@ -248,32 +251,7 @@ ${siteHead(toRoot)}
 <style>
 ${siteStyle(toRoot)}
 ${mastheadStyle(READING_COLUMN)}
-  main { padding: 1.5rem 1.25rem 5rem; }
-  h1 { margin-block: 1.5rem 1.1rem; font-size: clamp(1.9rem, 1.5rem + 1.8vw, 2.6rem); font-weight: 720;
-    letter-spacing: -.02em; }
-  h2 { margin-block: 2.9rem .8rem; padding-top: .75rem; border-top: 2px solid var(--ink); font-size: 1.5rem;
-    font-weight: 660; }
-  h3 { margin-block: 2rem .5rem; font-size: 1.16rem; font-weight: 640; }
-  h4 { margin-block: 1.5rem .4rem; font: 640 1rem/1.3 var(--display); text-wrap: balance; }
-  h1, h2, h3, h4 { scroll-margin-top: 1.5rem; }
-  p, ul, ol, dl, table, pre, blockquote { margin-block: 0 1rem; }
-  li { margin-block: .3rem; }
-  li > :is(ul, ol) { margin-block: .3rem 0; }
-  li::marker { color: var(--muted); }
-${CODE_CHIP}
-  pre { padding: 1rem; overflow: auto; border: ${PLATE_EDGE}; background: var(--surface); }
-  table { display: block; width: 100%; overflow: auto; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-  th { font: 600 .92rem/1.3 var(--display); font-stretch: 87.5%; text-align: left; background: var(--surface); }
-  th, td { padding: .55rem .8rem; border-bottom: 1px solid var(--line); vertical-align: top; }
-  blockquote { margin-inline: 0; padding: .75rem 1rem; color: var(--muted); border: ${PLATE_EDGE}; background: var(--surface); }
-  blockquote > :last-child { margin-bottom: 0; }
-  hr { height: 0; margin-block: 2rem; border: 0; border-top: 1px solid var(--line); }
-  img { max-width: 100%; }
-  main > * { box-sizing: border-box; max-width: ${READING_COLUMN}; margin-inline: auto; }
-  @media ${WIDE} {
-    main { max-width: 64rem; padding: 1.25rem clamp(1.5rem, 4vw, 4.5rem) 5rem; }
-    main > * { margin-inline: 0; }
-  }${repoNameStyle}
+${TEXT_STYLE}${repoNameStyle}
 </style>${mermaidHead}
 </head>
 <body>
